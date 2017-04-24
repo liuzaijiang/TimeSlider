@@ -42,17 +42,56 @@
 		opacity:0.4;
 	}
 	
-	.moddle{
-		position:relative;
-		margin:auto;
-		text-align:center;
-		z-index:1050;
-		width:250px;
-		height:130px;
-		background-color:#d4d4d4;
-		border-radius:12px;
-		box-shadow:1px 0px 14px 3px white ;
+	.modal{
+		position:fixed;
+		left:0;
+		right:0;
+		bottom:0;
+		top:0;
+		z-index:1000;
 		display:none;
+		overflow:auto;
+		overflow-y:scroll;	
+	}
+	
+	.modal-dialog{
+		position:relative;
+		width:600px;
+		margin:30px auto;
+	}
+	
+	.modal-content{
+		position:relative;
+		background-color:#f8f5f5;
+		background-clip:padding-box;
+		border:1px solid #d4d4d4;
+		border-radius:6px;
+		outline:none;
+		box-shadow:0 3px 9px rgba(0,0,0,0.5);
+	}
+
+	.modal-header{
+		min-height:16px;
+		padding:15px;
+		border-bottom:1px solid #e5e5e5;
+	}
+	
+	.modal-title{
+		margin:0;
+		line-height:1.42px;
+	}
+	
+	.modal-body{
+		position:relative;
+		padding:20px;
+	}
+	
+	
+	.modal-footer{
+		padding :19px 20px 20px;
+		text-align:right;
+		margin-top:15px;
+		border-top:1px solid #e5e5e5;
 	}
 	
 	.coordinate {
@@ -110,31 +149,23 @@
 		display:none;
 	}
 	
-	.delbtn{
-		margin-top:10px;
-		margin-right:110px;
-		font-size:14px;
-		line-height:1.427;
-		text-align:center;
-		border:0;
-	}
 	
-	.setbtn:hover,.delbtn:hover{
+	.setbtn:hover{
 		background-color:#e4e4e4;
 	}
 	
 	.setbtn{
 		margin-top:10px;
-		margin-right:110px;
 		font-size:14px;
 		line-height:1.427;
+		height:40px;
+		width:80px;
 		text-align:center;
-		border:0;
+		border:1px solid #d8d8d8;
 	}
 	
 	.timediv{
 		margin-top:10px;
-		margin-left:-25px;
 		width:200px;
 	}
 	
@@ -154,15 +185,31 @@
     <tr class="trInterval"></tr>
     <tr class="trNumber"></tr>
 </table>
-<div class="moddle" id="moddle">
-	<button type="button" class="delbtn" id="del">删除</button>
-	<div class="timediv">
-	<input type="text" class="time" maxlength="2" id="startH">:
-	<input type="text" class="time" maxlength="2" id="startM"><br>
-	<input type="text" class="time" maxlength="2" id="stopH" style="margin-top:5px;">:
-	<input type="text" class="time" maxlength="2" id="stopM">
+<div class="modal" id="modal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">
+				编辑
+				</h4>
+			</div>
+			<div class="modal-body">
+			<div class="timediv">
+				开始
+				<input type="text" class="time" maxlength="2" id="startH">:
+				<input type="text" class="time" maxlength="2" id="startM"><br>
+				结束
+				<input type="text" class="time" maxlength="2" id="stopH" style="margin-top:5px;">:
+				<input type="text" class="time" maxlength="2" id="stopM">
+			</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="setbtn" id="set">设置</button>
+				<button type="button" class="setbtn" id="del">删除</button>
+				<button type="button" class="setbtn" id="close">取消</button>
+			</div>
+		</div>
 	</div>
-	<button type="button" class="setbtn" id="set">设置</button>
 </div>
 <div class="menufix" id="fix"></div>
 <script type="text/javascript" src="jquery.js"></script>
@@ -489,7 +536,7 @@
 				$("#stopH").val("");
 				$("#stopM").val("");
 				$("#fix").show();
-				$("#moddle").show();
+				$("#modal").show();
 				Num=num;
 				Id=id;
 			 }
@@ -511,7 +558,7 @@ var Id;
 	$("#"+Id).remove();
 	slider_g_array--;
 	$("#fix").hide();
-	$("#moddle").hide();
+	$("#modal").hide();
  })
  
  $("#set").click(function(){
@@ -520,6 +567,11 @@ var Id;
 	var SPH=$("#stopH").val();
 	var SPM=$("#stopM").val();
 	
+	if(STH==""||STH==""||SPH==""||SPH=="")
+	{
+		alert("请设置");
+		return
+	}
 	if(STH<0||STH>23||SPH<0||SPH>24)
 	{
 		alert("请填写0-24之间的数字");
@@ -600,9 +652,13 @@ var Id;
 	
 	
 	$("#fix").hide();
-	$("#moddle").hide();
+	$("#modal").hide();
  })
 
+ $("#close").click(function(){
+	$("#fix").hide();
+	$("#modal").hide();
+ })
     function leftOver(e,id){
         $("#"+id).css ("cursor", "e-resize");
     }
