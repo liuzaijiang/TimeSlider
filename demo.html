@@ -1,0 +1,906 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>scheduler</title>
+<style type="text/css">
+    .timeSlider{
+		border-collapse:collapse;/*表格边框合并为一个*/
+		padding: 0;
+		margin: 0;
+		border:0;
+		display: block;
+		z-index: 0;
+		margin-left:250px;
+		position:relative;
+	}
+	
+	.timeSliderDiv{
+		height:30px;
+		width:32px;
+		z-index:4;
+		top:0;
+		position:absolute;
+		background:#007acc;
+	}
+	.trCanvas{
+		width: 768px;
+		height: 30px;
+		background: #f2f2ee;
+		position: relative;
+		z-index: 1;
+	}
+	
+	.menufix{
+		position:fixed;
+		left:0;
+		right:0;
+		bottom:0;
+		top:0;
+		z-index:999;
+		background-color:#e4e4e4;
+		display:none;
+		opacity:0.4;
+	}
+	
+	.modal{
+		position:fixed;
+		left:0;
+		right:0;
+		bottom:0;
+		top:0;
+		z-index:1000;
+		display:none;
+		overflow:auto;
+		overflow-y:scroll;	
+	}
+	
+	.modal-dialog{
+		position:relative;
+		width:600px;
+		margin:30px auto;
+	}
+	
+	.modal-content{
+		position:relative;
+		background-color:#f8f5f5;
+		background-clip:padding-box;
+		border:1px solid #d4d4d4;
+		border-radius:6px;
+		outline:none;
+		box-shadow:0 3px 9px rgba(0,0,0,0.5);
+	}
+
+	.modal-header{
+		min-height:16px;
+		padding:15px;
+		border-bottom:1px solid #e5e5e5;
+	}
+	
+	.modal-title{
+		margin:0;
+		line-height:1.42px;
+	}
+	
+	.modal-body{
+		position:relative;
+		padding:20px;
+	}
+	
+	
+	.modal-footer{
+		padding :19px 20px 20px;
+		text-align:right;
+		margin-top:15px;
+		border-top:1px solid #e5e5e5;
+	}
+	
+	.coordinate {
+		width:1px;
+		height:4px;
+		background-color:black;
+		position:absolute;
+	}
+	
+	.coordinateLab{
+		display:inline-block;
+		width:20px;
+		margin-left:-3px;
+	}
+	
+	.coordinateLabDiv{
+		width:20px;
+		margin-left:-3px;
+		top:32px;
+		position:absolute;
+	}
+	
+	.imgLeft{
+		position:absolute;
+		left:-7px;
+		top:25px;
+		height:15px;
+		width:12px;
+		background-color:#e4e4e4;
+	}
+	
+	.leftBar{
+		position:absolute;
+		left:-7px;
+		top:25px;
+		height:15px;
+		width:12px;
+		background-color:#e4e4e4;
+	}
+	
+	.rightBar{
+		position:absolute;
+		left:25px;
+		top:25px;
+		height:15px;
+		width:12px;
+		background-color:#e4e4e4;
+	}
+	
+	.barRight{
+		position:absolute;
+		left:25px;
+		top:25px;
+		height:15px;
+		width:12px;
+		background-color:#e4e4e4;
+	}
+	.leftShow{
+		background-color:blue;
+		color:white;
+		padding-left:3px;
+		width:44px;
+		height:19px;
+		position:absolute;
+		left:-30px;
+		top:48px;
+		display:none;
+	}
+	
+	.rightShow{
+		background-color:blue;
+		color:white;
+		padding-left:3px;
+		width:44px;
+		height:19px;
+		position:absolute;
+		left:18px;
+		top:48px;
+		display:none;
+	}
+	
+	
+	.setbtn:hover{
+		background-color:#e4e4e4;
+	}
+	
+	.setbtn{
+		font-size:14px;
+		line-height:1.427;
+		height:40px;
+		width:80px;
+		text-align:center;
+		border:1px solid #d8d8d8;
+		margin:2px;
+		border-radius:5px;
+	}
+	
+	.time-div{
+		margin-top:10px;
+	}
+	
+	.time{
+		width:20px;
+		margin:10px;
+	}
+</style>
+</head>
+<body>
+<div id="timeslider1" class="timeSlider" onselectstart="return false;">
+</div>
+
+<br/>
+<br/>
+<br/>
+<div id="timeslider2" class="timeSlider"  onselectstart="return false;">
+
+</div>
+<br/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript">
+	if (typeof jQuery === 'undefined') {
+		throw new Error('Slider\'s JavaScript requires jQuery')
+	}
+	
+	function TimeSlider(){
+		this.left_array=new Array();//存放每个拖块的左坐标
+		this.right_array=new Array();//存放每个拖块的右坐标
+		this.slderLeftOffset=0;//时间轴距离左页面的距离
+		this.oneDragBlockWidth=0;
+		this.oneHourWidth=0;
+		this.dragNum=0;//拖块个数-1
+		this.self=null;
+		this.hasMove=false;
+		this.whichOne=0;//目前操纵的是哪个拖块
+		this.timeSliderNum=0;//TimeSlider实例个数
+		this.calTimeFlag=false;//是否计算时间
+	}
+	
+	TimeSlider.prototype={
+		sliderArray : new Array(),//用来存放TimeSlider实例出来的对象
+		sliderTotal:0,//TimeSlider实例个数
+		init:function(obj){
+			TimeSlider.prototype.sliderTotal++;
+			this.timeSliderNum=TimeSlider.prototype.sliderTotal;
+			var divId=obj.id;
+			var oneDragBlockTime=obj.oneDragBlockTime||60;//每个拖块代表的时间
+			var self=this;//保存当前上下文
+			this.self=this;
+
+			
+			/*创建布局*/
+				var backgroundDiv=document.createElement("div");
+				$(backgroundDiv).addClass("trCanvas").appendTo("#"+divId);
+				
+				var oneHourWidth=Math.floor($(".trCanvas").width()/24);//每一个小时占的宽度
+				this.oneHourWidth=oneHourWidth;
+				var oneDragBlockWidth=Math.floor(oneHourWidth*oneDragBlockTime/60);//每个拖块的宽度
+				this.oneDragBlockWidth=oneDragBlockWidth;
+				
+				for(var i=0;i<25;i++){
+					var coordinateDiv=document.createElement("div");
+					$(coordinateDiv).addClass("coordinate").css({
+															  "left":oneHourWidth*i+"px"
+															}).appendTo("#"+divId);
+															
+		
+					var labelDiv=document.createElement("div");
+					if(i<10)
+					{
+						$(labelDiv).addClass("coordinateLabDiv").text(i).css({
+																  "left":oneHourWidth*i+"px"
+																}).appendTo("#"+divId);
+					}
+					else{
+						$(labelDiv).addClass("coordinateLabDiv").text(i).css({
+																  "left":oneHourWidth*i+"px",
+																  "margin-left":"-6px"
+																}).appendTo("#"+divId);
+					
+					}
+					//$(labelDiv).attr("readonly",true);
+				}
+				
+
+				
+				//弹出框
+				var menuFixedDiv=document.createElement("div");
+				$(menuFixedDiv).addClass("menufix").attr("id","fixedDiv"+this.timeSliderNum)
+				$("#"+divId).after(menuFixedDiv)
+				
+				var modalDiv=document.createElement("div");
+				var modalDialogDiv=document.createElement("div");
+				var modalContentDiv=document.createElement("div");
+				var modalHeaderDiv=document.createElement("div");
+				var modalBodyDiv=document.createElement("div");
+				var modalFooterDiv=document.createElement("div");
+				
+				var modalTitle=document.createElement("h4");
+				var modalTimeDiv=document.createElement("div");
+				var setBtn=document.createElement("button");
+				var delBtn=document.createElement("button");
+				var calBtn=document.createElement("button");
+				var startHour=document.createElement("input");
+				var startMin=document.createElement("input");
+				var stopHour=document.createElement("input");
+				var stopMin=document.createElement("input");
+				startHour.type="text";
+				startHour.maxLength=2
+				startMin.type="text";
+				startMin.maxLength=2
+				stopHour.type="text";
+				stopHour.maxLength=2
+				stopMin.type="text";
+				stopMin.maxLength=2
+				
+				$(modalDiv).addClass("modal").attr("id","modalDiv"+this.timeSliderNum)
+				$(modalDialogDiv).addClass("modal-dialog").appendTo(modalDiv);
+				$(modalContentDiv).addClass("modal-content").appendTo(modalDialogDiv);
+				$(modalHeaderDiv).addClass("modal-header").appendTo(modalContentDiv);
+				$(modalTitle).addClass("modal-title").text("编辑").appendTo(modalHeaderDiv);
+				$(modalBodyDiv).addClass("modal-body").appendTo(modalContentDiv);
+				
+				$(modalTimeDiv).addClass("time-div").appendTo(modalBodyDiv);
+				$(startHour).addClass("time").appendTo(modalTimeDiv).after(":").before("开始时间")
+				$(startMin).addClass("time").appendTo(modalTimeDiv)
+				$(stopHour).addClass("time").appendTo(modalTimeDiv).after(":").before("结束时间")
+				$(stopMin).addClass("time").appendTo(modalTimeDiv)
+				
+				$(modalFooterDiv).addClass("modal-footer").appendTo(modalContentDiv);								
+				$(setBtn).addClass("setbtn").appendTo(modalFooterDiv).text("设置").attr("id","setBtn"+this.sliderNum)
+				$(delBtn).addClass("setbtn").appendTo(modalFooterDiv).text("删除").attr("id","delBtn"+this.sliderNum)
+				$(calBtn).addClass("setbtn").appendTo(modalFooterDiv).text("取消").attr("id","calBtn"+this.sliderNum)
+				
+				$("#"+divId).after(modalDiv)
+				
+			/*end*/
+			
+			this.slderLeftOffset=Math.floor($("#"+divId).offset().left)//时间轴距离左页面的距离
+			
+			
+			$(backgroundDiv).mousedown(function(e){
+				var event=e?e:window.event;
+				self.createDrag(this,event.pageX);
+				/*if(document.all){  //兼容IE8
+					e.cancelBubble=true;
+				}else{
+					e.stopPropagation();
+				}*/
+			})
+			
+			if(obj.defaultTime)
+			{
+				for( key in obj.defaultTime)
+				{
+					var timeArray=this.getSliderOffsetX(obj.defaultTime[key])
+					this.createDrag(obj.id,timeArray[0],timeArray[1])
+				}
+			}
+		},
+			
+		createDrag:function(backgroundDiv,ex,ex2){
+			var self=this.self;
+			var dragLeft=Math.floor(ex-self.slderLeftOffset);
+			if(ex2)//如果指明了结束时间
+			{
+				var dragRight=ex2;
+			}
+			else{
+				var dragRight=dragLeft+self.oneDragBlockWidth;
+			}
+			var leftArrayLength=self.left_array.length;
+			
+			if(typeof(backgroundDiv)=="string")
+			{
+				$backgroundDiv=$("#"+backgroundDiv+" > .trCanvas");
+			}
+			else {
+				$backgroundDiv=$(backgroundDiv);
+			}
+			/*判断新建的时间段是否超过整个时间轴右边界*/
+			if((dragLeft)>=$backgroundDiv.width()-self.oneDragBlockWidth)
+			{
+				console.log("超过")
+				return;
+			}
+			
+			/*判断新创建的时间段是否能放下，防止时间段重叠，我的判断方法是：如果它的右坐标在其他时间段的左右坐标值之间则不能放下*/
+			if(leftArrayLength>=1)
+			{	
+				for(var j=0;j<leftArrayLength;j++)
+				{
+					if(dragRight>self.left_array[j]&&dragLeft<self.right_array[j])
+					{
+						console.log("重叠")
+						return;
+					}
+				}
+			}		
+
+			/*刚加入一个拖块就把其左右坐标进行保存*/
+			self.left_array.push(dragLeft);
+			self.right_array.push(dragRight);
+			/*将拖块的坐标进行排序*/
+			self.left_array.sort(function(a,b){
+				return a-b;
+			});
+			self.right_array.sort(function(a,b){
+				return a-b;
+			});
+			
+			var sliderNum=self.timeSliderNum
+			
+				
+			/*创建拖块*/
+			var drag="<div class='timeSliderDiv'"+
+					 'id=timeS'+sliderNum+'_'+self.dragNum+' '+
+					 'style=left:'+dragLeft+'px'+' '+
+					 'onconTextmenu="return false";'+
+					 '></div>'
+			
+			$backgroundDiv.append(drag);
+			var dragWidth=dragRight-dragLeft
+			$("#timeS"+sliderNum+'_'+self.dragNum).css("width",dragWidth+"px");
+			
+			$("#timeS"+sliderNum+"_"+self.dragNum).mousedown(function(e){
+				self.dragDown(e,this);
+				if(document.all){   //兼容IE8
+					e.cancelBubble=true;
+				}else{
+					e.stopPropagation();
+				}
+			}).mouseup(function(e){
+				self.dragUp(this);
+				/*if(document.all){  //兼容IE8
+					e.cancelBubble=true;
+				}else{
+					e.stopPropagation();
+				}*/
+			})
+
+			
+			var bar_left="<div class=leftBar"+" "+
+			              'id=leftBar'+sliderNum+"_"+self.dragNum+" "+			  
+						 "></div>"
+			$("#timeS"+sliderNum+"_"+self.dragNum).append(bar_left);
+			
+			$("#leftBar"+sliderNum+"_"+self.dragNum).mouseover(function(e){
+					self.barOver(this);
+					/*if(document.all){  //兼容IE8
+						e.cancelBubble=true;
+					}else{
+						e.stopPropagation();
+					}*/
+			}).mousedown(function(e){
+					self.leftBarDown(e,this);
+					if(document.all){  //兼容IE8
+						e.cancelBubble=true;
+					}else{
+						e.stopPropagation();
+					}
+			}).mouseup(function(e){
+					self.BarUp(this,"left");
+					if(document.all){  //兼容IE8
+						e.cancelBubble=true;
+					}else{
+						e.stopPropagation();
+					}
+			})
+			
+			
+			
+			var bar_right="<div class=rightBar"+" "+
+			              'id=rightBar'+sliderNum+"_"+self.dragNum+" "+					  
+						  "></div>"
+			$("#timeS"+sliderNum+"_"+self.dragNum).append(bar_right);
+			
+			var rightBarOffsetLeft=dragRight-dragLeft-$("#rightBar"+sliderNum+"_"+self.dragNum).width()/2
+			$("#rightBar"+sliderNum+"_"+self.dragNum).css("left",rightBarOffsetLeft)
+			
+			$("#rightBar"+sliderNum+"_"+self.dragNum).mouseover(function(e){
+					self.barOver(this);
+					/*if(document.all){  //兼容IE8
+						e.cancelBubble=true;
+					}else{
+						e.stopPropagation();
+					}*/
+			}).mousedown(function(e){
+					self.rightBarDown(e,this);
+					if(document.all){  //兼容IE8
+						e.cancelBubble=true;
+					}else{
+						e.stopPropagation();
+					}
+			}).mouseup(function(e){
+					self.BarUp(this,"right");
+					if(document.all){  //兼容IE8
+						e.cancelBubble=true;
+					}else{
+						e.stopPropagation();
+					}
+			})
+			
+			
+			
+			var left_show="<div class=leftShow"+" "+
+						   'id=leftShow'+sliderNum+"_"+self.dragNum+" "+
+						  "></div>"
+						  
+			$("#timeS"+sliderNum+"_"+self.dragNum).append(left_show);
+			
+			
+			var right_show="<div class=rightShow"+" "+
+						   'id=rightShow'+sliderNum+"_"+self.dragNum+" "+
+						  "></div>"
+						  
+			$("#timeS"+sliderNum+"_"+self.dragNum).append(right_show);
+			var rightShowOffsetLeft=dragRight-dragLeft-13;
+			$("#rightShow"+sliderNum+"_"+self.dragNum).css("left",rightShowOffsetLeft)
+			
+			self.getSliderTime(dragLeft,'leftShow'+sliderNum+'_'+self.dragNum);
+			self.getSliderTime(dragRight,'rightShow'+sliderNum+'_'+self.dragNum);
+		
+			/*控制时间显示效果*/
+			$("#timeS"+sliderNum+"_"+self.dragNum).hover(function(){
+				$(this).addClass("hover");	
+				$(".hover .leftShow").show();
+				$(".hover .rightShow").show();
+			},function(){
+				$(".hover .leftShow").hide();
+				$(".hover .rightShow").hide();
+				$(this).removeClass("hover");		
+			})
+			/*end*/
+			
+			/*设置按钮*/
+			$("#delBtn"+sliderNum).click(function(){
+			})
+			self.dragNum++;
+		},
+		dragDown:function(e,thisDrag){
+			console.log("lzjdown");
+			$(thisDrag).css("z-index","6");
+			$(thisDrag).css ("cursor", "move");
+			var self=this.self;
+			self.hasMove=false;
+			console.log(self);
+			
+			var rightShowId=$(thisDrag).children(".rightShow").attr("id");
+			var leftShowId=$(thisDrag).children(".leftShow").attr("id");
+		
+			var arrayLength=self.right_array.length;
+			var parentOriginalLeft=parseInt($(thisDrag).css("left"));//拖块的原始偏移量
+			var disX=parseInt(e.pageX-parentOriginalLeft-self.slderLeftOffset);//鼠标在拖动块上的偏移
+			var whichOne;
+
+			/*当我去移动时间段之前，先找到当前操作的时间段在数组中的位置*/
+			for(var i=0;i<arrayLength;i++)
+			{	
+				if(self.left_array[i]==parentOriginalLeft)
+				{
+					whichOne=i;
+					self.whichOne=i;
+					break;
+				}
+			}
+			
+		 document.onmousemove=function(ev)  {
+			var self=this.self;
+			console.log(self);
+			self.hasMove=true;
+			var l=parseInt(ev.pageX-disX-self.slderLeftOffset); //移动后的拖块偏移量
+			var parentId=$(thisDrag).attr("id");
+			var timeSliderWidth=$("#"+parentId).parent().width();//整个滑动条宽度
+			var maxWidth=timeSliderWidth-parseInt($("#"+parentId).css("width"))
+			if(l<0)
+             {
+              l=0;
+             }
+			 else if(l>=maxWidth)
+             {
+              l=maxWidth
+             }
+		
+            var width=$(thisDrag).width();
+			//l+width为拖块的右坐标
+			if(arrayLength==1)
+			{
+				$("#"+parentId).css({left: l<0?0:l + "px"});
+				self.calTimeFlag=true;
+			}
+			else if(arrayLength==2)
+			{
+				if(self.whichOne==0)
+				{
+		
+					if((l+width)<=self.left_array[self.whichOne+1])
+					{
+						$("#"+parentId).css({left: l<0?0:l + "px"});
+						self.calTimeFlag=true;
+					}			
+				}
+				else{
+
+					if(l>=self.right_array[self.whichOne-1])
+					{
+						$("#"+parentId).css({left: l<0?0:l + "px"});
+						self.calTimeFlag=true;
+					}
+				}
+			}
+			else{
+		
+				if(self.whichOne==0)
+				{
+					if((l+width)<=self.left_array[self.whichOne+1])
+					{		
+						$("#"+parentId).css({left: l<0?0:l + "px"});
+						self.calTimeFlag=true;
+					}
+				}
+				else if(self.whichOne==arrayLength-1){
+					if(l>=self.right_array[self.whichOne-1])
+					{
+						$("#"+parentId).css({left: l<0?0:l + "px"});
+						self.calTimeFlag=true;
+					}
+				}
+				else{
+					if((l+width)<=self.left_array[self.whichOne+1]&&l>=self.right_array[self.whichOne-1])
+						{
+							$("#"+parentId).css({left: l<0?0:l + "px"});
+							self.calTimeFlag=true;
+						}
+				}
+				
+			}
+			if(document.all){  //兼容IE8
+				e.cancelBubble=true;
+			}else{
+				e.stopPropagation();
+			}
+			if(self.calTimeFlag)
+			{
+				self.getSliderTime(l,leftShowId);
+				self.getSliderTime(l+width,rightShowId);
+				self.calTimeFlag=false;
+			}
+        }.bind(this);
+		document.onmouseup=function(){
+			var self=this.self;
+			$(thisDrag).css("z-index","4");
+			$(thisDrag).css ("cursor", "auto");
+			/*保存移动后的时间段的新坐标*/
+		
+			var left_new=$(thisDrag).css("left");
+			left_new=parseInt(left_new);
+			self.left_array[self.whichOne]=left_new;
+				
+			var right_new=$(thisDrag).css("left");
+			right_new=parseInt(right_new)+$(thisDrag).width();
+			self.right_array[self.whichOne]=right_new;
+			 document.onmousemove=null;
+			 document.onmouseup=null;
+			if(!self.hasMove)
+			 {
+				//$("#startH").val("");
+				//$("#startM").val("");
+				//$("#stopH").val("");
+				//$("#stopM").val("");
+				//$("#fixedDiv"+self.sliderNum).show();
+				//$("#modalDiv"+self.sliderNum).show();
+			 }
+			 else{
+			 }
+			 self.hasMove=false;
+		  }.bind(this);
+		},
+		
+		dragUp:function(thisDrag){
+			
+		},
+		leftBarDown:function(e,thisDrag){
+			$(thisDrag).css("cursor", "w-resize");
+			/*拉伸按钮会改变拖块的宽度*/
+			var parentId=$(thisDrag).parent().attr("id");			
+			//var parentOriginalWidth=$("#"+parentId).width();//拖块的原始宽度	
+			var parentOriginalLeft=parseInt($("#"+parentId).css("left"));//拖块的原始偏移量
+			var leftBarOffset=parseInt($(thisDrag).css("left"));
+			
+			var rightBar=$("#"+parentId).children(".rightBar").attr("id");//右拉伸按钮
+			var rightBarLeft=parseInt($("#"+rightBar).css("left"));
+			var barWidth=$("#"+rightBar).width();//拉伸按钮的宽度
+			
+			var rightShowId=$("#"+parentId).children(".rightShow").attr("id");//显示具体时间的div
+			var rightShowLeft=parseInt($("#"+rightShowId).css("left"));
+			
+			var leftShowId=$("#"+parentId).children(".leftShow").attr("id");//显示具体时间的div
+			var leftShowLeft=parseInt($("#"+leftShowId).css("left"));	
+			
+			var whichOne;
+			var self=this.self;
+			var timeSliderWidth=$(thisDrag).parent().parent().width();//整个滑动条宽度
+			/*寻找目前操作的拖块的坐标在数组中的索引*/
+			for(var i=0;i<self.left_array.length;i++)
+			{	
+				if(self.left_array[i]==parentOriginalLeft)
+				{
+					whichOne=i;
+					self.whichOne=i;
+					break;
+				}
+			}
+			
+			/*绑定拉伸条的移动事件*/
+		 $(document).bind('mousemove', function (ev) {
+            var pageX=parseInt(ev.pageX-self.slderLeftOffset);
+            if(pageX<=0)
+               {
+					pageX=0;
+			   }
+            else if(pageX>=timeSliderWidth)
+                {
+					pageX=timeSliderWidth;
+				}
+
+            var parentBlock;
+			var parentWidth=parseInt(self.right_array[i]-pageX);
+            if(parentOriginalLeft>=pageX){
+			//左拉
+				if(self.whichOne==0)
+				{
+					parentBlock=parseInt(parentOriginalLeft-pageX);
+					$("#"+parentId).css({width:parentWidth + "px",left:pageX+"px"});
+					$("#"+rightBar).css({left:parentBlock+rightBarLeft+"px"});
+					$("#"+rightShowId).css({left:parentBlock+rightShowLeft+"px"});
+					self.calTimeFlag=true;
+				}
+				else{
+				if(pageX>=self.right_array[self.whichOne-1])
+				 {
+					parentBlock=parseInt(parentOriginalLeft-pageX);
+					$("#"+parentId).css({width:parentWidth + "px",left:pageX+"px"});
+					$("#"+rightBar).css({left:parentBlock+rightBarLeft+"px"});
+					$("#"+rightShowId).css({left:parentBlock+rightShowLeft+"px"});
+					self.calTimeFlag=true;
+				 }
+				}
+           }
+			else{
+			//右拉
+                if(parentWidth>=self.oneDragBlockWidth/2){
+					 $("#"+parentId).css({width:parentWidth + "px",left:pageX+"px"});
+					 $("#"+rightBar).css({left:parentWidth-barWidth/2+"px"});
+					 $("#"+rightShowId).css("left",parentWidth-14+"px");
+					 self.calTimeFlag=true;
+                }
+            }
+           
+       
+				
+			if(self.calTimeFlag)
+			{			 
+				 self.getSliderTime(pageX,leftShowId);
+				 self.calTimeFlag=false;
+			}
+      
+        }).bind("mouseup",function(){
+			self.BarUp(thisDrag,"left");
+		})
+		
+		},
+	
+		barOver:function(thisDrag){
+			$(thisDrag).css ("cursor", "e-resize");
+		},
+		
+		BarUp:function(thisDrag,direction){
+			var parentId=$(thisDrag).parent().attr("id");
+			var self=this.self;
+			$(thisDrag).css("cursor", "default");
+			$(thisDrag).unbind("mousemove");
+			$("#"+parentId).unbind("mousemove");
+			$(document).unbind("mousemove");
+			$(document).unbind("mouseup");
+			if(direction=="left")
+			{
+				var left_new=parseInt($("#"+parentId).css("left"));
+				self.left_array[self.whichOne]=left_new;
+			}
+			else if(direction=="right"){
+				var right_new=parseInt($("#"+parentId).css("left"))+$("#"+parentId).width();
+				self.right_array[self.whichOne]=right_new;
+			}
+		},
+		
+		rightBarDown:function(e,thisDrag){
+			var parentId=$(thisDrag).parent().attr("id");
+			var rightShowId=$("#"+parentId).children(".rightShow").attr("id");
+			var rightShowLeft=$("#"+rightShowId).css("left");
+			var parentOriginalLeft=parseInt($("#"+parentId).css("left"));//拖块的原始偏移量
+			var whichOne;
+			var self=this.self;
+			var timeSliderWidth=$(thisDrag).parent().parent().width();//整个滑动条宽度
+			var rightBar=$("#"+parentId).children(".rightBar").attr("id");//右拉伸按钮
+			var barWidth=$("#"+rightBar).width();//拉伸按钮的宽度
+			/*寻找目前操作的拖块的坐标在数组中的索引*/
+			for(var i=0;i<self.right_array.length;i++)
+			{	
+				if(self.left_array[i]==parentOriginalLeft)
+				{
+					whichOne=i;
+					self.whichOne=i;
+					break;
+				}
+			}
+		
+			$(document).bind('mousemove',function(ev){
+				var pageX=parseInt(ev.pageX-self.slderLeftOffset);
+					if(pageX<=0)
+						{
+							pageX=0;
+						}
+					else if(pageX>=timeSliderWidth)
+						{
+							pageX=timeSliderWidth;
+						}
+			
+				var parentWidth=pageX>parentOriginalLeft?pageX-parentOriginalLeft:self.oneDragBlockWidth/2;
+				if(pageX>=parentOriginalLeft&&parentWidth>=self.oneDragBlockWidth/2)
+				{
+					if(whichOne==self.left_array.length-1)
+					{
+						$(thisDrag).css({left:parentWidth-barWidth/2 +"px"});
+						$("#"+parentId).css({width:parentWidth + "px"});
+						$("#"+rightShowId).css({left:parentWidth-14 + "px"});
+						self.calTimeFlag=true;
+					}
+					else{
+						if(pageX<=self.left_array[whichOne+1])
+						{
+							$(thisDrag).css({left:parentWidth-barWidth/2 +"px"});
+							$("#"+parentId).css({width:parentWidth + "px"});
+							$("#"+rightShowId).css({left:parentWidth-14 + "px"});
+							self.calTimeFlag=true;
+						}
+					}
+				}
+				else{
+					$(thisDrag).css({left:parentWidth-barWidth/2 +"px"});
+					$("#"+parentId).css({width:parentWidth + "px"});
+					$("#"+rightShowId).css({left:parentWidth-14 + "px"});
+					self.calTimeFlag=true;
+				}
+			
+       
+				if(self.calTimeFlag)
+				{
+				self.getSliderTime(pageX,rightShowId);
+				self.calTimeFlag=false;
+				}
+      
+			}).mouseup(function () {
+				self.BarUp(thisDrag,"right");
+			});
+			},
+		getSliderTime:function(offsetX,id){
+				var self=this.self;
+				var tmpHour= Math.floor(offsetX/self.oneHourWidth);
+				var hour=tmpHour.toString().length<2?"0"+tmpHour:tmpHour;
+				var min=parseInt(offsetX%self.oneHourWidth*60/self.oneHourWidth);
+				if(min<10)
+				{
+					min="0"+min;
+				}
+					$("#"+id).text(hour+":"+min);
+		
+			},
+		getSliderOffsetX:function(time){
+			var timeArray=new Array;
+			var self=this.self;
+			var startH=parseInt(time[0].split(":")[0])*self.oneHourWidth;
+			var startM=parseInt(time[0].split(":")[1])*self.oneHourWidth/60;
+			startM=Math.ceil(startM);
+			var stopH=parseInt(time[1].split(":")[0])*self.oneHourWidth;
+			var stopM=parseInt(time[1].split(":")[1])*self.oneHourWidth/60;
+			stopM=Math.ceil(stopM);
+			var startTime=startH+startM+self.slderLeftOffset;
+			var stopTime=stopH+stopM
+			timeArray[0]=startTime;
+			timeArray[1]=stopTime;
+			return timeArray
+		}
+
+	}
+	var lzj=new TimeSlider;
+	lzj.init({
+				id:"timeslider1",
+				defaultTime:{
+					"1":["07:46","12:00"],
+					"2":["12:00","13:43"]
+				}
+				})
+	var nzj=new TimeSlider;
+	nzj.init({
+				id:"timeslider2",
+				})
+
+</script>
+
+</body>
+</html>
