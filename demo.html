@@ -5,7 +5,6 @@
 <title>scheduler</title>
 <style type="text/css">
     .timeSlider{
-		border-collapse:collapse;/*表格边框合并为一个*/
 		padding: 0;
 		margin: 0;
 		border:0;
@@ -200,7 +199,7 @@
 	}
 </style>
 </head>
-<body>
+<body onselectstart="return false;">
 <div id="timeslider1" class="timeSlider" onselectstart="return false;">
 </div>
 
@@ -216,7 +215,7 @@
 	if (typeof jQuery === 'undefined') {
 		throw new Error('Slider\'s JavaScript requires jQuery')
 	}
-	
+	var myId=null;
 	function TimeSlider(){
 		this.left_array=new Array();//存放每个拖块的左坐标
 		this.right_array=new Array();//存放每个拖块的右坐标
@@ -224,7 +223,6 @@
 		this.oneDragBlockWidth=0;
 		this.oneHourWidth=0;
 		this.dragNum=0;//拖块个数-1
-		this.self=null;
 		this.hasMove=false;
 		this.whichOne=0;//目前操纵的是哪个拖块
 		this.timeSliderNum=0;//TimeSlider实例个数
@@ -240,9 +238,7 @@
 			var divId=obj.id;
 			var oneDragBlockTime=obj.oneDragBlockTime||60;//每个拖块代表的时间
 			var self=this;//保存当前上下文
-			this.self=this;
 
-			
 			/*创建布局*/
 				var backgroundDiv=document.createElement("div");
 				$(backgroundDiv).addClass("trCanvas").appendTo("#"+divId);
@@ -322,9 +318,26 @@
 				$(stopMin).addClass("time").appendTo(modalTimeDiv)
 				
 				$(modalFooterDiv).addClass("modal-footer").appendTo(modalContentDiv);								
-				$(setBtn).addClass("setbtn").appendTo(modalFooterDiv).text("设置").attr("id","setBtn"+this.sliderNum)
-				$(delBtn).addClass("setbtn").appendTo(modalFooterDiv).text("删除").attr("id","delBtn"+this.sliderNum)
-				$(calBtn).addClass("setbtn").appendTo(modalFooterDiv).text("取消").attr("id","calBtn"+this.sliderNum)
+				$(setBtn).addClass("setbtn").appendTo(modalFooterDiv).text("设置").attr("id","setBtn"+this.timeSliderNum)
+				$(delBtn).addClass("setbtn").appendTo(modalFooterDiv).text("删除").attr("id","delBtn"+this.timeSliderNum)
+				$(calBtn).addClass("setbtn").appendTo(modalFooterDiv).text("取消").attr("id","calBtn"+this.timeSliderNum)
+				
+				delBtn.onclick=function(){						
+						console.log(this.whichOne);
+						this.right_array.splice(this.whichOne,1);
+						this.left_array.splice(this.whichOne,1);
+						$("#"+myId).remove();
+						this.dragNum--;
+						$("#modalDiv"+this.timeSliderNum).hide();
+						$("#fixedDiv"+this.timeSliderNum).hide();
+						
+				}.bind(this)
+				
+				calBtn.onclick=function(){						
+						$("#modalDiv"+this.timeSliderNum).hide();
+						$("#fixedDiv"+this.timeSliderNum).hide();
+						
+				}.bind(this)
 				
 				$("#"+divId).after(modalDiv)
 				
@@ -354,7 +367,8 @@
 		},
 			
 		createDrag:function(backgroundDiv,ex,ex2){
-			var self=this.self;
+			console.log(this);
+			var self=this;
 			var dragLeft=Math.floor(ex-self.slderLeftOffset);
 			if(ex2)//如果指明了结束时间
 			{
@@ -391,7 +405,6 @@
 					}
 				}
 			}		
-
 			/*刚加入一个拖块就把其左右坐标进行保存*/
 			self.left_array.push(dragLeft);
 			self.right_array.push(dragRight);
@@ -526,17 +539,14 @@
 				$(this).removeClass("hover");		
 			})
 			/*end*/
-			
-			/*设置按钮*/
-			$("#delBtn"+sliderNum).click(function(){
-			})
+		
 			self.dragNum++;
 		},
 		dragDown:function(e,thisDrag){
 			console.log("lzjdown");
 			$(thisDrag).css("z-index","6");
-			$(thisDrag).css ("cursor", "move");
-			var self=this.self;
+			$(thisDrag).css("cursor", "move");
+			var self=this;
 			self.hasMove=false;
 			console.log(self);
 			
@@ -558,13 +568,14 @@
 					break;
 				}
 			}
-			
+			var parentId=$(thisDrag).attr("id");
+			myId=parentId;
 		 document.onmousemove=function(ev)  {
-			var self=this.self;
-			console.log(self);
+			var self=this;
+			//console.log(self);
 			self.hasMove=true;
 			var l=parseInt(ev.pageX-disX-self.slderLeftOffset); //移动后的拖块偏移量
-			var parentId=$(thisDrag).attr("id");
+			//var parentId=$(thisDrag).attr("id");
 			var timeSliderWidth=$("#"+parentId).parent().width();//整个滑动条宽度
 			var maxWidth=timeSliderWidth-parseInt($("#"+parentId).css("width"))
 			if(l<0)
@@ -642,9 +653,10 @@
 			}
         }.bind(this);
 		document.onmouseup=function(){
-			var self=this.self;
+			var self=this;
 			$(thisDrag).css("z-index","4");
 			$(thisDrag).css ("cursor", "auto");
+
 			/*保存移动后的时间段的新坐标*/
 		
 			var left_new=$(thisDrag).css("left");
@@ -662,8 +674,8 @@
 				//$("#startM").val("");
 				//$("#stopH").val("");
 				//$("#stopM").val("");
-				//$("#fixedDiv"+self.sliderNum).show();
-				//$("#modalDiv"+self.sliderNum).show();
+				$("#fixedDiv"+self.timeSliderNum).show();
+				$("#modalDiv"+self.timeSliderNum).show();
 			 }
 			 else{
 			 }
@@ -693,7 +705,7 @@
 			var leftShowLeft=parseInt($("#"+leftShowId).css("left"));	
 			
 			var whichOne;
-			var self=this.self;
+			var self=this;
 			var timeSliderWidth=$(thisDrag).parent().parent().width();//整个滑动条宽度
 			/*寻找目前操作的拖块的坐标在数组中的索引*/
 			for(var i=0;i<self.left_array.length;i++)
@@ -771,7 +783,7 @@
 		
 		BarUp:function(thisDrag,direction){
 			var parentId=$(thisDrag).parent().attr("id");
-			var self=this.self;
+			var self=this;
 			$(thisDrag).css("cursor", "default");
 			$(thisDrag).unbind("mousemove");
 			$("#"+parentId).unbind("mousemove");
@@ -794,7 +806,7 @@
 			var rightShowLeft=$("#"+rightShowId).css("left");
 			var parentOriginalLeft=parseInt($("#"+parentId).css("left"));//拖块的原始偏移量
 			var whichOne;
-			var self=this.self;
+			var self=this;
 			var timeSliderWidth=$(thisDrag).parent().parent().width();//整个滑动条宽度
 			var rightBar=$("#"+parentId).children(".rightBar").attr("id");//右拉伸按钮
 			var barWidth=$("#"+rightBar).width();//拉伸按钮的宽度
@@ -859,7 +871,7 @@
 			});
 			},
 		getSliderTime:function(offsetX,id){
-				var self=this.self;
+				var self=this;
 				var tmpHour= Math.floor(offsetX/self.oneHourWidth);
 				var hour=tmpHour.toString().length<2?"0"+tmpHour:tmpHour;
 				var min=parseInt(offsetX%self.oneHourWidth*60/self.oneHourWidth);
@@ -872,7 +884,7 @@
 			},
 		getSliderOffsetX:function(time){
 			var timeArray=new Array;
-			var self=this.self;
+			var self=this;
 			var startH=parseInt(time[0].split(":")[0])*self.oneHourWidth;
 			var startM=parseInt(time[0].split(":")[1])*self.oneHourWidth/60;
 			startM=Math.ceil(startM);
