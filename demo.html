@@ -227,6 +227,7 @@
 		this.whichOne=0;//目前操纵的是哪个拖块
 		this.timeSliderNum=0;//TimeSlider实例个数
 		this.calTimeFlag=false;//是否计算时间
+		this.dragId=null;//当前操作的拖块的ID
 	}
 	
 	TimeSlider.prototype={
@@ -323,11 +324,9 @@
 				$(calBtn).addClass("setbtn").appendTo(modalFooterDiv).text("取消").attr("id","calBtn"+this.timeSliderNum)
 				
 				delBtn.onclick=function(){						
-						console.log(this.whichOne);
 						this.right_array.splice(this.whichOne,1);
 						this.left_array.splice(this.whichOne,1);
-						$("#"+myId).remove();
-						this.dragNum--;
+						$("#"+this.dragId).remove();
 						$("#modalDiv"+this.timeSliderNum).hide();
 						$("#fixedDiv"+this.timeSliderNum).hide();
 						
@@ -569,15 +568,13 @@
 				}
 			}
 			var parentId=$(thisDrag).attr("id");
-			myId=parentId;
-		 document.onmousemove=function(ev)  {
-			var self=this;
-			//console.log(self);
-			self.hasMove=true;
-			var l=parseInt(ev.pageX-disX-self.slderLeftOffset); //移动后的拖块偏移量
-			//var parentId=$(thisDrag).attr("id");
 			var timeSliderWidth=$("#"+parentId).parent().width();//整个滑动条宽度
 			var maxWidth=timeSliderWidth-parseInt($("#"+parentId).css("width"))
+			this.dragId=parentId;
+		 document.onmousemove=function(ev)  {
+			var self=this;
+			self.hasMove=true;
+			var l=parseInt(ev.pageX-disX-self.slderLeftOffset); //移动后的拖块偏移量
 			if(l<0)
              {
               l=0;
@@ -614,8 +611,7 @@
 					}
 				}
 			}
-			else{
-		
+			else{		
 				if(self.whichOne==0)
 				{
 					if((l+width)<=self.left_array[self.whichOne+1])
