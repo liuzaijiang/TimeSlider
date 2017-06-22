@@ -197,17 +197,25 @@
 		width:20px;
 		margin:10px;
 	}
+	.week{
+		float:left;
+		margin-left:30px;
+	}
 </style>
 </head>
 <body onselectstart="return false;">
+<div>
+<label class="week">星期一:</label>
 <div id="timeslider1" class="timeSlider" onselectstart="return false;">
 </div>
-
+</div>
 <br/>
 <br/>
 <br/>
+<div>
+<label class="week">星期二:</label>
 <div id="timeslider2" class="timeSlider"  onselectstart="return false;">
-
+</div>
 </div>
 <br/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -313,29 +321,135 @@
 				$(modalBodyDiv).addClass("modal-body").appendTo(modalContentDiv);
 				
 				$(modalTimeDiv).addClass("time-div").appendTo(modalBodyDiv);
-				$(startHour).addClass("time").appendTo(modalTimeDiv).after(":").before("开始时间")
-				$(startMin).addClass("time").appendTo(modalTimeDiv)
-				$(stopHour).addClass("time").appendTo(modalTimeDiv).after(":").before("结束时间")
-				$(stopMin).addClass("time").appendTo(modalTimeDiv)
+				$(startHour).addClass("time").appendTo(modalTimeDiv).after(":").before("开始时间").attr("id","startH"+this.timeSliderNum)
+				$(startMin).addClass("time").appendTo(modalTimeDiv).attr("id","startM"+this.timeSliderNum)
+				$(stopHour).addClass("time").appendTo(modalTimeDiv).after(":").before("结束时间").attr("id","stopH"+this.timeSliderNum)
+				$(stopMin).addClass("time").appendTo(modalTimeDiv).attr("id","stopM"+this.timeSliderNum)
 				
 				$(modalFooterDiv).addClass("modal-footer").appendTo(modalContentDiv);								
 				$(setBtn).addClass("setbtn").appendTo(modalFooterDiv).text("设置").attr("id","setBtn"+this.timeSliderNum)
 				$(delBtn).addClass("setbtn").appendTo(modalFooterDiv).text("删除").attr("id","delBtn"+this.timeSliderNum)
 				$(calBtn).addClass("setbtn").appendTo(modalFooterDiv).text("取消").attr("id","calBtn"+this.timeSliderNum)
 				
+				setBtn.onclick=function(){
+						var STH=$("#startH"+this.timeSliderNum).val();
+						var STM=$("#startM"+this.timeSliderNum).val();
+						var SPH=$("#stopH"+this.timeSliderNum).val();
+						var SPM=$("#stopM"+this.timeSliderNum).val();
+						console.log(STH);
+						console.log(STM);
+						console.log(SPH);
+						console.log(SPM);
+						
+						if(STH==""||STH==""||SPH==""||SPH=="")
+						{
+							alert("请设置");
+							return
+						}
+						else if(STH<0||STH>23||SPH<0||SPH>24)
+						{
+							alert("小时请填写0-24之间的数字");
+							return;
+						}
+						else if(STM<0||STM>59||SPM<0||SPM>59)
+						{
+							alert("分钟请填写0-59之间的数字");
+							return;
+						}
+						else if(SPH<STH||(SPH==24&&SPM>0))
+						{
+							alert("请填写正确的时间");
+							return;
+						}
+						else if((STH==SPH)&&(SPM<STM))
+						{
+							alert("这个错得太离谱")
+							return;
+						}
+						else if((SPH*60+SPM)-(STH*60+STM)<40)
+						{
+							alert("间隔至少40分钟");
+							return;
+						}
+						var rightBarId=$("#"+this.dragId).children(".rightBar").attr("id");
+						var rightShowId=$("#"+this.dragId).children(".rightShow").attr("id");
+						var leftShowId=$("#"+this.dragId).children(".leftShow").attr("id");
+	
+						var newLeft=Math.ceil(STH*this.oneHourWidth+STM*this.oneHourWidth/60);
+						var newRight=Math.ceil(SPH*this.oneHourWidth+SPM*this.oneHourWidth/60);
+						console.log("right:"+newRight)
+						console.log("left:"+newLeft);
+						var arrayLen;
+						arrayLen=this.left_array.length;
+
+						/*设置过程中判断时间段是否超出边界范围及超过其他时间段*/
+						console.log($("#"+this.dragId).parent().width());
+						if(newLeft<0||newRight>$("#"+this.dragId).parent().width())
+						{
+							alert("超过时间抽长度，请重新设置");
+							return 
+						}
+						if(arrayLen>=2)
+						{	
+						if(this.whichOne==0)
+						{
+							if(newRight>this.left_array[this.whichOne+1])
+							{
+								alert("与其他时间段重合，请重新设置");
+								return ;
+							}
+						}
+						else if(this.whichOne==arrayLen-1)
+						{
+							if(newLeft<this.right_array[this.whichOne-1])
+							{
+								alert("与其他时间段重合，请重新设置");
+								return ;
+							}
+						}
+						else{
+								if(newLeft<this.right_array[this.whichOne-1]||newRight>this.left_array[this.whichOne+1])
+								{
+									alert("与其他时间段重合，请重新设置");
+									return ;
+								}
+							}
+						}
+	  
+						this.getSliderTime(newLeft,leftShowId);
+						this.getSliderTime(newRight,rightShowId);
+						this.left_array.splice(this.whichOne,1,newLeft);
+						this.right_array.splice(this.whichOne,1,newRight);
+	
+						$("#"+this.dragId).css({
+							"left":newLeft,
+							"width":newRight-newLeft
+						})
+	
+						$("#"+rightBarId).css({
+							"left":newRight-newLeft-$("#"+rightBarId).width()/2
+						})
+	
+						$("#"+rightShowId).css({
+							"left":newRight-newLeft-$("#"+rightShowId).width()/2
+						})
+	
+	
+						$("#modalDiv"+this.timeSliderNum).hide();
+						$("#fixedDiv"+this.timeSliderNum).hide();						
+				}.bind(this);
+				
 				delBtn.onclick=function(){						
 						this.right_array.splice(this.whichOne,1);
 						this.left_array.splice(this.whichOne,1);
 						$("#"+this.dragId).remove();
 						$("#modalDiv"+this.timeSliderNum).hide();
-						$("#fixedDiv"+this.timeSliderNum).hide();
-						
+						$("#fixedDiv"+this.timeSliderNum).hide();					
 				}.bind(this)
 				
 				calBtn.onclick=function(){						
 						$("#modalDiv"+this.timeSliderNum).hide();
-						$("#fixedDiv"+this.timeSliderNum).hide();
-						
+						$("#fixedDiv"+this.timeSliderNum).hide();		
 				}.bind(this)
 				
 				$("#"+divId).after(modalDiv)
@@ -366,7 +480,6 @@
 		},
 			
 		createDrag:function(backgroundDiv,ex,ex2){
-			console.log(this);
 			var self=this;
 			var dragLeft=Math.floor(ex-self.slderLeftOffset);
 			if(ex2)//如果指明了结束时间
@@ -542,12 +655,10 @@
 			self.dragNum++;
 		},
 		dragDown:function(e,thisDrag){
-			console.log("lzjdown");
 			$(thisDrag).css("z-index","6");
 			$(thisDrag).css("cursor", "move");
 			var self=this;
 			self.hasMove=false;
-			console.log(self);
 			
 			var rightShowId=$(thisDrag).children(".rightShow").attr("id");
 			var leftShowId=$(thisDrag).children(".leftShow").attr("id");
@@ -571,6 +682,7 @@
 			var timeSliderWidth=$("#"+parentId).parent().width();//整个滑动条宽度
 			var maxWidth=timeSliderWidth-parseInt($("#"+parentId).css("width"))
 			this.dragId=parentId;
+
 		 document.onmousemove=function(ev)  {
 			var self=this;
 			self.hasMove=true;
@@ -892,8 +1004,7 @@
 			timeArray[0]=startTime;
 			timeArray[1]=stopTime;
 			return timeArray
-		}
-
+		},
 	}
 	var lzj=new TimeSlider;
 	lzj.init({
