@@ -252,7 +252,7 @@
 				var backgroundDiv=document.createElement("div");
 				$(backgroundDiv).addClass("trCanvas").appendTo("#"+divId);
 				
-				var oneHourWidth=Math.floor($(".trCanvas").width()/24);//每一个小时占的宽度
+				var oneHourWidth=Math.floor($(backgroundDiv).width()/24);//每一个小时占的宽度
 				this.oneHourWidth=oneHourWidth;
 				var oneDragBlockWidth=Math.floor(oneHourWidth*oneDragBlockTime/60);//每个拖块的宽度
 				this.oneDragBlockWidth=oneDragBlockWidth;
@@ -332,14 +332,10 @@
 				$(calBtn).addClass("setbtn").appendTo(modalFooterDiv).text("取消").attr("id","calBtn"+this.timeSliderNum)
 				
 				setBtn.onclick=function(){
-						var STH=$("#startH"+this.timeSliderNum).val();
-						var STM=$("#startM"+this.timeSliderNum).val();
-						var SPH=$("#stopH"+this.timeSliderNum).val();
-						var SPM=$("#stopM"+this.timeSliderNum).val();
-						console.log(STH);
-						console.log(STM);
-						console.log(SPH);
-						console.log(SPM);
+						var STH=parseInt($("#startH"+this.timeSliderNum).val());
+						var STM=parseInt($("#startM"+this.timeSliderNum).val());
+						var SPH=parseInt($("#stopH"+this.timeSliderNum).val());
+						var SPM=parseInt($("#stopM"+this.timeSliderNum).val());
 						
 						if(STH==""||STH==""||SPH==""||SPH=="")
 						{
@@ -377,13 +373,10 @@
 	
 						var newLeft=Math.ceil(STH*this.oneHourWidth+STM*this.oneHourWidth/60);
 						var newRight=Math.ceil(SPH*this.oneHourWidth+SPM*this.oneHourWidth/60);
-						console.log("right:"+newRight)
-						console.log("left:"+newLeft);
 						var arrayLen;
 						arrayLen=this.left_array.length;
 
 						/*设置过程中判断时间段是否超出边界范围及超过其他时间段*/
-						console.log($("#"+this.dragId).parent().width());
 						if(newLeft<0||newRight>$("#"+this.dragId).parent().width())
 						{
 							alert("超过时间抽长度，请重新设置");
@@ -416,8 +409,8 @@
 							}
 						}
 	  
-						this.getSliderTime(newLeft,leftShowId);
-						this.getSliderTime(newRight,rightShowId);
+						//this.getSliderTime(newLeft,leftShowId);
+						//this.getSliderTime(newRight,rightShowId);
 						this.left_array.splice(this.whichOne,1,newLeft);
 						this.right_array.splice(this.whichOne,1,newRight);
 	
@@ -429,11 +422,16 @@
 						$("#"+rightBarId).css({
 							"left":newRight-newLeft-$("#"+rightBarId).width()/2
 						})
-	
+						
 						$("#"+rightShowId).css({
 							"left":newRight-newLeft-$("#"+rightShowId).width()/2
-						})
-	
+						})					
+						var textSTH=STH>10?STH:"0"+STH
+						var textSTM=STM>10?STM:"0"+STM
+						var textSPH=SPH>10?SPH:"0"+SPH
+						var textSPM=SPM>10?SPM:"0"+SPM
+						$("#"+rightShowId).text(textSPH+":"+textSPM);
+						$("#"+leftShowId).text(textSTH+":"+textSTM);
 	
 						$("#modalDiv"+this.timeSliderNum).hide();
 						$("#fixedDiv"+this.timeSliderNum).hide();						
@@ -456,7 +454,7 @@
 				
 			/*end*/
 			
-			this.slderLeftOffset=Math.floor($("#"+divId).offset().left)//时间轴距离左页面的距离
+			this.slderLeftOffset=$("#"+divId).offset().left//时间轴距离左页面的距离
 			
 			
 			$(backgroundDiv).mousedown(function(e){
@@ -473,15 +471,15 @@
 			{
 				for( key in obj.defaultTime)
 				{
-					var timeArray=this.getSliderOffsetX(obj.defaultTime[key])
-					this.createDrag(obj.id,timeArray[0],timeArray[1])
+					var timeArray=this.getSliderOffsetX(obj.defaultTime[key]);
+					this.createDrag(obj.id,timeArray[0],timeArray[1],timeArray[2],timeArray[3]);
 				}
 			}
 		},
 			
-		createDrag:function(backgroundDiv,ex,ex2){
+		createDrag:function(backgroundDiv,ex,ex2,timeStart,timeStop){
 			var self=this;
-			var dragLeft=Math.floor(ex-self.slderLeftOffset);
+			var dragLeft=ex-self.slderLeftOffset;
 			if(ex2)//如果指明了结束时间
 			{
 				var dragRight=ex2;
@@ -637,9 +635,16 @@
 			var rightShowOffsetLeft=dragRight-dragLeft-13;
 			$("#rightShow"+sliderNum+"_"+self.dragNum).css("left",rightShowOffsetLeft)
 			
-			self.getSliderTime(dragLeft,'leftShow'+sliderNum+'_'+self.dragNum);
-			self.getSliderTime(dragRight,'rightShow'+sliderNum+'_'+self.dragNum);
-		
+			if(ex2)
+			{
+					self.getSliderTime(dragLeft,'leftShow'+sliderNum+'_'+self.dragNum,timeStart);
+					self.getSliderTime(dragRight,'rightShow'+sliderNum+'_'+self.dragNum,timeStop);
+			}
+			else{
+					self.getSliderTime(dragLeft,'leftShow'+sliderNum+'_'+self.dragNum);
+					self.getSliderTime(dragRight,'rightShow'+sliderNum+'_'+self.dragNum);
+			}
+
 			/*控制时间显示效果*/
 			$("#timeS"+sliderNum+"_"+self.dragNum).hover(function(){
 				$(this).addClass("hover");	
@@ -978,16 +983,23 @@
 				self.BarUp(thisDrag,"right");
 			});
 			},
-		getSliderTime:function(offsetX,id){
-				var self=this;
-				var tmpHour= Math.floor(offsetX/self.oneHourWidth);
-				var hour=tmpHour.toString().length<2?"0"+tmpHour:tmpHour;
-				var min=parseInt(offsetX%self.oneHourWidth*60/self.oneHourWidth);
-				if(min<10)
+		getSliderTime:function(offsetX,id,timeString){
+				if(timeString)
 				{
-					min="0"+min;
+					$("#"+id).text(timeString);
 				}
-					$("#"+id).text(hour+":"+min);
+				else{
+					var self=this;
+					var tmpHour= Math.floor(offsetX/self.oneHourWidth);
+					var hour=tmpHour.toString().length<2?"0"+tmpHour:tmpHour;
+					var min=parseInt(offsetX%self.oneHourWidth*60/self.oneHourWidth);
+					console.log("2222")
+					if(min<10)
+					{
+						min="0"+min;
+					}
+						$("#"+id).text(hour+":"+min);
+				}
 		
 			},
 		getSliderOffsetX:function(time){
@@ -1003,6 +1015,8 @@
 			var stopTime=stopH+stopM
 			timeArray[0]=startTime;
 			timeArray[1]=stopTime;
+			timeArray[2]=time[0];
+			timeArray[3]=time[1];
 			return timeArray
 		},
 	}
@@ -1010,7 +1024,7 @@
 	lzj.init({
 				id:"timeslider1",
 				defaultTime:{
-					"1":["07:46","12:00"],
+					"1":["01:01","2:42"],
 					"2":["12:00","13:43"]
 				}
 				})
