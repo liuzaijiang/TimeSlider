@@ -201,6 +201,63 @@
 		float:left;
 		margin-left:30px;
 	}
+	
+	.editWrap{
+		position:relative;
+		height:50px;
+		width:100px;
+		left:1050px;
+		bottom:30px;
+	}
+	
+	.editDiv{
+		width:180px;
+		position:absolute;
+		left:0;
+		top:0;
+		display:none;
+		background-color:#f9f6f6;
+		border:1px solid #e4e4e4;
+		z-index:5;
+	}
+	
+	.editHeader{
+		min-height:16px;
+		padding:5px;
+		border-bottom:1px solid #e5e5e5;
+	}
+	
+	.editBody{
+		position:relative;
+		padding:10px;
+	}
+	
+	.editFooter{
+		padding :9px 2px 2px;
+		text-align:right;
+		margin-top:5px;
+		border-top:1px solid #e5e5e5;
+	}
+	
+	.delImg{
+		position:absolute;
+		left:40px;
+		top:2px;
+	}
+	
+	.delImg:hover{
+		cursor:pointer;
+	}
+	
+	.editBtn{
+		font-size:14px;
+		line-height:1.427;
+		height:20px;
+		width:50px;
+		text-align:center;
+		margin:2px;
+	}
+	
 </style>
 </head>
 <body onselectstart="return false;">
@@ -283,7 +340,7 @@
 				
 
 				
-				//弹出框
+				/*弹出框*/
 				var menuFixedDiv=document.createElement("div");
 				$(menuFixedDiv).addClass("menufix").attr("id","fixedDiv"+this.timeSliderNum)
 				$("#"+divId).after(menuFixedDiv)
@@ -366,7 +423,7 @@
 						{
 							alert("间隔至少40分钟");
 							return;
-						}
+						}						
 						var rightBarId=$("#"+this.dragId).children(".rightBar").attr("id");
 						var rightShowId=$("#"+this.dragId).children(".rightShow").attr("id");
 						var leftShowId=$("#"+this.dragId).children(".leftShow").attr("id");
@@ -408,9 +465,6 @@
 								}
 							}
 						}
-	  
-						//this.getSliderTime(newLeft,leftShowId);
-						//this.getSliderTime(newRight,rightShowId);
 						this.left_array.splice(this.whichOne,1,newLeft);
 						this.right_array.splice(this.whichOne,1,newRight);
 	
@@ -452,7 +506,125 @@
 				
 				$("#"+divId).after(modalDiv)
 				
-			/*end*/
+				/*end*/
+				
+				/*编辑区域*/
+				var editWrap=document.createElement("div");
+				$(editWrap).addClass("editWrap")
+
+				$("#"+divId).after(editWrap);
+				
+				var editImg=document.createElement("img");
+				editImg.src="edit.gif";
+				$(editImg).hover(function(){
+					this.style.cursor="pointer";
+				})
+				editImg.title="编辑";
+				$(editWrap).append(editImg);
+				editImg.onclick=function(){
+					$("#editDiv"+this.timeSliderNum).show();
+				}.bind(this);
+				
+				
+				var delImg=document.createElement("img");
+				delImg.src="del.gif";
+				delImg.title="删除";
+				$(delImg).addClass("delImg");
+				delImg.onclick=function(){
+					if(window.confirm("是否要删除此时间轴上的所有时间段"))
+					{
+						var len=this.right_array.length;
+						for(var i=len;i--;)
+						{
+							$("#timeS"+this.timeSliderNum+"_"+i).remove();
+						}
+						this.right_array.splice(0,this.right_array.length);
+						this.left_array.splice(0,this.right_array.length);
+					}
+				}.bind(this);
+				$(editWrap).append(delImg);
+				
+		
+				var editDiv=document.createElement("div");
+				$(editDiv).addClass("editDiv").attr("id","editDiv"+this.timeSliderNum)
+				
+				$(editWrap).append(editDiv);
+				
+				var editHeader=document.createElement("div");
+				$(editHeader).addClass("editHeader");
+				$(editDiv).append(editHeader);
+				
+				var editTitle=document.createElement("label")
+				$(editTitle).text("复制到");
+				$(editHeader).append(editTitle);
+				
+				var editBody=document.createElement("div");
+				$(editBody).addClass("editBody");
+				$(editDiv).append(editBody);
+				
+				var editTextObj={
+					0:"星期一",
+					1:"星期二",
+					2:"星期三",
+					3:"星期四",
+					4:"星期五",
+					5:"星期六",
+					6:"星期日",
+				}
+				
+				for(var i=0;i<7;i++)
+				{
+					var editBoxDiv=document.createElement("div");
+					editBoxDiv.style.display="inline-block";
+					$(editBody).append(editBoxDiv);
+					var editCheckBox=document.createElement("input");
+					editCheckBox.type="checkbox";
+					editCheckBox.onclick=function(){
+						$("#editCheckAll"+this.timeSliderNum).prop("checked",$(".editCBox"+this.timeSliderNum).length==$(".editCBox"+this.timeSliderNum).filter(":checked").length);
+					}.bind(this);
+					$(editCheckBox).addClass("editCBox"+this.timeSliderNum)
+					$(editBoxDiv).append(editCheckBox);
+					var editLabel=document.createElement("label");
+					$(editLabel).text(editTextObj[i]);
+					$(editBoxDiv).append(editLabel);
+				}
+	
+					/*全选按钮*/
+					var editBoxDiv=document.createElement("div");
+					editBoxDiv.style.display="inline-block";
+					$(editBody).append(editBoxDiv);
+					var editCheckBox=document.createElement("input");
+					editCheckBox.type="checkbox";
+					$(editCheckBox).attr("id","editCheckAll"+this.timeSliderNum);
+					$(editBoxDiv).append(editCheckBox);
+					var editLabel=document.createElement("label");
+					$(editLabel).text("全选");
+					$(editBoxDiv).append(editLabel);
+					editCheckBox.onclick=function(){
+						 $(".editCBox"+this.timeSliderNum).prop("checked",$("#editCheckAll"+this.timeSliderNum).prop("checked"));
+					}.bind(this);
+					/*end*/
+				
+				var editFooter=document.createElement("div");
+				$(editFooter).addClass("editFooter");
+				$(editDiv).append(editFooter);
+							
+				var editSave=document.createElement("input");
+				$(editSave).addClass("editBtn");
+				editSave.type="button";
+				editSave.value="保存";
+				$(editFooter).append(editSave);
+				
+				var editCancle=document.createElement("input");
+				$(editCancle).addClass("editBtn");
+				editCancle.type="button";
+				editCancle.value="取消";
+				editCancle.onclick=function(){
+					$("#editDiv"+this.timeSliderNum).hide();
+				}.bind(this)
+				$(editFooter).append(editCancle);
+				
+				/*end*/
 			
 			this.slderLeftOffset=$("#"+divId).offset().left//时间轴距离左页面的距离
 			
@@ -783,10 +955,10 @@
 			 document.onmouseup=null;
 			if(!self.hasMove)
 			 {
-				//$("#startH").val("");
-				//$("#startM").val("");
-				//$("#stopH").val("");
-				//$("#stopM").val("");
+				$("#startH"+self.timeSliderNum).val("");
+				$("#startM"+self.timeSliderNum).val("");
+				$("#stopH"+self.timeSliderNum).val("");
+				$("#stopM"+self.timeSliderNum).val("");
 				$("#fixedDiv"+self.timeSliderNum).show();
 				$("#modalDiv"+self.timeSliderNum).show();
 			 }
@@ -993,7 +1165,6 @@
 					var tmpHour= Math.floor(offsetX/self.oneHourWidth);
 					var hour=tmpHour.toString().length<2?"0"+tmpHour:tmpHour;
 					var min=parseInt(offsetX%self.oneHourWidth*60/self.oneHourWidth);
-					console.log("2222")
 					if(min<10)
 					{
 						min="0"+min;
