@@ -538,8 +538,9 @@
 						{
 							$("#timeS"+this.timeSliderNum+"_"+i).remove();
 						}
-						this.right_array.splice(0,this.right_array.length);
-						this.left_array.splice(0,this.right_array.length);
+						this.right_array.splice(0,len);
+						this.left_array.splice(0,len);
+						this.dragNum=0;
 					}
 				}.bind(this);
 				$(editWrap).append(delImg);
