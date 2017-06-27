@@ -251,8 +251,6 @@
 	
 	.editBtn{
 		font-size:14px;
-		line-height:1.427;
-		height:20px;
 		width:50px;
 		text-align:center;
 		margin:2px;
@@ -275,15 +273,61 @@
 </div>
 </div>
 <br/>
+<br/>
+<br/>
+<div>
+<label class="week">星期三:</label>
+<div id="timeslider3" class="timeSlider"  onselectstart="return false;">
+</div>
+</div>
+<br/>
+<br/>
+<br/>
+<div>
+<label class="week">星期四:</label>
+<div id="timeslider4" class="timeSlider"  onselectstart="return false;">
+</div>
+</div>
+<br/>
+<br/>
+<br/>
+<div>
+<label class="week">星期五:</label>
+<div id="timeslider5" class="timeSlider"  onselectstart="return false;">
+</div>
+</div>
+<br/>
+<br/>
+<br/>
+<div>
+<label class="week">星期六:</label>
+<div id="timeslider6" class="timeSlider"  onselectstart="return false;">
+</div>
+</div>
+<br/>
+<br/>
+<br/>
+<div>
+<label class="week">星期日:</label>
+<div id="timeslider7" class="timeSlider"  onselectstart="return false;">
+</div>
+</div>
+<br/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript">
 	if (typeof jQuery === 'undefined') {
 		throw new Error('Slider\'s JavaScript requires jQuery')
 	}
-	var myId=null;
+	
+	var contentAyyay=new Array();
+	
 	function TimeSlider(){
 		this.left_array=new Array();//存放每个拖块的左坐标
 		this.right_array=new Array();//存放每个拖块的右坐标
+		this.leftTime_array=new Array();//存放每个拖块的左坐标对应的时间
+		this.rightTime_array=new Array();//存放每个拖块的右坐标对应的时间
+		this.leftTime=0;
+		this.rightTime=0;
 		this.slderLeftOffset=0;//时间轴距离左页面的距离
 		this.oneDragBlockWidth=0;
 		this.oneHourWidth=0;
@@ -304,7 +348,7 @@
 			var divId=obj.id;
 			var oneDragBlockTime=obj.oneDragBlockTime||60;//每个拖块代表的时间
 			var self=this;//保存当前上下文
-
+			contentAyyay.push(this);
 			/*创建布局*/
 				var backgroundDiv=document.createElement("div");
 				$(backgroundDiv).addClass("trCanvas").appendTo("#"+divId);
@@ -494,6 +538,8 @@
 				delBtn.onclick=function(){						
 						this.right_array.splice(this.whichOne,1);
 						this.left_array.splice(this.whichOne,1);
+						this.leftTime_array.splice(this.whichOne,1);
+						this.rightTime_array.splice(this.whichOne,1);
 						$("#"+this.dragId).remove();
 						$("#modalDiv"+this.timeSliderNum).hide();
 						$("#fixedDiv"+this.timeSliderNum).hide();					
@@ -540,6 +586,8 @@
 						}
 						this.right_array.splice(0,len);
 						this.left_array.splice(0,len);
+						this.rightTime_array.splice(0,len);
+						this.leftTime_array.splice(0,len);
 						this.dragNum=0;
 					}
 				}.bind(this);
@@ -583,11 +631,15 @@
 					editCheckBox.onclick=function(){
 						$("#editCheckAll"+this.timeSliderNum).prop("checked",$(".editCBox"+this.timeSliderNum).length==$(".editCBox"+this.timeSliderNum).filter(":checked").length);
 					}.bind(this);
-					$(editCheckBox).addClass("editCBox"+this.timeSliderNum)
+					$(editCheckBox).addClass("editCBox"+this.timeSliderNum).attr("id","editCBox"+this.timeSliderNum+"_"+i);
 					$(editBoxDiv).append(editCheckBox);
 					var editLabel=document.createElement("label");
 					$(editLabel).text(editTextObj[i]);
 					$(editBoxDiv).append(editLabel);
+					if(i==this.timeSliderNum-1)
+					{
+						$(editBoxDiv).remove();
+					}
 				}
 	
 					/*全选按钮*/
@@ -614,6 +666,23 @@
 				$(editSave).addClass("editBtn");
 				editSave.type="button";
 				editSave.value="保存";
+				editSave.onclick=function(){
+					var len=this.left_array.length;
+					for(var j=0;j<7;j++)
+					{
+						if($("#editCBox"+this.timeSliderNum+"_"+j).prop("checked")==true)
+						{
+							var targetId=$(".trCanvas").eq(j).parent().attr("id");
+							
+							for(var i=0;i<len;i++)
+							{
+								contentAyyay[j].createDrag(targetId,this.left_array[i]+this.slderLeftOffset,this.right_array[i],this.leftTime_array[i],this.rightTime_array[i]);
+							}
+						}
+						
+					}
+					$("#editDiv"+this.timeSliderNum).hide();
+				}.bind(this)
 				$(editFooter).append(editSave);
 				
 				var editCancle=document.createElement("input");
@@ -808,14 +877,16 @@
 			var rightShowOffsetLeft=dragRight-dragLeft-13;
 			$("#rightShow"+sliderNum+"_"+self.dragNum).css("left",rightShowOffsetLeft)
 			
-			if(ex2)
+			if(timeStart)
 			{
-					self.getSliderTime(dragLeft,'leftShow'+sliderNum+'_'+self.dragNum,timeStart);
-					self.getSliderTime(dragRight,'rightShow'+sliderNum+'_'+self.dragNum,timeStop);
+					self.setSliderTime(dragLeft,'leftShow'+sliderNum+'_'+self.dragNum,timeStart);
+					self.setSliderTime(dragRight,'rightShow'+sliderNum+'_'+self.dragNum,timeStop);
+					self.getSliderTime();
 			}
 			else{
-					self.getSliderTime(dragLeft,'leftShow'+sliderNum+'_'+self.dragNum);
-					self.getSliderTime(dragRight,'rightShow'+sliderNum+'_'+self.dragNum);
+					self.setSliderTime(dragLeft,'leftShow'+sliderNum+'_'+self.dragNum);
+					self.setSliderTime(dragRight,'rightShow'+sliderNum+'_'+self.dragNum);
+					self.getSliderTime();
 			}
 
 			/*控制时间显示效果*/
@@ -933,8 +1004,8 @@
 			}
 			if(self.calTimeFlag)
 			{
-				self.getSliderTime(l,leftShowId);
-				self.getSliderTime(l+width,rightShowId);
+				self.setSliderTime(l,leftShowId);
+				self.setSliderTime(l+width,rightShowId);
 				self.calTimeFlag=false;
 			}
         }.bind(this);
@@ -952,6 +1023,9 @@
 			var right_new=$(thisDrag).css("left");
 			right_new=parseInt(right_new)+$(thisDrag).width();
 			self.right_array[self.whichOne]=right_new;
+			
+			self.getSliderTime("move");
+
 			 document.onmousemove=null;
 			 document.onmouseup=null;
 			if(!self.hasMove)
@@ -1053,7 +1127,7 @@
 				
 			if(self.calTimeFlag)
 			{			 
-				 self.getSliderTime(pageX,leftShowId);
+				 self.setSliderTime(pageX,leftShowId);
 				 self.calTimeFlag=false;
 			}
       
@@ -1084,6 +1158,7 @@
 				var right_new=parseInt($("#"+parentId).css("left"))+$("#"+parentId).width();
 				self.right_array[self.whichOne]=right_new;
 			}
+			self.getSliderTime("move");
 		},
 		
 		rightBarDown:function(e,thisDrag){
@@ -1148,7 +1223,7 @@
        
 				if(self.calTimeFlag)
 				{
-				self.getSliderTime(pageX,rightShowId);
+				self.setSliderTime(pageX,rightShowId);
 				self.calTimeFlag=false;
 				}
       
@@ -1156,10 +1231,18 @@
 				self.BarUp(thisDrag,"right");
 			});
 			},
-		getSliderTime:function(offsetX,id,timeString){
+		setSliderTime:function(offsetX,id,timeString){
+				var direction=id.substring(0,1);
 				if(timeString)
 				{
 					$("#"+id).text(timeString);
+					if(direction=="l")
+					{
+						this.leftTime=timeString;
+					}
+					else{
+						this.rightTime=timeString;
+					}
 				}
 				else{
 					var self=this;
@@ -1170,10 +1253,37 @@
 					{
 						min="0"+min;
 					}
-						$("#"+id).text(hour+":"+min);
+					$("#"+id).text(hour+":"+min);
+					if(direction=="l")
+					{
+						this.leftTime=hour+":"+min;
+					}
+					else{
+						this.rightTime=hour+":"+min;
+					}
 				}
-		
 			},
+		getSliderTime:function(action){
+					if(action=="move")
+					{
+						this.leftTime_array[this.whichOne]=this.leftTime;
+						this.rightTime_array[this.whichOne]=this.rightTime;
+					}
+					else{
+						this.leftTime_array.push(this.leftTime);
+						this.rightTime_array.push(this.rightTime);
+					}
+					this.leftTime_array.sort(function(a,b){
+						var A=parseInt(a.split(":")[0])*60+parseInt(a.split(":")[1]);
+						var B=parseInt(b.split(":")[0])*60+parseInt(b.split(":")[1]);
+						return A-B;
+					});
+					this.rightTime_array.sort(function(a,b){
+						var A=parseInt(a.split(":")[0])*60+parseInt(a.split(":")[1]);
+						var B=parseInt(b.split(":")[0])*60+parseInt(b.split(":")[1]);
+						return A-B;
+					});
+		},
 		getSliderOffsetX:function(time){
 			var timeArray=new Array;
 			var self=this;
@@ -1192,17 +1302,40 @@
 			return timeArray
 		},
 	}
-	var lzj=new TimeSlider;
-	lzj.init({
+	var timeS1=new TimeSlider;
+	timeS1.init({
 				id:"timeslider1",
 				defaultTime:{
-					"1":["01:01","2:42"],
+					"1":["01:01","02:42"],
 					"2":["12:00","13:43"]
 				}
 				})
-	var nzj=new TimeSlider;
-	nzj.init({
+	var timeS2=new TimeSlider;
+	timeS2.init({
 				id:"timeslider2",
+				})
+
+	var timeS3=new TimeSlider;
+	timeS3.init({
+				id:"timeslider3",
+				})
+
+	var timeS4=new TimeSlider;
+	timeS4.init({
+				id:"timeslider4",
+				})
+
+	var timeS5=new TimeSlider;
+	timeS5.init({
+				id:"timeslider5",
+				})
+	var timeS6=new TimeSlider;
+	timeS6.init({
+				id:"timeslider6",
+				})
+    var timeS7=new TimeSlider;
+	timeS7.init({
+				id:"timeslider7",
 				})
 
 </script>
