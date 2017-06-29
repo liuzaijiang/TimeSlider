@@ -319,20 +319,20 @@
 		throw new Error('Slider\'s JavaScript requires jQuery')
 	}
 	
-	var contentAyyay=new Array();
+	var contentAyyay=new Array();//存放每个时间轴对象实例的上下文this的数组
 	
 	function TimeSlider(){
 		this.left_array=new Array();//存放每个拖块的左坐标
 		this.right_array=new Array();//存放每个拖块的右坐标
 		this.leftTime_array=new Array();//存放每个拖块的左坐标对应的时间
 		this.rightTime_array=new Array();//存放每个拖块的右坐标对应的时间
-		this.leftTime=0;
-		this.rightTime=0;
+		this.leftTime=0;//存放当前操作拖块的时间
+		this.rightTime=0;//存放当前操作拖块的时间
 		this.slderLeftOffset=0;//时间轴距离左页面的距离
 		this.oneDragBlockWidth=0;
 		this.oneHourWidth=0;
 		this.dragNum=0;//拖块个数-1
-		this.hasMove=false;
+		this.hasMove=false;//判断拖块是click事件还是move事件
 		this.whichOne=0;//目前操纵的是哪个拖块
 		this.timeSliderNum=0;//TimeSlider实例个数
 		this.calTimeFlag=false;//是否计算时间
@@ -342,6 +342,8 @@
 	TimeSlider.prototype={
 		sliderArray : new Array(),//用来存放TimeSlider实例出来的对象
 		sliderTotal:0,//TimeSlider实例个数
+		
+		/*创建整个时间轴的DOM结构*/
 		init:function(obj){
 			TimeSlider.prototype.sliderTotal++;
 			this.timeSliderNum=TimeSlider.prototype.sliderTotal;
@@ -620,7 +622,6 @@
 					5:"星期六",
 					6:"星期日",
 				}
-				
 				for(var i=0;i<7;i++)
 				{
 					var editBoxDiv=document.createElement("div");
@@ -718,7 +719,10 @@
 				}
 			}
 		},
-			
+		
+		/*创建拖块函数，backgroundDiv为时间轴的背景DOM，
+		ex为鼠标点击的位置，即创建的起始点，ex2代表拖块的宽度，若不存在，则默认一个小时的宽度，
+		timeStart和timeStop为拖块的初始时间显示，若不存在则根据坐标进行计算，若存在则直接显示其值*/
 		createDrag:function(backgroundDiv,ex,ex2,timeStart,timeStop){
 			var self=this;
 			var dragLeft=ex-self.slderLeftOffset;
@@ -745,7 +749,7 @@
 				return;
 			}
 			
-			/*判断新创建的时间段是否能放下，防止时间段重叠，我的判断方法是：如果它的右坐标在其他时间段的左右坐标值之间则不能放下*/
+			/*判断新创建的时间段是否能放下，防止时间段重叠*/
 			if(leftArrayLength>=1)
 			{	
 				for(var j=0;j<leftArrayLength;j++)
@@ -789,13 +793,6 @@
 				}else{
 					e.stopPropagation();
 				}
-			}).mouseup(function(e){
-				self.dragUp(this);
-				/*if(document.all){  //兼容IE8
-					e.cancelBubble=true;
-				}else{
-					e.stopPropagation();
-				}*/
 			})
 
 			
@@ -903,6 +900,8 @@
 		
 			self.dragNum++;
 		},
+		
+		/*拖块按下事件，主要是用来拖拽拖块和点击弹出编辑框*/
 		dragDown:function(e,thisDrag){
 			$(thisDrag).css("z-index","6");
 			$(thisDrag).css("cursor", "move");
@@ -945,7 +944,7 @@
               l=maxWidth
              }
 		
-            var width=$(thisDrag).width();
+            var width=$("#"+parentId).width();
 			//l+width为拖块的右坐标
 			if(arrayLength==1)
 			{
@@ -1011,17 +1010,17 @@
         }.bind(this);
 		document.onmouseup=function(){
 			var self=this;
-			$(thisDrag).css("z-index","4");
-			$(thisDrag).css ("cursor", "auto");
+			$("#"+parentId).css("z-index","4");
+			$("#"+parentId).css ("cursor", "auto");
 
 			/*保存移动后的时间段的新坐标*/
 		
-			var left_new=$(thisDrag).css("left");
+			var left_new=$("#"+parentId).css("left");
 			left_new=parseInt(left_new);
 			self.left_array[self.whichOne]=left_new;
 				
-			var right_new=$(thisDrag).css("left");
-			right_new=parseInt(right_new)+$(thisDrag).width();
+			var right_new=$("#"+parentId).css("left");
+			right_new=parseInt(right_new)+$("#"+parentId).width();
 			self.right_array[self.whichOne]=right_new;
 			
 			self.getSliderTime("move");
@@ -1043,9 +1042,8 @@
 		  }.bind(this);
 		},
 		
-		dragUp:function(thisDrag){
-			
-		},
+		
+		/*左拉伸按钮鼠标按下事件 e为事件对象，thisDrag为当前操作的拖块*/
 		leftBarDown:function(e,thisDrag){
 			$(thisDrag).css("cursor", "w-resize");
 			/*拉伸按钮会改变拖块的宽度*/
@@ -1137,10 +1135,12 @@
 		
 		},
 	
+		/*拉伸条mouseover事件*/
 		barOver:function(thisDrag){
 			$(thisDrag).css ("cursor", "e-resize");
 		},
 		
+		/*拉伸按钮鼠标松开事件thisDrag为当前操作的拖块,direction为当前是操作的左边拉伸按钮还是右边拉伸按钮*/
 		BarUp:function(thisDrag,direction){
 			var parentId=$(thisDrag).parent().attr("id");
 			var self=this;
@@ -1161,6 +1161,7 @@
 			self.getSliderTime("move");
 		},
 		
+		/*右拉伸按钮鼠标按下事件 e为事件对象，thisDrag为当前操作的拖块*/
 		rightBarDown:function(e,thisDrag){
 			var parentId=$(thisDrag).parent().attr("id");
 			var rightShowId=$("#"+parentId).children(".rightShow").attr("id");
@@ -1231,6 +1232,9 @@
 				self.BarUp(thisDrag,"right");
 			});
 			},
+		/*设置当前的显示时间
+		  参数offsetX为偏移量，id为显示时间的DOM id， timeString为传进来的具体时间，若此值存在则代表手动设置时间显示，并不是移动过程中的时间显示，前者更精确
+		*/
 		setSliderTime:function(offsetX,id,timeString){
 				var direction=id.substring(0,1);
 				if(timeString)
@@ -1263,6 +1267,7 @@
 					}
 				}
 			},
+		/*获取当前的拖块的显示时间，并存入数组，按从小到大顺序排列*/
 		getSliderTime:function(action){
 					if(action=="move")
 					{
@@ -1284,6 +1289,13 @@
 						return A-B;
 					});
 		},
+		/*获取当前对应时间的left偏移量，参数time为传进来的时间数组
+			返回值：
+			timeArray[0]为开始时间对应的偏移量
+			timeArray[1]为结束时间对应的偏移量
+			timeArray[2]为传进来的开始时间,主要是为了显示正确
+			timeArray[3]为传进来的结束时间,主要是为了显示正确
+		*/
 		getSliderOffsetX:function(time){
 			var timeArray=new Array;
 			var self=this;
@@ -1302,6 +1314,8 @@
 			return timeArray
 		},
 	}
+	
+	/* 动态创建7个时间轴 */
 	var timeS1=new TimeSlider;
 	timeS1.init({
 				id:"timeslider1",

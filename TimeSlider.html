@@ -545,7 +545,11 @@
 			 }
 			 hasMove=false;
         }
-        ev.stopPropagation(); 
+          if(document.all){  //兼容IE8
+				ev.cancelBubble=true;
+			}else{
+				ev.stopPropagation();
+		}
        //阻止冒泡,return false; is ok
 	  }
 	  
@@ -840,7 +844,11 @@ var Id;
 			$(document).unbind("mousemove");
 			$(document).unbind("mouseup");
         });
-        e.stopPropagation();
+         if(document.all){  //兼容IE8
+			e.cancelBubble=true;
+		}else{
+			e.stopPropagation();
+		}
     }
     function rightUp(e,id){
         var parentId=$("#"+id).parent().attr("id");
