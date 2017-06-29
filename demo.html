@@ -27,7 +27,6 @@
 		height: 30px;
 		background: #f2f2ee;
 		position: relative;
-		z-index: 1;
 	}
 	
 	.menufix{
@@ -50,8 +49,6 @@
 		top:0;
 		z-index:1000;
 		display:none;
-		overflow:auto;
-		overflow-y:scroll;	
 	}
 	
 	.modal-dialog{
@@ -99,12 +96,7 @@
 		height:4px;
 		background-color:black;
 		position:absolute;
-	}
-	
-	.coordinateLab{
-		display:inline-block;
-		width:20px;
-		margin-left:-3px;
+		z-index:-1;
 	}
 	
 	.coordinateLabDiv{
@@ -112,16 +104,9 @@
 		margin-left:-3px;
 		top:32px;
 		position:absolute;
+		z-index:-1;
 	}
 	
-	.imgLeft{
-		position:absolute;
-		left:-7px;
-		top:25px;
-		height:15px;
-		width:12px;
-		background-color:#e4e4e4;
-	}
 	
 	.leftBar{
 		position:absolute;
@@ -130,6 +115,7 @@
 		height:15px;
 		width:12px;
 		background-color:#e4e4e4;
+		display:none;
 	}
 	
 	.rightBar{
@@ -139,16 +125,9 @@
 		height:15px;
 		width:12px;
 		background-color:#e4e4e4;
+		display:none;
 	}
 	
-	.barRight{
-		position:absolute;
-		left:25px;
-		top:25px;
-		height:15px;
-		width:12px;
-		background-color:#e4e4e4;
-	}
 	.leftShow{
 		background-color:blue;
 		color:white;
@@ -888,12 +867,18 @@
 
 			/*控制时间显示效果*/
 			$("#timeS"+sliderNum+"_"+self.dragNum).hover(function(){
-				$(this).addClass("hover");	
+				$(this).addClass("hover");
+				$(this).css("z-index",5);
 				$(".hover .leftShow").show();
 				$(".hover .rightShow").show();
+				$(".hover .leftBar").show();
+				$(".hover .rightBar").show();
 			},function(){
+				$(this).css("z-index",4);
 				$(".hover .leftShow").hide();
 				$(".hover .rightShow").hide();
+				$(".hover .leftBar").hide();
+				$(".hover .rightBar").hide();
 				$(this).removeClass("hover");		
 			})
 			/*end*/
@@ -903,7 +888,7 @@
 		
 		/*拖块按下事件，主要是用来拖拽拖块和点击弹出编辑框*/
 		dragDown:function(e,thisDrag){
-			$(thisDrag).css("z-index","6");
+			$(thisDrag).css("z-index","5");
 			$(thisDrag).css("cursor", "move");
 			var self=this;
 			self.hasMove=false;
