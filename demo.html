@@ -855,7 +855,7 @@
 						  "></div>"
 						  
 			$("#timeS"+sliderNum+"_"+self.dragNum).append(right_show);
-			var rightShowOffsetLeft=dragRight-dragLeft+1;
+			var rightShowOffsetLeft=dragRight-dragLeft;
 			$("#rightShow"+sliderNum+"_"+self.dragNum).css("left",rightShowOffsetLeft)
 			
 			if(timeStart)
@@ -1171,7 +1171,7 @@
                 if(parentWidth>=self.oneDragBlockWidth/2){
 					 $("#"+parentId).css({width:parentWidth + "px",left:pageX+"px"});
 					 $("#"+rightBar).css({left:parentWidth-barWidth/2+"px"});
-					 $("#"+rightShowId).css("left",parentWidth-14+"px");
+					 $("#"+rightShowId).css("left",parentWidth+"px");
 					 self.calTimeFlag=true;
                 }
             }
@@ -1258,7 +1258,7 @@
 					{
 						var parentWidth=pageX-parentOriginalLeft;
 						$("#"+parentId).css({width:parentWidth + "px"});
-						$("#"+rightShowId).css({left:parentWidth-1 + "px"});
+						$("#"+rightShowId).css({left:parentWidth + "px"});
 						$(thisBar).css({left:parentWidth-barWidth/2 +"px"});
 						self.calTimeFlag=true;
 					}
@@ -1267,7 +1267,7 @@
 						{
 							var parentWidth=pageX-parentOriginalLeft;
 							$("#"+parentId).css({width:parentWidth + "px"});
-							$("#"+rightShowId).css({left:parentWidth-1 + "px"});
+							$("#"+rightShowId).css({left:parentWidth + "px"});
 							$(thisBar).css({left:parentWidth-barWidth/2 +"px"});
 							self.calTimeFlag=true;
 						}
