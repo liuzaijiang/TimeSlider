@@ -21,6 +21,8 @@
 		top:0;
 		position:absolute;
 		background:#007acc;
+		border-left:.2px solid black;
+		border-right:.2px solid black;
 	}
 	.trCanvas{
 		width: 768px;
@@ -293,12 +295,11 @@
 </div>
 <br/>
 <script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="underscore.js"></script>
 <script type="text/javascript">
 	if (typeof jQuery === 'undefined') {
 		throw new Error('Slider\'s JavaScript requires jQuery')
 	}
-	
-	var contentAyyay=new Array();//存放每个时间轴对象实例的上下文this的数组
 	
 	function TimeSlider(){
 		this.left_array=new Array();//存放每个拖块的左坐标
@@ -319,7 +320,7 @@
 	}
 	
 	TimeSlider.prototype={
-		sliderArray : new Array(),//用来存放TimeSlider实例出来的对象
+		contentAyyay : new Array(),//存放每个时间轴对象实例的上下文this的数组
 		sliderTotal:0,//TimeSlider实例个数
 		
 		/*创建整个时间轴的DOM结构*/
@@ -329,7 +330,7 @@
 			var divId=obj.id;
 			var oneDragBlockTime=obj.oneDragBlockTime||60;//每个拖块代表的时间
 			var self=this;//保存当前上下文
-			contentAyyay.push(this);
+			self.contentAyyay.push(this);
 			/*创建布局*/
 				var backgroundDiv=document.createElement("div");
 				$(backgroundDiv).addClass("trCanvas").appendTo("#"+divId);
@@ -656,7 +657,7 @@
 							
 							for(var i=0;i<len;i++)
 							{
-								contentAyyay[j].createDrag(targetId,this.left_array[i]+this.slderLeftOffset,this.right_array[i],this.leftTime_array[i],this.rightTime_array[i]);
+								this.contentAyyay[j].createDrag(targetId,this.left_array[i]+this.slderLeftOffset,this.right_array[i],this.leftTime_array[i],this.rightTime_array[i]);
 							}
 						}
 						
@@ -682,11 +683,6 @@
 			$(backgroundDiv).mousedown(function(e){
 				var event=e?e:window.event;
 				self.createDrag(this,event.pageX);
-				/*if(document.all){  //兼容IE8
-					e.cancelBubble=true;
-				}else{
-					e.stopPropagation();
-				}*/
 			})
 			
 			if(obj.defaultTime)
@@ -892,7 +888,6 @@
 			$(thisDrag).css("cursor", "move");
 			var self=this;
 			self.hasMove=false;
-			
 			var rightShowId=$(thisDrag).children(".rightShow").attr("id");
 			var leftShowId=$(thisDrag).children(".leftShow").attr("id");
 		
@@ -902,21 +897,15 @@
 			var whichOne;
 
 			/*当我去移动时间段之前，先找到当前操作的时间段在数组中的位置*/
-			for(var i=0;i<arrayLength;i++)
-			{	
-				if(self.left_array[i]==parentOriginalLeft)
-				{
-					whichOne=i;
-					self.whichOne=i;
-					break;
-				}
-			}
+			whichOne=self.left_array.indexOf(parentOriginalLeft);
+			self.whichOne=whichOne;
+
 			var parentId=$(thisDrag).attr("id");
 			var timeSliderWidth=$("#"+parentId).parent().width();//整个滑动条宽度
 			var maxWidth=timeSliderWidth-parseInt($("#"+parentId).css("width"))
 			this.dragId=parentId;
-
-		 document.onmousemove=function(ev)  {
+	
+			document.onmousemove=_.throttle(function(ev){
 			var self=this;
 			self.hasMove=true;
 			var l=parseInt(ev.pageX-disX-self.slderLeftOffset); //移动后的拖块偏移量
@@ -981,19 +970,14 @@
 				}
 				
 			}
-			if(document.all){  //兼容IE8
-				e.cancelBubble=true;
-			}else{
-				e.stopPropagation();
-			}
 			if(self.calTimeFlag)
 			{
 				self.setSliderTime(l,leftShowId);
 				self.setSliderTime(l+width,rightShowId);
 				self.calTimeFlag=false;
 			}
-        }.bind(this);
-		document.onmouseup=function(){
+			}.bind(this),20)
+		document.onmouseup=function(ev){
 			var self=this;
 			$("#"+parentId).css("z-index","4");
 			$("#"+parentId).css ("cursor", "auto");
@@ -1023,6 +1007,11 @@
 			 }
 			 else{
 			 }
+			 if(document.all){  //兼容IE8
+				ev.cancelBubble=true;
+			 }else{
+				ev.stopPropagation();
+			}	
 			 self.hasMove=false;
 		  }.bind(this);
 		},
@@ -1051,18 +1040,10 @@
 			var self=this;
 			var timeSliderWidth=$(thisDrag).parent().parent().width();//整个滑动条宽度
 			/*寻找目前操作的拖块的坐标在数组中的索引*/
-			for(var i=0;i<self.left_array.length;i++)
-			{	
-				if(self.left_array[i]==parentOriginalLeft)
-				{
-					whichOne=i;
-					self.whichOne=i;
-					break;
-				}
-			}
-			
+			whichOne=self.left_array.indexOf(parentOriginalLeft);
+			self.whichOne=whichOne;
 			/*绑定拉伸条的移动事件*/
-		 $(document).bind('mousemove', function (ev) {
+		 document.onmousemove=_.throttle(function(ev){
             var pageX=parseInt(ev.pageX-self.slderLeftOffset);
             if(pageX<=0)
                {
@@ -1074,7 +1055,7 @@
 				}
 
             var parentBlock;
-			var parentWidth=parseInt(self.right_array[i]-pageX);
+			var parentWidth=parseInt(self.right_array[whichOne]-pageX);
             if(parentOriginalLeft>=pageX){
 			//左拉
 				if(self.whichOne==0)
@@ -1113,11 +1094,10 @@
 				 self.setSliderTime(pageX,leftShowId);
 				 self.calTimeFlag=false;
 			}
-      
-        }).bind("mouseup",function(){
+        }.bind(this),20);
+		document.onmouseup=function(ev){
 			self.BarUp(thisDrag,"left");
-		})
-		
+		}
 		},
 	
 		/*拉伸条mouseover事件*/
@@ -1130,10 +1110,8 @@
 			var parentId=$(thisDrag).parent().attr("id");
 			var self=this;
 			$(thisDrag).css("cursor", "default");
-			$(thisDrag).unbind("mousemove");
-			$("#"+parentId).unbind("mousemove");
-			$(document).unbind("mousemove");
-			$(document).unbind("mouseup");
+			document.onmousemove=null;
+			document.onmouseup=null;
 			if(direction=="left")
 			{
 				var left_new=parseInt($("#"+parentId).css("left"));
@@ -1158,17 +1136,9 @@
 			var rightBar=$("#"+parentId).children(".rightBar").attr("id");//右拉伸按钮
 			var barWidth=$("#"+rightBar).width();//拉伸按钮的宽度
 			/*寻找目前操作的拖块的坐标在数组中的索引*/
-			for(var i=0;i<self.right_array.length;i++)
-			{	
-				if(self.left_array[i]==parentOriginalLeft)
-				{
-					whichOne=i;
-					self.whichOne=i;
-					break;
-				}
-			}
-		
-			$(document).bind('mousemove',function(ev){
+			whichOne=self.left_array.indexOf(parentOriginalLeft);
+			self.whichOne=whichOne;
+			document.onmousemove=_.throttle(function(ev){
 				var pageX=parseInt(ev.pageX-self.slderLeftOffset);
 					if(pageX<=0)
 						{
@@ -1212,11 +1182,16 @@
 				self.setSliderTime(pageX,rightShowId);
 				self.calTimeFlag=false;
 				}
-      
-			}).mouseup(function () {
+			}.bind(this),20);
+			document.onmouseup=function(ev){
 				self.BarUp(thisDrag,"right");
-			});
-			},
+				if(document.all){  //兼容IE8
+					ev.cancelBubble=true;
+				}else{
+					ev.stopPropagation();
+				}	
+			}
+		},
 		/*设置当前的显示时间
 		  参数offsetX为偏移量，id为显示时间的DOM id， timeString为传进来的具体时间，若此值存在则代表手动设置时间显示，并不是移动过程中的时间显示，前者更精确
 		*/
