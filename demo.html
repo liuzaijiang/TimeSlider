@@ -21,8 +21,8 @@
 		top:0;
 		position:absolute;
 		background:#007acc;
-		border-left:.2px solid black;
-		border-right:.2px solid black;
+		border-left:.1px solid black;
+		border-right:.1px solid black;
 	}
 	.trCanvas{
 		width: 768px;
@@ -300,6 +300,7 @@
 	if (typeof jQuery === 'undefined') {
 		throw new Error('Slider\'s JavaScript requires jQuery')
 	}
+	
 	
 	function TimeSlider(){
 		this.left_array=new Array();//存放每个拖块的左坐标
@@ -683,6 +684,11 @@
 			$(backgroundDiv).mousedown(function(e){
 				var event=e?e:window.event;
 				self.createDrag(this,event.pageX);
+				/*if(document.all){  //兼容IE8
+					e.cancelBubble=true;
+				}else{
+					e.stopPropagation();
+				}*/
 			})
 			
 			if(obj.defaultTime)
@@ -888,6 +894,7 @@
 			$(thisDrag).css("cursor", "move");
 			var self=this;
 			self.hasMove=false;
+			
 			var rightShowId=$(thisDrag).children(".rightShow").attr("id");
 			var leftShowId=$(thisDrag).children(".leftShow").attr("id");
 		
@@ -899,13 +906,13 @@
 			/*当我去移动时间段之前，先找到当前操作的时间段在数组中的位置*/
 			whichOne=self.left_array.indexOf(parentOriginalLeft);
 			self.whichOne=whichOne;
-
+			
 			var parentId=$(thisDrag).attr("id");
 			var timeSliderWidth=$("#"+parentId).parent().width();//整个滑动条宽度
 			var maxWidth=timeSliderWidth-parseInt($("#"+parentId).css("width"))
 			this.dragId=parentId;
-	
-			document.onmousemove=_.throttle(function(ev){
+			
+		 document.onmousemove=function(ev)  {
 			var self=this;
 			self.hasMove=true;
 			var l=parseInt(ev.pageX-disX-self.slderLeftOffset); //移动后的拖块偏移量
@@ -970,14 +977,19 @@
 				}
 				
 			}
+			if(document.all){  //兼容IE8
+				e.cancelBubble=true;
+			}else{
+				e.stopPropagation();
+			}
 			if(self.calTimeFlag)
 			{
 				self.setSliderTime(l,leftShowId);
 				self.setSliderTime(l+width,rightShowId);
 				self.calTimeFlag=false;
 			}
-			}.bind(this),20)
-		document.onmouseup=function(ev){
+        }.bind(this);
+		document.onmouseup=function(){
 			var self=this;
 			$("#"+parentId).css("z-index","4");
 			$("#"+parentId).css ("cursor", "auto");
@@ -1007,11 +1019,6 @@
 			 }
 			 else{
 			 }
-			 if(document.all){  //兼容IE8
-				ev.cancelBubble=true;
-			 }else{
-				ev.stopPropagation();
-			}	
 			 self.hasMove=false;
 		  }.bind(this);
 		},
@@ -1039,11 +1046,12 @@
 			var whichOne;
 			var self=this;
 			var timeSliderWidth=$(thisDrag).parent().parent().width();//整个滑动条宽度
-			/*寻找目前操作的拖块的坐标在数组中的索引*/
+			/*当我去移动时间段之前，先找到当前操作的时间段在数组中的位置*/
 			whichOne=self.left_array.indexOf(parentOriginalLeft);
 			self.whichOne=whichOne;
+			
 			/*绑定拉伸条的移动事件*/
-		 document.onmousemove=_.throttle(function(ev){
+		 $(document).bind('mousemove', function (ev) {
             var pageX=parseInt(ev.pageX-self.slderLeftOffset);
             if(pageX<=0)
                {
@@ -1055,7 +1063,7 @@
 				}
 
             var parentBlock;
-			var parentWidth=parseInt(self.right_array[whichOne]-pageX);
+			var parentWidth=parseInt(self.right_array[i]-pageX);
             if(parentOriginalLeft>=pageX){
 			//左拉
 				if(self.whichOne==0)
@@ -1094,10 +1102,11 @@
 				 self.setSliderTime(pageX,leftShowId);
 				 self.calTimeFlag=false;
 			}
-        }.bind(this),20);
-		document.onmouseup=function(ev){
+      
+        }).bind("mouseup",function(){
 			self.BarUp(thisDrag,"left");
-		}
+		})
+		
 		},
 	
 		/*拉伸条mouseover事件*/
@@ -1110,8 +1119,10 @@
 			var parentId=$(thisDrag).parent().attr("id");
 			var self=this;
 			$(thisDrag).css("cursor", "default");
-			document.onmousemove=null;
-			document.onmouseup=null;
+			$(thisDrag).unbind("mousemove");
+			$("#"+parentId).unbind("mousemove");
+			$(document).unbind("mousemove");
+			$(document).unbind("mouseup");
 			if(direction=="left")
 			{
 				var left_new=parseInt($("#"+parentId).css("left"));
@@ -1138,7 +1149,8 @@
 			/*寻找目前操作的拖块的坐标在数组中的索引*/
 			whichOne=self.left_array.indexOf(parentOriginalLeft);
 			self.whichOne=whichOne;
-			document.onmousemove=_.throttle(function(ev){
+		
+			$(document).bind('mousemove',function(ev){
 				var pageX=parseInt(ev.pageX-self.slderLeftOffset);
 					if(pageX<=0)
 						{
@@ -1182,16 +1194,11 @@
 				self.setSliderTime(pageX,rightShowId);
 				self.calTimeFlag=false;
 				}
-			}.bind(this),20);
-			document.onmouseup=function(ev){
+      
+			}).mouseup(function () {
 				self.BarUp(thisDrag,"right");
-				if(document.all){  //兼容IE8
-					ev.cancelBubble=true;
-				}else{
-					ev.stopPropagation();
-				}	
-			}
-		},
+			});
+			},
 		/*设置当前的显示时间
 		  参数offsetX为偏移量，id为显示时间的DOM id， timeString为传进来的具体时间，若此值存在则代表手动设置时间显示，并不是移动过程中的时间显示，前者更精确
 		*/
@@ -1313,6 +1320,5 @@
 				})
 
 </script>
-
 </body>
 </html>
