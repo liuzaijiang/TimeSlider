@@ -509,7 +509,9 @@
 						
 						$("#"+rightShowId).css({
 							"left":newRight-newLeft-$("#"+rightShowId).width()/2
-						})					
+						})			
+
+
 						var textSTH=STH>10?STH:"0"+STH
 						var textSTM=STM>10?STM:"0"+STM
 						var textSPH=SPH>10?SPH:"0"+SPH
@@ -662,6 +664,7 @@
 							for(var i=0;i<len;i++)
 							{
 								this.contentAyyay[j].createDrag(targetId,this.left_array[i]+this.slderLeftOffset,this.right_array[i],this.leftTime_array[i],this.rightTime_array[i]);
+								//this.contentAyyay[j].createDrag(targetId,this.left_array[i]+this.slderLeftOffset,this.right_array[i]);
 							}
 						}
 						
@@ -700,6 +703,7 @@
 				{
 					var timeArray=this.getSliderOffsetX(obj.defaultTime[key]);
 					this.createDrag(obj.id,timeArray[0],timeArray[1],timeArray[2],timeArray[3]);
+					//this.createDrag(obj.id,timeArray[0],timeArray[1]);
 				}
 			}
 		},
@@ -951,7 +955,14 @@
 					if((l+width)<=self.left_array[self.whichOne+1])
 					{
 						$("#"+parentId).css({left: l<0?0:l + "px"});
-						self.calTimeFlag=true;
+						if((l+width)==self.left_array[self.whichOne+1])
+						{
+							$("#"+rightShowId).text(self.leftTime_array[self.whichOne+1])
+							self.calTimeFlag=false;
+						}
+						else{
+							self.calTimeFlag=true;
+						}
 					}			
 				}
 				else{
@@ -959,7 +970,14 @@
 					if(l>=self.right_array[self.whichOne-1])
 					{
 						$("#"+parentId).css({left: l<0?0:l + "px"});
-						self.calTimeFlag=true;
+						if((l)==self.right_array[self.whichOne-1])
+						{
+							$("#"+leftShowId).text(self.rightTime_array[self.whichOne-1])
+							self.calTimeFlag=false;
+						}
+						else{
+							self.calTimeFlag=true;
+						}
 					}
 				}
 			}
@@ -969,21 +987,46 @@
 					if((l+width)<=self.left_array[self.whichOne+1])
 					{		
 						$("#"+parentId).css({left: l<0?0:l + "px"});
-						self.calTimeFlag=true;
+						if((l+width)==self.left_array[self.whichOne+1])
+						{
+							$("#"+rightShowId).text(self.leftTime_array[self.whichOne+1])
+							self.calTimeFlag=false;
+						}
+						else{
+							self.calTimeFlag=true;
+						}
 					}
 				}
 				else if(self.whichOne==arrayLength-1){
 					if(l>=self.right_array[self.whichOne-1])
 					{
 						$("#"+parentId).css({left: l<0?0:l + "px"});
-						self.calTimeFlag=true;
+						if((l)==self.right_array[self.whichOne-1])
+						{
+							$("#"+leftShowId).text(self.rightTime_array[self.whichOne-1])
+							self.calTimeFlag=false;
+						}
+						else{
+							self.calTimeFlag=true;
+						}
 					}
 				}
 				else{
 					if((l+width)<=self.left_array[self.whichOne+1]&&l>=self.right_array[self.whichOne-1])
 						{
 							$("#"+parentId).css({left: l<0?0:l + "px"});
-							self.calTimeFlag=true;
+							if((l+width)==self.left_array[self.whichOne+1])
+							{
+								$("#"+rightShowId).text(self.leftTime_array[self.whichOne+1])
+								self.calTimeFlag=false;
+							}
+							else if((l)==self.right_array[self.whichOne-1]){
+								$("#"+leftShowId).text(self.rightTime_array[self.whichOne-1])
+								self.calTimeFlag=false;
+							}
+							else{
+								self.calTimeFlag=true;
+							}
 						}
 				}
 				
@@ -1098,10 +1141,17 @@
 					$("#"+parentId).css({width:parentWidth + "px",left:pageX+"px"});
 					$("#"+rightBar).css({left:parentBlock+rightBarLeft+"px"});
 					$("#"+rightShowId).css({left:parentBlock+rightShowLeft+"px"});
-					self.calTimeFlag=true;
+					if(pageX==self.right_array[self.whichOne-1])
+					{
+						$("#"+leftShowId).text(self.rightTime_array[self.whichOne-1])
+						self.calTimeFlag=false;
+					}
+					else{
+						self.calTimeFlag=true;
+					}
 				 }
 				}
-           }
+            }
 			else{
 			//右拉
                 if(parentWidth>=self.oneDragBlockWidth/2){
@@ -1211,7 +1261,14 @@
 							$("#"+parentId).css({width:parentWidth + "px"});
 							$("#"+rightShowId).css({left:parentWidth + "px"});
 							$(thisBar).css({left:parentWidth-barWidth/2 +"px"});
-							self.calTimeFlag=true;
+							if(pageX==self.left_array[self.whichOne+1])
+							{
+								$("#"+rightShowId).text(self.leftTime_array[self.whichOne+1])
+								self.calTimeFlag=false;
+							}
+							else{
+								self.calTimeFlag=true;
+							}
 						}
 					
 					}
