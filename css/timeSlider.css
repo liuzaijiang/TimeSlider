@@ -1,0 +1,237 @@
+﻿    .timeSlider{
+		padding: 0;
+		margin: 0;
+		border:0;
+		display: block;
+		z-index: 0;
+		margin-left:250px;
+		position:relative;
+	}
+	
+	.timeSliderDiv{
+		height:30px;
+		width:32px;
+		z-index:4;
+		top:0;
+		position:absolute;
+		background:#007acc;
+	
+	}
+	.trCanvas{
+		width: 768px;
+		height: 30px;
+		background: #f2f2ee;
+		position: relative;
+	}
+	
+	.menufix{
+		position:fixed;
+		left:0;
+		right:0;
+		bottom:0;
+		top:0;
+		z-index:999;
+		background-color:#e4e4e4;
+		display:none;
+		opacity:0.4;
+	}
+	
+	.modal{
+		position:fixed;
+		left:0;
+		right:0;
+		bottom:0;
+		top:0;
+		z-index:1000;
+		display:none;
+	}
+	
+	.modal-dialog{
+		position:relative;
+		width:600px;
+		margin:30px auto;
+	}
+	
+	.modal-content{
+		position:relative;
+		background-color:#f8f5f5;
+		background-clip:padding-box;
+		border:1px solid #d4d4d4;
+		border-radius:6px;
+		outline:none;
+		box-shadow:0 3px 9px rgba(0,0,0,0.5);
+	}
+
+	.modal-header{
+		min-height:16px;
+		padding:15px;
+		border-bottom:1px solid #e5e5e5;
+	}
+	
+	.modal-title{
+		margin:0;
+		line-height:1.42px;
+	}
+	
+	.modal-body{
+		position:relative;
+		padding:20px;
+	}
+	
+	
+	.modal-footer{
+		padding :19px 20px 20px;
+		text-align:right;
+		margin-top:15px;
+		border-top:1px solid #e5e5e5;
+	}
+	
+	.coordinate {
+		width:1px;
+		height:4px;
+		background-color:black;
+		position:absolute;
+		z-index:-1;
+	}
+	
+	.coordinateLabDiv{
+		width:20px;
+		margin-left:-3px;
+		top:32px;
+		position:absolute;
+		z-index:-1;
+	}
+	
+	
+	.leftBar{
+		position:absolute;
+		left:-7px;
+		top:25px;
+		height:15px;
+		width:12px;
+		background-color:#e4e4e4;
+		display:none;
+	}
+	
+	.rightBar{
+		position:absolute;
+		left:25px;
+		top:25px;
+		height:15px;
+		width:12px;
+		background-color:#e4e4e4;
+		display:none;
+	}
+	
+	.leftShow{
+		background-color:blue;
+		color:white;
+		padding-left:3px;
+		width:44px;
+		height:18px;
+		position:absolute;
+		left:-30px;
+		top:48px;
+		text-align:center;
+		line-height:18px;
+		font-size:.8em;
+		display:none;
+	}
+	
+	.rightShow{
+		background-color:blue;
+		color:white;
+		padding-left:3px;
+		width:44px;
+		height:18px;
+		position:absolute;
+		top:48px;
+		text-align:center;
+		line-height:18px;
+		font-size:.8em;
+		display:none;
+	}
+	
+	
+	.setbtn:hover{
+		background-color:#e4e4e4;
+	}
+	
+	.setbtn{
+		font-size:14px;
+		line-height:1.427;
+		height:40px;
+		width:80px;
+		text-align:center;
+		border:1px solid #d8d8d8;
+		margin:2px;
+		border-radius:5px;
+	}
+	
+	.time-div{
+		margin-top:10px;
+	}
+	
+	.time{
+		width:20px;
+		margin:10px;
+	}
+	.week{
+		float:left;
+		margin-left:30px;
+	}
+	
+	.editWrap{
+		position:relative;
+		height:50px;
+		width:100px;
+		left:1050px;
+		bottom:30px;
+	}
+	
+	.editDiv{
+		width:180px;
+		position:absolute;
+		left:0;
+		top:0;
+		display:none;
+		background-color:#f9f6f6;
+		border:1px solid #e4e4e4;
+		z-index:5;
+	}
+	
+	.editHeader{
+		min-height:16px;
+		padding:5px;
+		border-bottom:1px solid #e5e5e5;
+	}
+	
+	.editBody{
+		position:relative;
+		padding:10px;
+	}
+	
+	.editFooter{
+		padding :9px 2px 2px;
+		text-align:right;
+		margin-top:5px;
+		border-top:1px solid #e5e5e5;
+	}
+	
+	.delImg{
+		position:absolute;
+		left:40px;
+		top:2px;
+	}
+	
+	.delImg:hover{
+		cursor:pointer;
+	}
+	
+	.editBtn{
+		font-size:14px;
+		width:50px;
+		text-align:center;
+		margin:2px;
+	}
+	
