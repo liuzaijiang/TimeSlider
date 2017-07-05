@@ -643,7 +643,7 @@
 				}
 			}
 			
-		 document.onmousemove=_.throttle(function(ev){
+		 document.onmousemove=function(ev){
 			var self=this;
 			self.hasMove=true;
 			l=parseInt(ev.pageX-disX-self.slderLeftOffset);
@@ -659,7 +659,7 @@
 				self.setSliderTime(l+width,rightShowId);
 				self.calTimeFlag=false;
 			}
-			}.bind(this),30);
+			}.bind(this)
 		
 		document.onmouseup=function(ev){
 			var self=this;
