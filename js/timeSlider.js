@@ -156,8 +156,8 @@
 						var rightShowId=$("#"+this.dragId).children(".rightShow").attr("id");
 						var leftShowId=$("#"+this.dragId).children(".leftShow").attr("id");
 	
-						var newLeft=Math.ceil(STH*this.oneHourWidth+STM*this.oneHourWidth/60);
-						var newRight=Math.ceil(SPH*this.oneHourWidth+SPM*this.oneHourWidth/60);
+						var newLeft=parseFloat((STH*this.oneHourWidth+STM*this.oneHourWidth/60).toFixed(1));
+						var newRight=parseFloat((SPH*this.oneHourWidth+SPM*this.oneHourWidth/60).toFixed(1));
 						var arrayLen;
 						arrayLen=this.left_array.length;
 
@@ -214,9 +214,10 @@
 						var textSTM=STM>10?STM:"0"+STM
 						var textSPH=SPH>10?SPH:"0"+SPH
 						var textSPM=SPM>10?SPM:"0"+SPM
-						$("#"+rightShowId).text(textSPH+":"+textSPM);
-						$("#"+leftShowId).text(textSTH+":"+textSTM);
 	
+						this.setSliderTime(newLeft,leftShowId);
+				     	this.setSliderTime(newRight,rightShowId);
+						
 						$("#modalDiv"+this.timeSliderNum).hide();
 						$("#fixedDiv"+this.timeSliderNum).hide();						
 				}.bind(this);
@@ -361,8 +362,8 @@
 							
 							for(var i=0;i<len;i++)
 							{
-								this.contentAyyay[j].createDrag(targetId,this.left_array[i]+this.slderLeftOffset,this.right_array[i],this.leftTime_array[i],this.rightTime_array[i]);
-								//this.contentAyyay[j].createDrag(targetId,this.left_array[i]+this.slderLeftOffset,this.right_array[i]);
+								//this.contentAyyay[j].createDrag(targetId,this.left_array[i]+this.slderLeftOffset,this.right_array[i],this.leftTime_array[i],this.rightTime_array[i]);
+								this.contentAyyay[j].createDrag(targetId,this.left_array[i]+this.slderLeftOffset,this.right_array[i]);
 							}
 						}
 						
@@ -400,8 +401,8 @@
 				for( key in obj.defaultTime)
 				{
 					var timeArray=this.getSliderOffsetX(obj.defaultTime[key]);
-					this.createDrag(obj.id,timeArray[0],timeArray[1],timeArray[2],timeArray[3]);
-					//this.createDrag(obj.id,timeArray[0],timeArray[1]);
+					//this.createDrag(obj.id,timeArray[0],timeArray[1],timeArray[2],timeArray[3]);
+					this.createDrag(obj.id,timeArray[0],timeArray[1]);
 				}
 			}
 		},
@@ -469,9 +470,10 @@
 					 '></div>'
 			
 			$backgroundDiv.append(drag);
-			var dragWidth=dragRight-dragLeft;
+
+			var dragWidth=parseFloat((dragRight-dragLeft).toFixed(1));
 			$("#timeS"+sliderNum+'_'+self.dragNum).width(dragWidth)
-			
+		
 			$("#timeS"+sliderNum+"_"+self.dragNum).mousedown(function(e){
 				self.dragDown(e,this);
 				if(document.all){   //兼容IE8
@@ -602,8 +604,8 @@
 			var leftShowId=$(thisDrag).children(".leftShow").attr("id");
 		
 			var arrayLength=self.right_array.length;
-			var parentOriginalLeft=parseInt($(thisDrag).css("left"));//拖块的原始偏移量
-			var disX=parseInt(e.pageX-parentOriginalLeft-self.slderLeftOffset);//鼠标在拖动块上的偏移
+			var parentOriginalLeft=parseFloat(this.getStyle($(thisDrag)[0],"left"));//拖块的原始偏移量
+			var disX=parseFloat(e.pageX-parentOriginalLeft-self.slderLeftOffset);//鼠标在拖动块上的偏移
 			var whichOne;
 			
 	
@@ -625,9 +627,9 @@
 			//var where;//判断当前操作的滑块是处理哪个位置，开头，中间或者结尾
 			var leftBorder=0//左边界；
 			var rightBorder=timeSliderWidth//右边界
-			var dragWidth=$("#"+parentId).width();//拖块自身的宽度
-			var width=$("#"+parentId).width();//拖块自身的宽度
+			var dragWidth=parseFloat(this.getStyle($("#"+parentId)[0],"width"));//拖块自身的宽度
 			var l=0; //移动后的拖块偏移量
+			var showRight=0;
 			if(arrayLength>1)
 			{
 				if(self.whichOne==0)
@@ -642,21 +644,21 @@
 					rightBorder=self.left_array[self.whichOne+1];
 				}
 			}
-			
 		 document.onmousemove=function(ev){
 			var self=this;
 			self.hasMove=true;
-			l=parseInt(ev.pageX-disX-self.slderLeftOffset);
+			l=parseFloat(ev.pageX-disX-self.slderLeftOffset);
+			showRight=l+dragWidth;
 			if(l<=leftBorder)
 			{
 				l=leftBorder
 			}
-			else if(l>=rightBorder)
+			else if(l>=(rightBorder-dragWidth))
 			{
-				l=rightBorder;
+				l=rightBorder-dragWidth;
 			}
 			
-			if(l>=leftBorder&&(l+width)<=rightBorder)
+			if(l>=leftBorder&&(l+dragWidth)<=rightBorder)
 			{
 						$("#"+parentId).css({left:l + "px"});
 						self.calTimeFlag=true;
@@ -664,7 +666,7 @@
 			if(self.calTimeFlag)
 			{
 				self.setSliderTime(l,leftShowId);
-				self.setSliderTime(l+width,rightShowId);
+				self.setSliderTime(l+dragWidth,rightShowId);
 				self.calTimeFlag=false;
 			}
 			}.bind(this)
@@ -674,12 +676,12 @@
 			$("#"+parentId).css ("cursor", "auto");
 			/*保存移动后的时间段的新坐标*/
 		
-			var left_new=$("#"+parentId).css("left");
-			left_new=parseInt(left_new);
+			var left_new=parseFloat(this.getStyle($("#"+parentId)[0],"left"));
 			self.left_array[whichOne]=left_new;
-			var right_new=$("#"+parentId).css("left");
-			right_new=parseInt(right_new)+$("#"+parentId).width();
+			
+			var right_new=left_new+parseFloat(this.getStyle($("#"+parentId)[0],"width"));
 			self.right_array[whichOne]=right_new;
+			
 			self.getSliderTime("move");
 			document.onmousemove=null;
 			document.onmouseup=null;
@@ -707,7 +709,8 @@
 			$(thisBar).css("cursor", "w-resize");
 			/*拉伸按钮会改变拖块的宽度*/
 			var parentId=$(thisBar).parent().attr("id");			
-			var parentOriginalLeft=parseInt($("#"+parentId).css("left"));//拖块的原始偏移量
+			//var parentOriginalLeft=parseInt($("#"+parentId).css("left"));//拖块的原始偏移量
+			var parentOriginalLeft=parseFloat(this.getStyle($("#"+parentId)[0],"left"));//拖块的原始偏移量
 			var leftBarOffset=parseInt($(thisBar).css("left"));
 			
 			var rightBar=$("#"+parentId).children(".rightBar").attr("id");//右拉伸按钮
@@ -748,13 +751,13 @@
 			
 			/*绑定拉伸条的移动事件*/
 		document.onmousemove=_.throttle(function(ev){
-            var pageX=parseInt(ev.pageX-self.slderLeftOffset);
+            var pageX=parseFloat(ev.pageX-self.slderLeftOffset);
             if(pageX<=leftBorder)
             {
 				pageX=leftBorder;
 			 }
             var parentBlock;
-			var parentWidth=parseInt(self.right_array[whichOne]-pageX);
+			var parentWidth=parseFloat(self.right_array[whichOne]-pageX);
             if(parentOriginalLeft>=pageX){
 			//左拉
 				if(pageX>=leftBorder){
@@ -802,11 +805,13 @@
 			document.onmouseup=null;
 			if(direction=="left")
 			{
-				var left_new=parseInt($("#"+parentId).css("left"));
+				//var left_new=parseInt($("#"+parentId).css("left"));
+				var left_new=parseFloat(this.getStyle($("#"+parentId)[0],"left"));
 				self.left_array[self.whichOne]=left_new;
 			}
 			else if(direction=="right"){
-				var right_new=parseInt($("#"+parentId).css("left"))+$("#"+parentId).width();
+				//var right_new=parseInt($("#"+parentId).css("left"))+$("#"+parentId).width();
+				var right_new=parseFloat(this.getStyle($("#"+parentId)[0],"left"))+parseFloat(this.getStyle($("#"+parentId)[0],"width"));
 				self.right_array[self.whichOne]=right_new;
 			}
 			self.getSliderTime("move");
@@ -817,10 +822,11 @@
 			var parentId=$(thisBar).parent().attr("id");
 			var rightShowId=$("#"+parentId).children(".rightShow").attr("id");
 			var rightShowLeft=$("#"+rightShowId).css("left");
-			var parentOriginalLeft=parseInt($("#"+parentId).css("left"));//拖块的原始偏移量
-			var parentOriginalWidth=$("#"+parentId).width();//拖块的原始宽度
+			//var parentOriginalLeft=parseInt($("#"+parentId).css("left"));//拖块的原始偏移量
+			var parentOriginalLeft=parseFloat(this.getStyle($("#"+parentId)[0],"left"));//拖块的原始偏移量
+			//var parentOriginalWidth=$("#"+parentId).width();//拖块的原始宽度
+			var parentOriginalWidth=parseFloat(this.getStyle($("#"+parentId)[0],"width"));//拖块的原始宽度
 			var originalRight=parentOriginalLeft+parentOriginalWidth//拖块原始右坐标
-
 			var whichOne;
 			var self=this;
 			var timeSliderWidth=$(thisBar).parent().parent().width();//整个滑动条宽度
@@ -853,7 +859,7 @@
 			}
 		
 			document.onmousemove=_.throttle(function(ev){
-				var pageX=parseInt(ev.pageX-self.slderLeftOffset);
+				var pageX=parseFloat(ev.pageX-self.slderLeftOffset);
 				if(pageX>=timeSliderWidth)
 				{
 					pageX=timeSliderWidth;
@@ -887,38 +893,25 @@
 			}
 			},
 		/*设置当前的显示时间
-		  参数offsetX为偏移量，id为显示时间的DOM id， timeString为传进来的具体时间，若此值存在则代表手动设置时间显示，并不是移动过程中的时间显示，前者更精确
+		  参数offsetX为偏移量，id为显示时间的DOM id
 		*/
-		setSliderTime:function(offsetX,id,timeString){
+		setSliderTime:function(offsetX,id){
 				var direction=id.substring(0,1);
-				if(timeString)
+				var self=this;
+				var tmpHour= Math.floor(offsetX/self.oneHourWidth);
+				var hour=tmpHour.toString().length<2?"0"+tmpHour:tmpHour;
+				var min=Math.round(offsetX%self.oneHourWidth*60/self.oneHourWidth);
+				if(min<10)
 				{
-					$("#"+id).text(timeString);
-					if(direction=="l")
-					{
-						this.leftTime=timeString;
-					}
-					else{
-						this.rightTime=timeString;
-					}
+					min="0"+min;
+				}
+				$("#"+id).text(hour+":"+min);
+				if(direction=="l")
+				{
+					this.leftTime=hour+":"+min;
 				}
 				else{
-					var self=this;
-					var tmpHour= Math.floor(offsetX/self.oneHourWidth);
-					var hour=tmpHour.toString().length<2?"0"+tmpHour:tmpHour;
-					var min=parseInt(offsetX%self.oneHourWidth*60/self.oneHourWidth);
-					if(min<10)
-					{
-						min="0"+min;
-					}
-					$("#"+id).text(hour+":"+min);
-					if(direction=="l")
-					{
-						this.leftTime=hour+":"+min;
-					}
-					else{
-						this.rightTime=hour+":"+min;
-					}
+					this.rightTime=hour+":"+min;
 				}
 			},
 		/*获取当前的拖块的显示时间，并存入数组，按从小到大顺序排列*/
@@ -947,26 +940,27 @@
 			返回值：
 			timeArray[0]为开始时间对应的偏移量
 			timeArray[1]为结束时间对应的偏移量
-			timeArray[2]为传进来的开始时间,主要是为了显示正确
-			timeArray[3]为传进来的结束时间,主要是为了显示正确
 		*/
 		getSliderOffsetX:function(time){
 			var timeArray=new Array;
 			var self=this;
 			var startH=parseInt(time[0].split(":")[0])*self.oneHourWidth;
 			var startM=parseInt(time[0].split(":")[1])*self.oneHourWidth/60;
-			startM=Math.ceil(startM);
+			startM=parseFloat(startM.toFixed(1))
 			var stopH=parseInt(time[1].split(":")[0])*self.oneHourWidth;
 			var stopM=parseInt(time[1].split(":")[1])*self.oneHourWidth/60;
-			stopM=Math.ceil(stopM);
+			stopM=parseFloat(stopM.toFixed(1))
 			var startTime=startH+startM+self.slderLeftOffset;
 			var stopTime=stopH+stopM
 			timeArray[0]=startTime;
 			timeArray[1]=stopTime;
-			timeArray[2]=time[0];
-			timeArray[3]=time[1];
 			return timeArray
 		},
+		/*
+			获取当前元素真实的属性值
+			element为当前元素
+			attr为具体属性
+		*/
 		getStyle:function (element, attr) {
           if(element.currentStyle) {
                 return element.currentStyle[attr];
