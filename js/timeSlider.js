@@ -224,7 +224,7 @@
 						})
 						
 						$("#"+rightShowId).css({
-							"left":newRight-newLeft-$("#"+rightShowId).width()/2
+							"left":newRight-newLeft
 						})			
 
 
@@ -661,8 +661,7 @@
 			$(document).mousemove(function(ev){
 				//var x=self.getMousePos(ev).x;
 			    self.hasMove=true;
-			    l=parseFloat(ev.pageX-disX-self.slderLeftOffset);
-			    showRight=l+dragWidth;
+			    l=parseFloat(parseFloat(ev.pageX-disX-self.slderLeftOffset).toFixed(1));
 		     	if(l<=leftBorder)
 			   {
 				  l=leftBorder
@@ -671,7 +670,7 @@
 			   {
 				  l=rightBorder-dragWidth;
 			   }
-			
+				showRight=parseFloat((l+dragWidth).toFixed(1));
 			   if(l>=leftBorder&&(l+dragWidth)<=rightBorder)
 			   {
 					$("#"+parentId).css({left:l + "px"});
@@ -680,7 +679,8 @@
 			   if(self.calTimeFlag)
 			  {
 				  self.setSliderTime(l,leftShowId);
-				  self.setSliderTime(l+dragWidth,rightShowId);
+				  self.setSliderTime(showRight,rightShowId);
+				  //self.setSliderTime(l+dragWidth,rightShowId);
 				  self.calTimeFlag=false;
 			   }	
 			})
@@ -727,10 +727,10 @@
 			document.onmouseup=null;
 			if(!self.hasMove)
 			 {
-				$("#startH"+self.timeSliderNum).val("");
-				$("#startM"+self.timeSliderNum).val("");
-				$("#stopH"+self.timeSliderNum).val("");
-				$("#stopM"+self.timeSliderNum).val("");
+				$("#startH"+self.timeSliderNum).val(parseInt($("#"+leftShowId).text().split(":")[0]));
+				$("#startM"+self.timeSliderNum).val(parseInt($("#"+leftShowId).text().split(":")[1]));
+				$("#stopH"+self.timeSliderNum).val(parseInt($("#"+rightShowId).text().split(":")[0]));
+				$("#stopM"+self.timeSliderNum).val(parseInt($("#"+rightShowId).text().split(":")[1]));
 				$("#fixedDiv"+self.timeSliderNum).show();
 				$("#modalDiv"+self.timeSliderNum).show();
 			 }
@@ -1069,7 +1069,7 @@
 			element为当前元素
 			attr为具体属性
 		*/
-		getStyle:function (element, attr) {
+		getStyle:function (element, attr) {	
           if(element.currentStyle) {
                 return element.currentStyle[attr];
            } else {
