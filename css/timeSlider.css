@@ -33,6 +33,7 @@
 		z-index:999;
 		background-color:#e4e4e4;
 		display:none;
+		filter:progid:DXImageTransform.Microsoft.Alpha(opacity=40);
 		opacity:0.4;
 	}
 	

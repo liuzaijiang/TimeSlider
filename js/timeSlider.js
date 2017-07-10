@@ -1,7 +1,25 @@
-﻿if (typeof jQuery === 'undefined') {
-		throw new Error('Slider\'s JavaScript requires jQuery')
-	}
+﻿	if (typeof jQuery === 'undefined') {
+			throw new Error('Slider\'s JavaScript requires jQuery')
+		}
 	
+	//让bind函数支持IE8
+	if (!Function.prototype.bind) { 
+		Function.prototype.bind = function (oThis) { 
+			if (typeof this !== "function") { 
+				throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable"); 
+			} 
+			var aArgs = Array.prototype.slice.call(arguments, 1), 
+			fToBind = this, 
+			fNOP = function () {}, 
+			fBound = function () { 
+			return fToBind.apply(this instanceof fNOP && oThis ? this: oThis, 
+			aArgs.concat(Array.prototype.slice.call(arguments))); 
+			}; 
+			fNOP.prototype = this.prototype; 
+			fBound.prototype = new fNOP(); 
+			return fBound; 
+		}; 
+	}
 	
 	function TimeSlider(){
 		this.left_array=new Array();//存放每个拖块的左坐标
@@ -222,6 +240,7 @@
 						$("#fixedDiv"+this.timeSliderNum).hide();						
 				}.bind(this);
 				
+				
 				delBtn.onclick=function(){						
 						this.right_array.splice(this.whichOne,1);
 						this.left_array.splice(this.whichOne,1);
@@ -389,11 +408,6 @@
 			$(backgroundDiv).mousedown(function(e){
 				var event=e?e:window.event;
 				self.createDrag(this,event.pageX);
-				/*if(document.all){  //兼容IE8
-					e.cancelBubble=true;
-				}else{
-					e.stopPropagation();
-				}*/
 			})
 			
 			if(obj.defaultTime)
@@ -477,7 +491,7 @@
 			$("#timeS"+sliderNum+"_"+self.dragNum).mousedown(function(e){
 				self.dragDown(e,this);
 				if(document.all){   //兼容IE8
-					e.cancelBubble=true;
+					 e.originalEvent.cancelBubble =true;
 				}else{
 					e.stopPropagation();
 				}
@@ -498,14 +512,14 @@
 			}).mousedown(function(e){
 					self.leftBarDown(e,this);
 					if(document.all){  //兼容IE8
-						e.cancelBubble=true;
+						 e.originalEvent.cancelBubble =true;
 					}else{
 						e.stopPropagation();
 					}
 			}).mouseup(function(e){
 					self.barUp(this,"left");
 					if(document.all){  //兼容IE8
-						e.cancelBubble=true;
+						 e.originalEvent.cancelBubble =true;
 					}else{
 						e.stopPropagation();
 					}
@@ -531,14 +545,14 @@
 			}).mousedown(function(e){
 					self.rightBarDown(e,this);
 					if(document.all){  //兼容IE8
-						e.cancelBubble=true;
+						 e.originalEvent.cancelBubble =true;
 					}else{
 						e.stopPropagation();
 					}
 			}).mouseup(function(e){
 					self.barUp(this,"right");
 					if(document.all){  //兼容IE8
-						e.cancelBubble=true;
+						 e.originalEvent.cancelBubble =true;
 					}else{
 						e.stopPropagation();
 					}
@@ -604,8 +618,8 @@
 			var leftShowId=$(thisDrag).children(".leftShow").attr("id");
 		
 			var arrayLength=self.right_array.length;
-			var parentOriginalLeft=parseFloat(this.getStyle($(thisDrag)[0],"left"));//拖块的原始偏移量
-			var disX=parseFloat(e.pageX-parentOriginalLeft-self.slderLeftOffset);//鼠标在拖动块上的偏移
+			var parentOriginalLeft=parseFloat(parseFloat(this.getStyle($(thisDrag)[0],"left")).toFixed(1));//拖块的原始偏移量
+			var disX=parseFloat((e.pageX-parentOriginalLeft-self.slderLeftOffset).toFixed(1));//鼠标在拖动块上的偏移
 			var whichOne;
 			
 	
@@ -627,7 +641,7 @@
 			//var where;//判断当前操作的滑块是处理哪个位置，开头，中间或者结尾
 			var leftBorder=0//左边界；
 			var rightBorder=timeSliderWidth//右边界
-			var dragWidth=parseFloat(this.getStyle($("#"+parentId)[0],"width"));//拖块自身的宽度
+			var dragWidth=parseFloat(parseFloat(this.getStyle($("#"+parentId)[0],"width")).toFixed(1));//拖块自身的宽度
 			var l=0; //移动后的拖块偏移量
 			var showRight=0;
 			if(arrayLength>1)
@@ -644,10 +658,37 @@
 					rightBorder=self.left_array[self.whichOne+1];
 				}
 			}
-		 document.onmousemove=function(ev){
-			var self=this;
+			$(document).mousemove(function(ev){
+				//var x=self.getMousePos(ev).x;
+			    self.hasMove=true;
+			    l=parseFloat(ev.pageX-disX-self.slderLeftOffset);
+			    showRight=l+dragWidth;
+		     	if(l<=leftBorder)
+			   {
+				  l=leftBorder
+		   	   }
+			   else if(l>=(rightBorder-dragWidth))
+			   {
+				  l=rightBorder-dragWidth;
+			   }
+			
+			   if(l>=leftBorder&&(l+dragWidth)<=rightBorder)
+			   {
+					$("#"+parentId).css({left:l + "px"});
+					self.calTimeFlag=true;
+			   }
+			   if(self.calTimeFlag)
+			  {
+				  self.setSliderTime(l,leftShowId);
+				  self.setSliderTime(l+dragWidth,rightShowId);
+				  self.calTimeFlag=false;
+			   }	
+			})
+		 /*document.onmousemove=function(ev){
+		    console.log(self);
+			var x=self.getMousePos(ev).x;
 			self.hasMove=true;
-			l=parseFloat(ev.pageX-disX-self.slderLeftOffset);
+			l=parseFloat(x-disX-self.slderLeftOffset);
 			showRight=l+dragWidth;
 			if(l<=leftBorder)
 			{
@@ -669,21 +710,20 @@
 				self.setSliderTime(l+dragWidth,rightShowId);
 				self.calTimeFlag=false;
 			}
-			}.bind(this)
-		
-		document.onmouseup=function(ev){
-			var self=this;
+			}.bind(this)*/
+
+		document.onmouseup=function(){
 			$("#"+parentId).css ("cursor", "auto");
 			/*保存移动后的时间段的新坐标*/
 		
-			var left_new=parseFloat(this.getStyle($("#"+parentId)[0],"left"));
+			var left_new=parseFloat(parseFloat(self.getStyle($("#"+parentId)[0],"left")).toFixed(1));
 			self.left_array[whichOne]=left_new;
 			
-			var right_new=left_new+parseFloat(this.getStyle($("#"+parentId)[0],"width"));
+			var right_new=left_new+parseFloat(self.getStyle($("#"+parentId)[0],"width"));
+			right_new=parseFloat(right_new.toFixed(1));
 			self.right_array[whichOne]=right_new;
-			
 			self.getSliderTime("move");
-			document.onmousemove=null;
+			$(document).off("mousemove");
 			document.onmouseup=null;
 			if(!self.hasMove)
 			 {
@@ -695,7 +735,7 @@
 				$("#modalDiv"+self.timeSliderNum).show();
 			 }
 			 self.hasMove=false;
-		  }.bind(this)
+		  }
 		  if(document.all){  //兼容IE8
 			e.cancelBubble=true;
 			}else{
@@ -710,7 +750,7 @@
 			/*拉伸按钮会改变拖块的宽度*/
 			var parentId=$(thisBar).parent().attr("id");			
 			//var parentOriginalLeft=parseInt($("#"+parentId).css("left"));//拖块的原始偏移量
-			var parentOriginalLeft=parseFloat(this.getStyle($("#"+parentId)[0],"left"));//拖块的原始偏移量
+			var parentOriginalLeft=parseFloat(parseFloat(this.getStyle($("#"+parentId)[0],"left")).toFixed(1));//拖块的原始偏移量
 			var leftBarOffset=parseInt($(thisBar).css("left"));
 			
 			var rightBar=$("#"+parentId).children(".rightBar").attr("id");//右拉伸按钮
@@ -750,8 +790,45 @@
 			}
 			
 			/*绑定拉伸条的移动事件*/
-		document.onmousemove=_.throttle(function(ev){
-            var pageX=parseFloat(ev.pageX-self.slderLeftOffset);
+			$(document).mousemove(function(ev){
+			     //var x=self.getMousePos(ev).x;
+                 var pageX=parseFloat(ev.pageX-self.slderLeftOffset);
+                 if(pageX<=leftBorder)
+                 {
+			     	pageX=leftBorder;
+			     }
+				var parentBlock;
+				var parentWidth=parseFloat(self.right_array[whichOne]-pageX);
+				if(parentOriginalLeft>=pageX){
+				//左拉
+					if(pageX>=leftBorder){
+						parentBlock=parseInt(parentOriginalLeft-pageX);
+						$("#"+parentId).css({width:parentWidth + "px",left:pageX+"px"});
+						$("#"+rightBar).css({left:parentBlock+rightBarLeft+"px"});
+						$("#"+rightShowId).css({left:parentBlock+rightShowLeft+"px"});
+						self.calTimeFlag=true;
+					}
+				}
+				else{
+				//右拉
+					if(parentWidth>=self.oneDragBlockWidth/2){
+						$("#"+parentId).css({width:parentWidth + "px",left:pageX+"px"});
+						$("#"+rightBar).css({left:parentWidth-barWidth/2+"px"});
+						$("#"+rightShowId).css("left",parentWidth+"px");
+						self.calTimeFlag=true;
+					}
+				}
+           
+				if(self.calTimeFlag)
+				{			 
+					self.setSliderTime(pageX,leftShowId);
+					self.calTimeFlag=false;
+				}
+				})
+		/*document.onmousemove=_.throttle(function(ev){
+			
+			var x=this.getMousePos(ev).x;
+            var pageX=parseFloat(x-self.slderLeftOffset);
             if(pageX<=leftBorder)
             {
 				pageX=leftBorder;
@@ -783,8 +860,7 @@
 				 self.setSliderTime(pageX,leftShowId);
 				 self.calTimeFlag=false;
 			}
-      
-        }.bind(this),50)
+        }.bind(this),50)*/
 		document.onmouseup=function(){
 			self.barUp(thisBar,"left");
 		}
@@ -801,17 +877,18 @@
 			var parentId=$(thisBar).parent().attr("id");
 			var self=this;
 			$(thisBar).css("cursor", "default");
+			$(document).off("mousemove");
 			document.onmousemove=null;
 			document.onmouseup=null;
 			if(direction=="left")
 			{
 				//var left_new=parseInt($("#"+parentId).css("left"));
-				var left_new=parseFloat(this.getStyle($("#"+parentId)[0],"left"));
+				var left_new=parseFloat(parseFloat(this.getStyle($("#"+parentId)[0],"left")).toFixed(1));
 				self.left_array[self.whichOne]=left_new;
 			}
 			else if(direction=="right"){
 				//var right_new=parseInt($("#"+parentId).css("left"))+$("#"+parentId).width();
-				var right_new=parseFloat(this.getStyle($("#"+parentId)[0],"left"))+parseFloat(this.getStyle($("#"+parentId)[0],"width"));
+				var right_new=parseFloat(parseFloat(this.getStyle($("#"+parentId)[0],"left")).toFixed(1))+parseFloat(parseFloat(this.getStyle($("#"+parentId)[0],"width")).toFixed(1));
 				self.right_array[self.whichOne]=right_new;
 			}
 			self.getSliderTime("move");
@@ -823,17 +900,15 @@
 			var rightShowId=$("#"+parentId).children(".rightShow").attr("id");
 			var rightShowLeft=$("#"+rightShowId).css("left");
 			//var parentOriginalLeft=parseInt($("#"+parentId).css("left"));//拖块的原始偏移量
-			var parentOriginalLeft=parseFloat(this.getStyle($("#"+parentId)[0],"left"));//拖块的原始偏移量
+			var parentOriginalLeft=parseFloat(parseFloat(this.getStyle($("#"+parentId)[0],"left")).toFixed(1));//拖块的原始偏移量
 			//var parentOriginalWidth=$("#"+parentId).width();//拖块的原始宽度
-			var parentOriginalWidth=parseFloat(this.getStyle($("#"+parentId)[0],"width"));//拖块的原始宽度
+			var parentOriginalWidth=parseFloat(parseFloat(this.getStyle($("#"+parentId)[0],"width")).toFixed(1));//拖块的原始宽度
 			var originalRight=parentOriginalLeft+parentOriginalWidth//拖块原始右坐标
 			var whichOne;
 			var self=this;
 			var timeSliderWidth=$(thisBar).parent().parent().width();//整个滑动条宽度
 			var rightBar=$("#"+parentId).children(".rightBar").attr("id");//右拉伸按钮
 			var barWidth=$("#"+rightBar).width();//拉伸按钮的宽度
-			whichOne=self.left_array.indexOf(parentOriginalLeft);
-			self.whichOne=whichOne;
 			var len=self.left_array.length;
 
 			
@@ -857,9 +932,42 @@
 					rightBorder=self.left_array[whichOne+1];
 				}
 			}
-		
-			document.onmousemove=_.throttle(function(ev){
-				var pageX=parseFloat(ev.pageX-self.slderLeftOffset);
+			
+			$(document).mousemove(function(ev){
+					//var x=slef.getMousePos(ev).x;
+					var pageX=parseFloat(ev.pageX-self.slderLeftOffset);
+					if(pageX>=timeSliderWidth)
+					{
+						pageX=timeSliderWidth;
+					}
+	
+					var parentWidth=pageX-parentOriginalLeft;//现在拖块的宽度
+	
+					if(parentWidth>=self.oneDragBlockWidth/2)
+					{
+						if(pageX>=rightBorder)
+						{
+							pageX=rightBorder;
+						}
+						var parentWidth=pageX-parentOriginalLeft;
+						$("#"+parentId).css({width:parentWidth + "px"});
+						$("#"+rightShowId).css({left:parentWidth + "px"});
+						$(thisBar).css({left:parentWidth-barWidth/2 +"px"});
+						self.calTimeFlag=true;
+					}
+			
+					if(self.calTimeFlag)
+					{
+						self.setSliderTime(pageX,rightShowId);
+						self.calTimeFlag=false;
+					}
+      
+					})
+			
+			
+			/*document.onmousemove=_.throttle(function(ev){
+				var x=this.getMousePos(ev).x;
+				var pageX=parseFloat(x-self.slderLeftOffset);
 				if(pageX>=timeSliderWidth)
 				{
 					pageX=timeSliderWidth;
@@ -886,11 +994,11 @@
 				self.calTimeFlag=false;
 				}
       
-			}.bind(this),50)
+			}.bind(this),50)*/
 			
 			document.onmouseup=function(){
 				self.barUp(thisBar,"right");
-			}
+			 }
 			},
 		/*设置当前的显示时间
 		  参数offsetX为偏移量，id为显示时间的DOM id
@@ -969,6 +1077,18 @@
             }
 		   return style;
 		},
+		/*获取鼠标位置，为了兼容ie8
+		  Firefox支持属性pageX,与pageY属性，这两个属性已经把页面滚动计算在内了, 
+		  在Chrome可以通过document.body.scrollLeft，document.body.scrollTop计算出页面滚动位移， 
+		  而在IE下可以通过document.documentElement.scrollLeft ，document.documentElement.scrollTop */
+		getMousePos:function (event) { 
+			 var e = event || window.event; 
+			 var scrollX = document.documentElement.scrollLeft || document.body.scrollLeft; 
+			 var scrollY = document.documentElement.scrollTop || document.body.scrollTop; 
+			 var x = e.pageX || e.clientX + scrollX; 
+			 var y = e.pageY || e.clientY + scrollY; 
+			 return { 'x': x, 'y': y }; 
+		} 
 	}
 	
 	/* 动态创建7个时间轴 */
