@@ -647,10 +647,18 @@
 			var self=this;
 			self.hasMove=true;
 			l=parseInt(ev.pageX-disX-self.slderLeftOffset);
+			if(l<=leftBorder)
+			{
+				l=leftBorder
+			}
+			else if(l>=rightBorder)
+			{
+				l=rightBorder;
+			}
 			
 			if(l>=leftBorder&&(l+width)<=rightBorder)
 			{
-						$("#"+parentId).css({left: l<0?0:l + "px"});
+						$("#"+parentId).css({left:l + "px"});
 						self.calTimeFlag=true;
 			}
 			if(self.calTimeFlag)
@@ -741,16 +749,16 @@
 			/*绑定拉伸条的移动事件*/
 		document.onmousemove=_.throttle(function(ev){
             var pageX=parseInt(ev.pageX-self.slderLeftOffset);
-            if(pageX<=0)
+            if(pageX<=leftBorder)
             {
-				pageX=0;
+				pageX=leftBorder;
 			 }
             var parentBlock;
 			var parentWidth=parseInt(self.right_array[whichOne]-pageX);
             if(parentOriginalLeft>=pageX){
 			//左拉
 				if(pageX>=leftBorder){
-					parentBlock=parseInt(parentOriginalLeft-pageX);
+				    parentBlock=parseInt(parentOriginalLeft-pageX);
 					$("#"+parentId).css({width:parentWidth + "px",left:pageX+"px"});
 					$("#"+rightBar).css({left:parentBlock+rightBarLeft+"px"});
 					$("#"+rightShowId).css({left:parentBlock+rightShowLeft+"px"});
@@ -855,15 +863,15 @@
 	
 				if(parentWidth>=self.oneDragBlockWidth/2)
 				{
-					if(pageX<=rightBorder)
+					if(pageX>=rightBorder)
 					{
-						var parentWidth=pageX-parentOriginalLeft;
+						pageX=rightBorder;
+					}
+					    var parentWidth=pageX-parentOriginalLeft;
 						$("#"+parentId).css({width:parentWidth + "px"});
 						$("#"+rightShowId).css({left:parentWidth + "px"});
 						$(thisBar).css({left:parentWidth-barWidth/2 +"px"});
 						self.calTimeFlag=true;
-						
-					}
 				}
 			
 				if(self.calTimeFlag)
@@ -958,6 +966,14 @@
 			timeArray[2]=time[0];
 			timeArray[3]=time[1];
 			return timeArray
+		},
+		getStyle:function (element, attr) {
+          if(element.currentStyle) {
+                return element.currentStyle[attr];
+           } else {
+                return getComputedStyle(element, false)[attr];
+            }
+		   return style;
 		},
 	}
 	
