@@ -140,7 +140,7 @@
 						var SPH=parseInt($("#stopH"+this.timeSliderNum).val());
 						var SPM=parseInt($("#stopM"+this.timeSliderNum).val());
 						
-						if(STH==""||STH==""||SPH==""||SPH=="")
+						if((STH).toString()==""||(STM).toString()==""||(SPH).toString()==""||(SPM).toString()=="")
 						{
 							alert("请设置");
 							return
@@ -177,12 +177,14 @@
 						var newLeft=parseFloat((STH*this.oneHourWidth+STM*this.oneHourWidth/60).toFixed(1));
 						var newRight=parseFloat((SPH*this.oneHourWidth+SPM*this.oneHourWidth/60).toFixed(1));
 						var arrayLen;
+						console.log("newLeft:"+newLeft);
+						console.log("newRight:"+newRight);
 						arrayLen=this.left_array.length;
 
 						/*设置过程中判断时间段是否超出边界范围及超过其他时间段*/
 						if(newLeft<0||newRight>$("#"+this.dragId).parent().width())
 						{
-							alert("超过时间抽长度，请重新设置");
+							alert("超过时间轴长度，请重新设置");
 							return 
 						}
 						if(arrayLen>=2)
@@ -1007,12 +1009,21 @@
 				var direction=id.substring(0,1);
 				var self=this;
 				var tmpHour= Math.floor(offsetX/self.oneHourWidth);
-				var hour=tmpHour.toString().length<2?"0"+tmpHour:tmpHour;
+				console.log(offsetX%self.oneHourWidth*60/self.oneHourWidth);
+				console.log((offsetX%self.oneHourWidth*60/self.oneHourWidth).toFixed(1))
 				var min=Math.round(offsetX%self.oneHourWidth*60/self.oneHourWidth);
+				console.log(min)
 				if(min<10)
 				{
 					min="0"+min;
 				}
+				else if(min==60)
+				{
+					min="00";
+					tmpHour+=1;
+				}
+				var hour=tmpHour.toString().length<2?"0"+tmpHour:tmpHour;
+				
 				$("#"+id).text(hour+":"+min);
 				if(direction=="l")
 				{
@@ -1096,7 +1107,7 @@
 	timeS1.init({
 				id:"timeslider1",
 				defaultTime:{
-					"1":["01:01","02:42"],
+					"1":["01:01","02:43"],
 					"2":["12:00","13:43"]
 				}
 				})
