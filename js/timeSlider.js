@@ -626,7 +626,9 @@
 			
 	
 			/*当我去移动时间段之前，先找到当前操作的时间段在数组中的位置*/
-			for(var i=0;i<arrayLength;i++)
+			whichOne=self.binarySearch(self.left_array,parentOriginalLeft)
+			self.whichOne=whichOne;
+			/*for(var i=0;i<arrayLength;i++)
 			{	
 				if(self.left_array[i]==parentOriginalLeft)
 				{
@@ -634,7 +636,7 @@
 					self.whichOne=i;
 					break;
 				}
-			}
+			}*/
 			var parentId=$(thisDrag).attr("id");
 			var timeSliderWidth=$("#"+parentId).parent().width();//整个滑动条宽度
 			this.dragId=parentId;
@@ -770,7 +772,9 @@
 			
 			var arrayLength=self.left_array.length;
 			/*当我去移动时间段之前，先找到当前操作的时间段在数组中的位置*/
-			for(var i=0;i<arrayLength;i++)
+			whichOne=self.binarySearch(self.left_array,parentOriginalLeft)
+			self.whichOne=whichOne;
+			/*for(var i=0;i<arrayLength;i++)
 			{	
 				if(self.left_array[i]==parentOriginalLeft)
 				{
@@ -778,7 +782,7 @@
 					self.whichOne=i;
 					break;
 				}
-			}
+			}*/
 			
 			/*优化逻辑*/
 			var leftBorder=0//左边界；
@@ -913,8 +917,9 @@
 			var barWidth=$("#"+rightBar).width();//拉伸按钮的宽度
 			var len=self.left_array.length;
 
-			
-			for(var i=0;i<len;i++)
+			whichOne=self.binarySearch(self.left_array,parentOriginalLeft)
+			self.whichOne=whichOne;
+			/*for(var i=0;i<len;i++)
 			{	
 				if(self.left_array[i]==parentOriginalLeft)
 				{
@@ -922,7 +927,7 @@
 					self.whichOne=i;
 					break;
 				}
-			}
+			}*/
 			
 			/*优化逻辑*/
 			var rightBorder=timeSliderWidth//左边界；
@@ -1009,10 +1014,7 @@
 				var direction=id.substring(0,1);
 				var self=this;
 				var tmpHour= Math.floor(offsetX/self.oneHourWidth);
-				console.log(offsetX%self.oneHourWidth*60/self.oneHourWidth);
-				console.log((offsetX%self.oneHourWidth*60/self.oneHourWidth).toFixed(1))
 				var min=Math.round(offsetX%self.oneHourWidth*60/self.oneHourWidth);
-				console.log(min)
 				if(min<10)
 				{
 					min="0"+min;
@@ -1099,7 +1101,21 @@
 			 var x = e.pageX || e.clientX + scrollX; 
 			 var y = e.pageY || e.clientY + scrollY; 
 			 return { 'x': x, 'y': y }; 
-		} 
+		},
+		binarySearch:function(data, dest, start, end){  
+			var end = end || data.length - 1,  
+			start = start || 0,  
+			m = Math.floor((start + end) / 2);  
+			if(data[m] == dest){  
+				return m;  
+			}  
+			if(dest < data[m]){  
+				return this.binarySearch(data, dest, 0, m-1);  
+			}else{  
+				return this.binarySearch(data, dest, m+1, end);  
+			}      
+			return false;  
+		},
 	}
 	
 	/* 动态创建7个时间轴 */
