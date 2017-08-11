@@ -1,4 +1,5 @@
-﻿	if (typeof jQuery === 'undefined') {
+﻿(function(){
+	if (typeof jQuery === 'undefined') {
 			throw new Error('Slider\'s JavaScript requires jQuery')
 		}
 	
@@ -471,13 +472,12 @@
 			self.left_array.sort(function(a,b){
 				return a-b;
 			});
+			
 			self.right_array.sort(function(a,b){
 				return a-b;
 			});
-			
 			var sliderNum=self.timeSliderNum
 			
-				
 			/*创建拖块*/
 			var drag="<div class='timeSliderDiv'"+
 					 'id=timeS'+sliderNum+'_'+self.dragNum+' '+
@@ -487,6 +487,7 @@
 			
 			$backgroundDiv.append(drag);
 
+			
 			var dragWidth=parseFloat((dragRight-dragLeft).toFixed(1));
 			$("#timeS"+sliderNum+'_'+self.dragNum).width(dragWidth)
 		
@@ -1117,6 +1118,9 @@
 			return false;  
 		},
 	}
+	
+	window.TimeSlider=TimeSlider;
+})()
 	
 	/* 动态创建7个时间轴 */
 	var timeS1=new TimeSlider;
