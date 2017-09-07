@@ -22,6 +22,24 @@
 		}; 
 	}
 	
+    var getInstance=function(){
+        var res={};
+        return function(fn){
+            if(res[fn])
+            {
+                return res[fn]
+            }
+            res[fn]=fn.call(this,arguments)
+            return res;
+        }
+    }()
+    
+    function createCoverDiv(){
+        var fixedDiv=document.createElement("div");
+		$(fixedDiv).addClass("fixBGDiv").attr("id","fixedDiv")
+		return fixedDiv;
+    }
+    
 	function TimeSlider(){
 		this.left_array=new Array();//存放每个拖块的左坐标
 		this.right_array=new Array();//存放每个拖块的右坐标
@@ -44,15 +62,11 @@
 		contentAyyay : new Array(),//存放每个时间轴对象实例的上下文this的数组
 		sliderTotal:0,//TimeSlider实例个数
 		
-		/*创建整个时间轴的DOM结构*/
-		init:function(obj){
-			TimeSlider.prototype.sliderTotal++;
-			this.timeSliderNum=TimeSlider.prototype.sliderTotal;
-			var divId=obj.id;
+        createLayout:function(obj){
+            var divId=obj.id;
 			var oneDragBlockTime=obj.oneDragBlockTime||60;//每个拖块代表的时间
 			var self=this;//保存当前上下文
-			self.contentAyyay.push(this);
-			/*创建布局*/
+            /*创建布局*/
 				var backgroundDiv=document.createElement("div");
 				$(backgroundDiv).addClass("trCanvas").appendTo("#"+divId);
 				
@@ -88,9 +102,8 @@
 
 				
 				/*弹出框*/
-				var menuFixedDiv=document.createElement("div");
-				$(menuFixedDiv).addClass("menufix").attr("id","fixedDiv"+this.timeSliderNum)
-				$("#"+divId).after(menuFixedDiv)
+				var fixedDiv=getInstance(createCoverDiv)
+				$("body").append(fixedDiv)
 				
 				var modalDiv=document.createElement("div");
 				var modalDialogDiv=document.createElement("div");
@@ -178,8 +191,6 @@
 						var newLeft=parseFloat((STH*this.oneHourWidth+STM*this.oneHourWidth/60).toFixed(1));
 						var newRight=parseFloat((SPH*this.oneHourWidth+SPM*this.oneHourWidth/60).toFixed(1));
 						var arrayLen;
-						console.log("newLeft:"+newLeft);
-						console.log("newRight:"+newRight);
 						arrayLen=this.left_array.length;
 
 						/*设置过程中判断时间段是否超出边界范围及超过其他时间段*/
@@ -240,7 +251,7 @@
 				     	this.setSliderTime(newRight,rightShowId);
 						
 						$("#modalDiv"+this.timeSliderNum).hide();
-						$("#fixedDiv"+this.timeSliderNum).hide();						
+						$("#fixedDiv").hide();						
 				}.bind(this);
 				
 				
@@ -251,12 +262,12 @@
 						this.rightTime_array.splice(this.whichOne,1);
 						$("#"+this.dragId).remove();
 						$("#modalDiv"+this.timeSliderNum).hide();
-						$("#fixedDiv"+this.timeSliderNum).hide();					
+						$("#fixedDiv").hide();					
 				}.bind(this)
 				
 				calBtn.onclick=function(){						
 						$("#modalDiv"+this.timeSliderNum).hide();
-						$("#fixedDiv"+this.timeSliderNum).hide();		
+						$("#fixedDiv").hide();		
 				}.bind(this)
 				
 				$("#"+divId).after(modalDiv)
@@ -412,16 +423,34 @@
 				var event=e?e:window.event;
 				self.createDrag(this,event.pageX);
 			})
-			
-			if(obj.defaultTime)
+			if(Object.prototype.toString.call(obj.defaultTime)=="[object Array]")
 			{
-				for( key in obj.defaultTime)
+                _.map(obj.defaultTime,function(item){
+                    var startTime=item.split("-")[0];
+                    var stopTime=item.split("-")[1];
+                    var timeArray=new Array();
+                    var _timeArray=new Array();
+                    timeArray.push(startTime);
+                    timeArray.push(stopTime);
+                    _timeArray=this.getSliderOffsetX(timeArray);
+                    
+                    this.createDrag(obj.id,_timeArray[0],_timeArray[1]);
+                }.bind(this))
+			}
+            else if(Object.prototype.toString.call(obj.defaultTime)=="[object Object]"){
+                for( key in obj.defaultTime)
 				{
-					var timeArray=this.getSliderOffsetX(obj.defaultTime[key]);
-					//this.createDrag(obj.id,timeArray[0],timeArray[1],timeArray[2],timeArray[3]);
+					var timeArray=this.getSliderOffsetX(obj.defaultTime[key]);	
 					this.createDrag(obj.id,timeArray[0],timeArray[1]);
 				}
-			}
+            }
+        },
+		/*创建整个时间轴的DOM结构*/
+		init:function(obj){
+			TimeSlider.prototype.sliderTotal++;
+			this.timeSliderNum=TimeSlider.prototype.sliderTotal;
+			this.contentAyyay.push(this);
+			this.createLayout(obj);
 		},
 		
 		/*创建拖块函数，backgroundDiv为时间轴的背景DOM，
@@ -736,7 +765,7 @@
 				$("#startM"+self.timeSliderNum).val(parseInt($("#"+leftShowId).text().split(":")[1]));
 				$("#stopH"+self.timeSliderNum).val(parseInt($("#"+rightShowId).text().split(":")[0]));
 				$("#stopM"+self.timeSliderNum).val(parseInt($("#"+rightShowId).text().split(":")[1]));
-				$("#fixedDiv"+self.timeSliderNum).show();
+				$("#fixedDiv").show();
 				$("#modalDiv"+self.timeSliderNum).show();
 			 }
 			 self.hasMove=false;
@@ -1121,40 +1150,3 @@
 	
 	window.TimeSlider=TimeSlider;
 })()
-	
-	/* 动态创建7个时间轴 */
-	var timeS1=new TimeSlider;
-	timeS1.init({
-				id:"timeslider1",
-				defaultTime:{
-					"1":["01:01","02:43"],
-					"2":["12:00","13:43"]
-				}
-				})
-	var timeS2=new TimeSlider;
-	timeS2.init({
-				id:"timeslider2",
-				})
-
-	var timeS3=new TimeSlider;
-	timeS3.init({
-				id:"timeslider3",
-				})
-
-	var timeS4=new TimeSlider;
-	timeS4.init({
-				id:"timeslider4",
-				})
-
-	var timeS5=new TimeSlider;
-	timeS5.init({
-				id:"timeslider5",
-				})
-	var timeS6=new TimeSlider;
-	timeS6.init({
-				id:"timeslider6",
-				})
-    var timeS7=new TimeSlider;
-	timeS7.init({
-				id:"timeslider7",
-				})

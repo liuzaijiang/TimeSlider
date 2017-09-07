@@ -24,7 +24,7 @@
 		position: relative;
 	}
 	
-	.menufix{
+	.fixBGDiv{
 		position:fixed;
 		left:0;
 		right:0;

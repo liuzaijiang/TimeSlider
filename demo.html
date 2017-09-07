@@ -51,5 +51,45 @@
 <script type="text/javascript" src="lib/jquery.js"></script>
 <script type="text/javascript" src="lib/underscore.js"></script>
 <script type="text/javascript" src="js/timeSlider.js"></script>
+<script>
+    /* 动态创建7个时间轴 */
+    var defaultTime1=["01:01-02:43","12:00-13:43"];
+	var timeS1=new TimeSlider;
+	timeS1.init({
+				id:"timeslider1",
+				defaultTime:defaultTime1,
+				})
+                
+	var timeS2=new TimeSlider;
+	timeS2.init({
+				id:"timeslider2",
+                defaultTime:{
+                    "1":["01:01","02:43"]
+                 }
+				})
+
+	var timeS3=new TimeSlider;
+	timeS3.init({
+				id:"timeslider3",
+				})
+
+	var timeS4=new TimeSlider;
+	timeS4.init({
+				id:"timeslider4",
+				})
+
+	var timeS5=new TimeSlider;
+	timeS5.init({
+				id:"timeslider5",
+				})
+	var timeS6=new TimeSlider;
+	timeS6.init({
+				id:"timeslider6",
+				})
+    var timeS7=new TimeSlider;
+	timeS7.init({
+				id:"timeslider7",
+				})
+</script>
 </body>
 </html>
