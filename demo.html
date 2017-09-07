@@ -4,9 +4,19 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link type="text/css" rel="stylesheet" href="css/timeSlider.css" />
 <title>scheduler</title>
+<style>
+    body{
+        background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAG0lEQVQIW2OMqXogyYADMIIkl7QpPMcmP+gkAYLGGdeobP2EAAAAAElFTkSuQmCC)
+    }
+    
+    .code{
+       width:500px;
+       border:1px solid black;
+       background:#d4d4d4;
+    }
+</style>
 </head>
 <body>
-
 <div onselectstart="return false;">
 	<label class="week">星期一:</label>
 	<div id="timeslider1" class="timeSlider">
@@ -48,51 +58,67 @@
 	<div id="timeslider7" class="timeSlider">
 	</div>
 </div>
+<br>
+初始化方式：
+<pre class="code">
+var defaultTime1=["01:01-02:43","12:00-13:43"];
+var timeS1=new TimeSlider({
+        id:"timeslider1",
+        defaultTime:defaultTime1
+   });
+</pre>
+<p>
+获取星期一时间轴上时间
+</p>
+
+<button id="getTime">获取</button>
+<p id="content">
+</p>
 <script type="text/javascript" src="lib/jquery.js"></script>
 <script type="text/javascript" src="lib/underscore.js"></script>
 <script type="text/javascript" src="js/timeSlider.js"></script>
 <script>
     /* 动态创建7个时间轴 */
     var defaultTime1=["01:01-02:43","12:00-13:43"];
-	var timeS1=new TimeSlider;
-	timeS1.init({
-				id:"timeslider1",
-				defaultTime:defaultTime1,
-				})
-                
-	var timeS2=new TimeSlider;
-	timeS2.init({
-				id:"timeslider2",
-                defaultTime:{
-                    "1":["01:01","02:43"]
-                 }
-				})
-
-	var timeS3=new TimeSlider;
-	timeS3.init({
-				id:"timeslider3",
-				})
-
-	var timeS4=new TimeSlider;
-	timeS4.init({
-				id:"timeslider4",
-				})
-
-	var timeS5=new TimeSlider;
-	timeS5.init({
-				id:"timeslider5",
-				})
-	var timeS6=new TimeSlider;
-	timeS6.init({
-				id:"timeslider6",
-				})
-    var timeS7=new TimeSlider;
-	timeS7.init({
-				id:"timeslider7",
-				})
-                
-    console.log(timeS1.leftTime_array)
-    console.log(timeS1.rightTime_array)       
+	var timeS1=new TimeSlider({
+        id:"timeslider1",
+        defaultTime:defaultTime1
+    });
+    
+    var timeS2=new TimeSlider({
+        id:"timeslider2",
+    });
+    
+    var timeS3=new TimeSlider({
+        id:"timeslider3",
+    });
+    
+    var timeS4=new TimeSlider({
+        id:"timeslider4",
+    });
+    
+    var timeS5=new TimeSlider({
+        id:"timeslider5",
+    });
+    
+    var timeS6=new TimeSlider({
+        id:"timeslider6",
+    });
+    
+    var timeS7=new TimeSlider({
+        id:"timeslider7",
+    });
+              
+              
+    $("#getTime").click(function(){
+        $("#content").empty();
+        var sliderTime=[];
+        _.forEach(timeS1.leftTime_array,function(item,index){
+            var time='<span>'+item+"-"+timeS1.rightTime_array[index]+'</span></br>';
+            
+           $("#content").append(time)
+        })
+    })        
 </script>
 </body>
 </html>

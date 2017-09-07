@@ -198,7 +198,7 @@
 
 	var contentArray = new Array(); //存放每个时间轴对象实例的上下文this的数组
 
-	function TimeSlider() {
+	function TimeSlider(initObj) {
 		this.left_array = new Array(); //存放每个拖块的左坐标
 		this.right_array = new Array(); //存放每个拖块的右坐标
 		this.leftTime_array = new Array(); //存放每个拖块的左坐标对应的时间
@@ -214,6 +214,8 @@
 		this.timeSliderNum = 0; //TimeSlider实例个数
 		this.calTimeFlag = false; //是否计算时间
 		this.dragId = null; //当前操作的拖块的ID
+        
+        this.init(initObj);//初始化开始
 	}
 
 	TimeSlider.prototype = {
@@ -429,16 +431,11 @@
                                 ex2:_timeArray[1]
                             })
 				}.bind(this))
-			} else if (Object.prototype.toString.call(obj.defaultTime) == "[object Object]") {
-				for (key in obj.defaultTime) {
-					var _timeArray = this.getSliderOffsetX(obj.defaultTime[key]);
-                    this.createDrag({
-                                backgroundDiv:obj.id,
-                                ex:_timeArray[0],
-                                ex2:_timeArray[1]
-                      })
-				}
-			}
+			}else if(obj.defaultTime)
+            {
+                throw new Error('时间初始化需要数组格式');
+            }
+
 		},
 
 		init : function (obj) {
