@@ -171,7 +171,10 @@
 
 			self.setSliderTime(newLeft, leftShowId);
 			self.setSliderTime(newRight, rightShowId);
-
+            
+            /*更新时间数组里面的时间*/
+            self.leftTime_array.splice(self.whichOne, 1, self.leftTime);
+			self.rightTime_array.splice(self.whichOne, 1, self.rightTime);
 			$("#modalDiv").hide();
 			$("#fixedDiv").hide();
 		}
@@ -529,11 +532,6 @@
 
 			$("#leftBar" + sliderNum + "_" + self.dragNum).mouseover(function (e) {
 				self.barOver(this);
-				/*if(document.all){  //兼容IE8
-				e.cancelBubble=true;
-				}else{
-				e.stopPropagation();
-				}*/
 			}).mousedown(function (e) {
 				self.leftBarDown(e, this);
 				if (document.all) { //兼容IE8
@@ -560,11 +558,6 @@
 
 				$("#rightBar" + sliderNum + "_" + self.dragNum).mouseover(function (e) {
 					self.barOver(this);
-					/*if(document.all){  //兼容IE8
-					e.cancelBubble=true;
-					}else{
-					e.stopPropagation();
-					}*/
 				}).mousedown(function (e) {
 					self.rightBarDown(e, this);
 					if (document.all) { //兼容IE8
@@ -627,7 +620,6 @@
 
 		/*拖块按下事件，主要是用来拖拽拖块和点击弹出编辑框*/
 		dragDown : function (e, thisDrag) {
-            console.log("down");
 			$(thisDrag).css("z-index", "5");
 			$(thisDrag).css("cursor", "move");
 			var self = this;
@@ -644,13 +636,6 @@
 			/*当我去移动时间段之前，先找到当前操作的时间段在数组中的位置*/
 			whichOne = self.binarySearch(self.left_array, parentOriginalLeft);
 			self.whichOne = whichOne;
-			/*for(var i=0;i<arrayLength;i++){
-			if(self.left_array[i]==parentOriginalLeft){
-			whichOne=i;
-			self.whichOne=i;
-			break;
-			}
-			}*/
 			var parentId = $(thisDrag).attr("id");
 			var timeSliderWidth = $("#" + parentId).parent().width(); //整个滑动条宽度
 			this.dragId = parentId;
@@ -826,11 +811,9 @@
 			document.onmousemove = null;
 			document.onmouseup = null;
 			if (direction == "left") {
-				//var left_new=parseInt($("#"+parentId).css("left"));
 				var left_new = parseFloat(parseFloat(this.getStyle($("#" + parentId)[0], "left")).toFixed(1));
 				self.left_array[self.whichOne] = left_new;
 			} else if (direction == "right") {
-				//var right_new=parseInt($("#"+parentId).css("left"))+$("#"+parentId).width();
 				var right_new = parseFloat(parseFloat(this.getStyle($("#" + parentId)[0], "left")).toFixed(1)) + parseFloat(parseFloat(this.getStyle($("#" + parentId)[0], "width")).toFixed(1));
 				self.right_array[self.whichOne] = right_new;
 			}
