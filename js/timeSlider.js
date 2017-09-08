@@ -375,20 +375,12 @@
 			editSave.type = "button";
 			editSave.value = "保存";
 			editSave.onclick = function () {
-				var len = this.left_array.length;
-				for (var j = 0; j < 7; j++) {
-					if ($("#editCBox" + this.timeSliderNum + "_" + j).prop("checked") == true) {
-						var targetId = $(".trCanvas").eq(j).parent().attr("id");
-						for (var i = 0; i < len; i++) {
-                            contentArray[j].createDrag({
-                                    backgroundDiv:targetId,
-                                    ex:this.left_array[i] + this.slderLeftOffset,
-                                    ex2:this.right_array[i]
-                            })  
-						}
-					}
-
-				}
+              if(!window.confirm("是否选择覆盖已存在时间段？")){                    
+                this.copyTimeSlider(0);
+              }
+              else{
+               this.copyTimeSlider(1);
+              }
 				$("#editDiv" + this.timeSliderNum).hide();
 			}.bind(this)
             
@@ -426,7 +418,6 @@
             }
 
 		},
-        
         /*时间初始化*/
         timeInit:function(data){
           _.map(data, function (item) {
@@ -470,6 +461,26 @@
 			this.dragNum = 0;
         },
         
+        /*flag为1是复制时全覆盖，0是选择性覆盖*/
+        copyTimeSlider:function(flag){
+                var len = this.left_array.length;
+                 for (var j = 0; j < 7; j++) {
+					if ($("#editCBox" + this.timeSliderNum + "_" + j).prop("checked") == true) {
+						var targetId = $(".trCanvas").eq(j).parent().attr("id");                       
+                        if(flag)
+                        {
+                            contentArray[j].removeAll();
+                        }
+						for (var i = 0; i < len; i++) {                         
+                            contentArray[j].createDrag({
+                                    backgroundDiv:targetId,
+                                    ex:this.left_array[i] + this.slderLeftOffset,
+                                    ex2:this.right_array[i]
+                            })  
+						}
+					}
+				}
+        },
 		/*创建拖块函数，
         obj参数：
         backgroundDiv为时间轴的背景DOM，
