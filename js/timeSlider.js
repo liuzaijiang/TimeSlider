@@ -217,21 +217,29 @@
 		this.timeSliderNum = 0; //TimeSlider实例个数
 		this.calTimeFlag = false; //是否计算时间
 		this.dragId = null; //当前操作的拖块的ID
+        this.mountId=null;//当前挂载的真实DOM的ID
         
         this.init(initObj);//初始化开始
 	}
 
 	TimeSlider.prototype = {
 		sliderTotal : 0, //TimeSlider实例个数
-
+        
+        init : function (obj) {
+			contentArray.push(this);
+			TimeSlider.prototype.sliderTotal++;
+			this.timeSliderNum = TimeSlider.prototype.sliderTotal;
+			this.createLayout(obj);
+		},
+        
 		/*创建整个时间轴的DOM结构*/
 		createLayout : function (obj) {
-			var divId = obj.id;
+			this.mountId = obj.id;
 			var oneDragBlockTime = obj.oneDragBlockTime || 60; //每个拖块代表的时间
 			var self = this; //保存当前上下文
 			/*创建布局*/
 			var backgroundDiv = document.createElement("div");
-			$(backgroundDiv).addClass("trCanvas").appendTo("#" + divId);
+			$(backgroundDiv).addClass("trCanvas").appendTo("#" + this.mountId);
 
 			var oneHourWidth = Math.floor($(backgroundDiv).width() / 24); //每一个小时占的宽度
 			this.oneHourWidth = oneHourWidth;
@@ -242,18 +250,18 @@
 				var coordinateDiv = document.createElement("div");
 				$(coordinateDiv).addClass("coordinate").css({
 					"left" : oneHourWidth * i + "px"
-				}).appendTo("#" + divId);
+				}).appendTo("#" + this.mountId);
 
 				var labelDiv = document.createElement("div");
 				if (i < 10) {
 					$(labelDiv).addClass("coordinateLabDiv").text(i).css({
 						"left" : oneHourWidth * i + "px"
-					}).appendTo("#" + divId);
+					}).appendTo("#" + this.mountId);
 				} else {
 					$(labelDiv).addClass("coordinateLabDiv").text(i).css({
 						"left" : oneHourWidth * i + "px",
 						"margin-left" : "-6px"
-					}).appendTo("#" + divId);
+					}).appendTo("#" + this.mountId);
 
 				}
 				//$(labelDiv).attr("readonly",true);
@@ -272,7 +280,7 @@
 			var editWrap = document.createElement("div");
 			$(editWrap).addClass("editWrap")
 
-			$("#" + divId).after(editWrap);
+			$("#" + this.mountId).after(editWrap);
 
 			var editImg = document.createElement("img");
 			editImg.src = "images/edit.gif";
@@ -291,15 +299,7 @@
 			$(delImg).addClass("delImg");
 			delImg.onclick = function () {
 				if (window.confirm("是否要删除此时间轴上的所有时间段")) {
-					var len = this.right_array.length;
-					for (var i = len; i--; ) {
-						$("#timeS" + this.timeSliderNum + "_" + i).remove();
-					}
-					this.right_array.splice(0, len);
-					this.left_array.splice(0, len);
-					this.rightTime_array.splice(0, len);
-					this.leftTime_array.splice(0, len);
-					this.dragNum = 0;
+					this.removeAll();
 				}
 			}.bind(this);
 			$(editWrap).append(delImg);
@@ -405,7 +405,7 @@
 			$(editFooter).append(editCancle);
 			/*end*/
 
-			this.slderLeftOffset = $("#" + divId).offset().left; //时间轴距离左页面的距离
+			this.slderLeftOffset = $("#" + this.mountId).offset().left; //时间轴距离左页面的距离
 
 
 			$(backgroundDiv).mousedown(function (e) {
@@ -419,7 +419,17 @@
             
             /*两种时间初始化，数据或者对象*/
 			if (Object.prototype.toString.call(obj.defaultTime) == "[object Array]") {
-				_.map(obj.defaultTime, function (item) {
+				this.timeInit(obj.defaultTime);
+			}else if(obj.defaultTime)
+            {
+                throw new Error('时间初始化需要数组格式');
+            }
+
+		},
+        
+        /*时间初始化*/
+        timeInit:function(data){
+          _.map(data, function (item) {
 					var startTime = item.split("-")[0];
 					var stopTime = item.split("-")[1];
 					var timeArray = new Array();
@@ -429,25 +439,37 @@
 					_timeArray = this.getSliderOffsetX(timeArray);
 
                     this.createDrag({
-                                backgroundDiv:obj.id,
+                                backgroundDiv:this.mountId,
                                 ex:_timeArray[0],
                                 ex2:_timeArray[1]
-                            })
-				}.bind(this))
-			}else if(obj.defaultTime)
+                         })
+		   }.bind(this))  
+        },
+        
+        /*提供给用户的接口，删除某个时间轴上所有时间段，并重新设置*/
+        setTime:function(setTimeArray){
+            if (Object.prototype.toString.call(setTimeArray) == "[object Array]") {
+                this.removeAll();
+                this.timeInit(setTimeArray);
+			}else if(setTimeArray)
             {
                 throw new Error('时间初始化需要数组格式');
             }
-
-		},
-
-		init : function (obj) {
-			contentArray.push(this);
-			TimeSlider.prototype.sliderTotal++;
-			this.timeSliderNum = TimeSlider.prototype.sliderTotal;
-			this.createLayout(obj);
-		},
-
+        },
+        
+        /*删除当前时间轴上所有时间段*/
+        removeAll:function(){
+            var len = this.right_array.length;
+			for (var i = len; i--; ) {
+				$("#timeS" + this.timeSliderNum + "_" + i).remove();
+			}
+			this.right_array.splice(0, len);
+			this.left_array.splice(0, len);
+			this.rightTime_array.splice(0, len);
+			this.leftTime_array.splice(0, len);
+			this.dragNum = 0;
+        },
+        
 		/*创建拖块函数，
         obj参数：
         backgroundDiv为时间轴的背景DOM，

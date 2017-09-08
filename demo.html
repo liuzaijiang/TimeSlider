@@ -70,10 +70,16 @@ var timeS1=new TimeSlider({
 <p>
 获取星期一时间轴上时间
 </p>
-
 <button id="getTime">获取</button>
 <p id="content">
 </p>
+<p>
+重新设置星期一时间轴上时间
+</p>
+<button id="setTime">设置</button>
+<pre class="code">
+timeS1.setTime(["2:30-14:43","15:40-18:30"])
+</pre>
 <script type="text/javascript" src="lib/jquery.js"></script>
 <script type="text/javascript" src="lib/underscore.js"></script>
 <script type="text/javascript" src="js/timeSlider.js"></script>
@@ -119,6 +125,10 @@ var timeS1=new TimeSlider({
            $("#content").append(time)
         })
     })        
+    
+    $("#setTime").click(function(){
+        timeS1.setTime(["2:30-14:43","15:40-18:30"])
+    })
 </script>
 </body>
 </html>
