@@ -17,44 +17,62 @@
 </style>
 </head>
 <body>
+<div class="eventBoxWrap">
+    <label class="label-event">事件1</label>
+    <div class="eventBox">
+    </div>
+    <label class="label-event">事件2</label>
+    <div class="eventBox">
+    </div>
+    <label class="label-event">事件3</label>
+    <div class="eventBox">
+    </div>
+    <label class="label-event">事件4</label>
+    <div class="eventBox">
+    </div>
+    <label class="label-event">事件5</label>
+    <div class="eventBox">
+    </div>
+</div>
+
 <div onselectstart="return false;">
-	<label class="week">星期一:</label>
+	<label class="label-week">星期一:</label>
 	<div id="timeslider1" class="timeSlider">
 	</div>
 </div>
 
 <div onselectstart="return false;">
-	<label class="week">星期二:</label>
+	<label class="label-week">星期二:</label>
 	<div id="timeslider2" class="timeSlider">
 	</div>
 </div>
 
 <div onselectstart="return false;">
-	<label class="week">星期三:</label>
+	<label class="label-week">星期三:</label>
 	<div id="timeslider3" class="timeSlider">
 	</div>
 </div>
 
 <div onselectstart="return false;">
-	<label class="week">星期四:</label>
+	<label class="label-week">星期四:</label>
 	<div id="timeslider4" class="timeSlider">
 	</div>
 </div>
 
 <div onselectstart="return false;">
-	<label class="week">星期五:</label>
+	<label class="label-week">星期五:</label>
 	<div id="timeslider5" class="timeSlider">
 	</div>
 </div>
 
 <div onselectstart="return false;">
-	<label class="week">星期六:</label>
+	<label class="label-week">星期六:</label>
 	<div id="timeslider6" class="timeSlider">
 	</div>
 </div>
 
 <div onselectstart="return false;">
-	<label class="week">星期日:</label>
+	<label class="label-week">星期日:</label>
 	<div id="timeslider7" class="timeSlider">
 	</div>
 </div>
@@ -78,7 +96,10 @@ var timeS1=new TimeSlider({
 </p>
 <button id="setTime">设置</button>
 <pre class="code">
-timeS1.setTime(["2:30-14:43","15:40-18:30"])
+timeS1.setTime({
+           setTimeArray:["2:30-14:43","15:40-18:30"],        
+           setEventsArray:[4,2]
+        })
 </pre>
 <script type="text/javascript" src="lib/jquery.js"></script>
 <script type="text/javascript" src="lib/underscore.js"></script>
@@ -86,9 +107,11 @@ timeS1.setTime(["2:30-14:43","15:40-18:30"])
 <script>
     /* 动态创建7个时间轴 */
     var defaultTime1=["01:01-02:43","12:00-13:43"];
+    var defaultEvents1=[1,3];
 	var timeS1=new TimeSlider({
         id:"timeslider1",
-        defaultTime:defaultTime1
+        defaultTime:defaultTime1,
+        defaultEvents:defaultEvents1
     });
     
     var timeS2=new TimeSlider({
@@ -127,7 +150,10 @@ timeS1.setTime(["2:30-14:43","15:40-18:30"])
     })        
     
     $("#setTime").click(function(){
-        timeS1.setTime(["2:30-14:43","15:40-18:30"])
+        timeS1.setTime({
+              setTimeArray:["2:30-14:43","15:40-18:30"],        
+              setEventsArray:[4,2]
+        })
     })
 </script>
 </body>

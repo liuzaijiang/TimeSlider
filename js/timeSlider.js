@@ -8,7 +8,7 @@
 		Function.prototype.bind = function (oThis) {
 			if (typeof this !== "function") {
 				throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
-				}
+			}
 			var aArgs = Array.prototype.slice.call(arguments, 1),
 			fToBind = this,
 			fNOP = function () {},
@@ -21,9 +21,8 @@
 			return fBound;
 		};
 	}
-    
-    
-    /*单例模式*/
+
+	/*单例模式*/
 	var getInstance = function () {
 		var res = {};
 		return function (fn) {
@@ -33,12 +32,34 @@
 			res[fn] = fn.call(this, arguments)
 				return res;
 		}
-	}()
+	}
+	()
 
 	function createCoverDiv() {
 		var fixedDiv = document.createElement("div");
 		$(fixedDiv).addClass("fixBGDiv").attr("id", "fixedDiv")
 		return fixedDiv;
+	}
+
+	var defalutColor = ["007acc", 'a5df12', 'eaaae4', '04d4d4', 'd32311'];
+	/*为事件BOX添加颜色*/
+	//var setColorForEvent= function(){
+	(function () {
+		_.forEach($(".eventBox"), function (item, index) {
+			$(item).css("backgroundColor", "#" + defalutColor[index])
+		})
+	})()
+
+	//将颜色从rgb转换为16进制格式
+	function rgbToHex(rgb) {
+		var _rgb = rgb.match(/[^\(\)]+(?=\))/g)[0].split(",");
+		if (_rgb) {
+			var hex = "";
+			_.forEach(_rgb, function (item) {
+				hex += ("0" + parseInt(item).toString(16)).slice(-2);
+			})
+			return (hex);
+		}
 	}
 
 	function createPopUpBox() {
@@ -58,6 +79,11 @@
 		var startMin = document.createElement("input");
 		var stopHour = document.createElement("input");
 		var stopMin = document.createElement("input");
+
+		var eventDiv = document.createElement("div");
+		var eventLabel = document.createElement("label");
+		var eventSelect = document.createElement("select");
+
 		startHour.type = "text";
 		startHour.maxLength = 2;
 		startMin.type = "text";
@@ -71,6 +97,16 @@
 			"id" : "modalDiv",
 			'data-number' : ""
 		})
+
+		eventLabel.innerHTML = "选择事件类型:";
+		var eventArray = ["事件1", "事件2", "事件3", "事件4", "事件5"]
+		_.forEach(eventArray, function (item, index) {
+			var myOption = document.createElement("option");
+			myOption.value = index + 1;
+			myOption.text = item;
+			eventSelect.add(myOption);
+		})
+
 		$(modalDialogDiv).addClass("modal-dialog").appendTo(modalDiv);
 		$(modalContentDiv).addClass("modal-content").appendTo(modalDialogDiv);
 		$(modalHeaderDiv).addClass("modal-header").appendTo(modalContentDiv);
@@ -83,12 +119,16 @@
 		$(stopHour).addClass("time").appendTo(modalTimeDiv).after(":").before("结束时间").attr("id", "stopH")
 		$(stopMin).addClass("time").appendTo(modalTimeDiv).attr("id", "stopM")
 
+		$(eventLabel).appendTo(eventDiv);
+		$(eventSelect).addClass("eventSelect").attr("id", "eventSelect").appendTo(eventDiv);
+		$(eventDiv).appendTo(modalBodyDiv);
+
 		$(modalFooterDiv).addClass("modal-footer").appendTo(modalContentDiv);
 		$(setBtn).addClass("setbtn").appendTo(modalFooterDiv).text("设置").attr("id", "setBtn")
 		$(delBtn).addClass("setbtn").appendTo(modalFooterDiv).text("删除").attr("id", "delBtn")
 		$(calBtn).addClass("setbtn").appendTo(modalFooterDiv).text("取消").attr("id", "calBtn")
 
-        /*绑定事件*/
+		/*绑定事件*/
 		setBtn.onclick = function () {
 			var contentIndex = $("#modalDiv").attr("data-number") - 1;
 			var self = contentArray[contentIndex];
@@ -171,10 +211,14 @@
 
 			self.setSliderTime(newLeft, leftShowId);
 			self.setSliderTime(newRight, rightShowId);
-            
-            /*更新时间数组里面的时间*/
-            self.leftTime_array.splice(self.whichOne, 1, self.leftTime);
+
+			/*更新时间数组里面的时间*/
+			self.leftTime_array.splice(self.whichOne, 1, self.leftTime);
 			self.rightTime_array.splice(self.whichOne, 1, self.rightTime);
+
+            /*更新事件*/
+			$("#" + self.dragId).css("backgroundColor", "#" + defalutColor[$("#eventSelect").val() - 1]);
+            self.events_array.splice(self.whichOne, 1, $("#eventSelect").val() - 1);    
 			$("#modalDiv").hide();
 			$("#fixedDiv").hide();
 		}
@@ -186,6 +230,7 @@
 			self.left_array.splice(self.whichOne, 1);
 			self.leftTime_array.splice(self.whichOne, 1);
 			self.rightTime_array.splice(self.whichOne, 1);
+            self.events_array.splice(self.whichOne, 1);
 			$("#" + self.dragId).remove();
 			$("#modalDiv").hide();
 			$("#fixedDiv").hide();
@@ -206,6 +251,7 @@
 		this.right_array = new Array(); //存放每个拖块的右坐标
 		this.leftTime_array = new Array(); //存放每个拖块的左坐标对应的时间
 		this.rightTime_array = new Array(); //存放每个拖块的右坐标对应的时间
+		this.events_array = new Array(); //存放每个时间轴的事件
 		this.leftTime = 0; //存放当前操作拖块的时间
 		this.rightTime = 0; //存放当前操作拖块的时间
 		this.slderLeftOffset = 0; //时间轴距离左页面的距离
@@ -213,28 +259,30 @@
 		this.oneHourWidth = 0;
 		this.dragNum = 0; //拖块个数-1
 		this.hasMove = false; //判断拖块是click事件还是move事件
-		this.whichOne = 0; //目前操纵的是哪个拖块
+		this.whichOne = 0; //目前操纵的拖块在坐标数组中的索引
 		this.timeSliderNum = 0; //TimeSlider实例个数
 		this.calTimeFlag = false; //是否计算时间
 		this.dragId = null; //当前操作的拖块的ID
-        this.mountId=null;//当前挂载的真实DOM的ID
-        
-        this.init(initObj);//初始化开始
+		this.mountId = null; //当前挂载的真实DOM的ID
+		this.currentEvent = null; //当前操作拖块的事件
+
+		this.init(initObj); //初始化开始
 	}
 
 	TimeSlider.prototype = {
 		sliderTotal : 0, //TimeSlider实例个数
-        
-        init : function (obj) {
+
+		init : function (obj) {
 			contentArray.push(this);
 			TimeSlider.prototype.sliderTotal++;
 			this.timeSliderNum = TimeSlider.prototype.sliderTotal;
 			this.createLayout(obj);
 		},
-        
+
 		/*创建整个时间轴的DOM结构*/
 		createLayout : function (obj) {
 			this.mountId = obj.id;
+			this.events_array = obj.defaultEvents || [];
 			var oneDragBlockTime = obj.oneDragBlockTime || 60; //每个拖块代表的时间
 			var self = this; //保存当前上下文
 			/*创建布局*/
@@ -338,8 +386,7 @@
 				editCheckBox.type = "checkbox";
 				editCheckBox.onclick = function () {
 					$("#editCheckAll" + this.timeSliderNum).prop("checked", $(".editCBox" + this.timeSliderNum).length == $(".editCBox" + this.timeSliderNum).filter(":checked").length);
-				}
-				.bind(this);
+				}.bind(this);
 				$(editCheckBox).addClass("editCBox" + this.timeSliderNum).attr("id", "editCBox" + this.timeSliderNum + "_" + i);
 				$(editBoxDiv).append(editCheckBox);
 				var editLabel = document.createElement("label");
@@ -375,15 +422,14 @@
 			editSave.type = "button";
 			editSave.value = "保存";
 			editSave.onclick = function () {
-              if(!window.confirm("是否选择覆盖已存在时间段？")){                    
-                this.copyTimeSlider(0);
-              }
-              else{
-               this.copyTimeSlider(1);
-              }
+				if (!window.confirm("是否选择覆盖已存在时间段？")) {
+					this.copyTimeSlider(0);
+				} else {
+					this.copyTimeSlider(1);
+				}
 				$("#editDiv" + this.timeSliderNum).hide();
 			}.bind(this)
-            
+
 			$(editFooter).append(editSave);
 
 			var editCancle = document.createElement("input");
@@ -393,7 +439,7 @@
 			editCancle.onclick = function () {
 				$("#editDiv" + this.timeSliderNum).hide();
 			}.bind(this)
-            
+
 			$(editFooter).append(editCancle);
 			/*end*/
 
@@ -402,55 +448,56 @@
 
 			$(backgroundDiv).mousedown(function (e) {
 				var event = e ? e : window.event;
-                self.createDrag({
-                                backgroundDiv:this,
-                                ex:event.pageX,
-                            })
-                
+				self.createDrag({
+					backgroundDiv : this,
+					ex : event.pageX,
+				})
+
 			})
-            
-            /*两种时间初始化，数据或者对象*/
+
+			/*时间初始化*/
 			if (Object.prototype.toString.call(obj.defaultTime) == "[object Array]") {
 				this.timeInit(obj.defaultTime);
-			}else if(obj.defaultTime)
-            {
-                throw new Error('时间初始化需要数组格式');
-            }
+			} else if (obj.defaultTime) {
+				throw new Error('时间初始化需要数组格式');
+			}
 
 		},
-        /*时间初始化*/
-        timeInit:function(data){
-          _.map(data, function (item) {
-					var startTime = item.split("-")[0];
-					var stopTime = item.split("-")[1];
-					var timeArray = new Array();
-					var _timeArray = new Array();
-					timeArray.push(startTime);
-					timeArray.push(stopTime);
-					_timeArray = this.getSliderOffsetX(timeArray);
+		/*时间初始化*/
+		timeInit : function (data) {
+			_.map(data, function (item, index) {
+				var startTime = item.split("-")[0];
+				var stopTime = item.split("-")[1];
+				var timeArray = new Array();
+				var _timeArray = new Array();
+				var event = this.events_array[index];
+				timeArray.push(startTime);
+				timeArray.push(stopTime);
+				_timeArray = this.getSliderOffsetX(timeArray);
+				this.createDrag({
+					backgroundDiv : this.mountId,
+					ex : _timeArray[0],
+					ex2 : _timeArray[1],
+					events : event,
+				})
+			}.bind(this))
+		},
 
-                    this.createDrag({
-                                backgroundDiv:this.mountId,
-                                ex:_timeArray[0],
-                                ex2:_timeArray[1]
-                         })
-		   }.bind(this))  
-        },
-        
-        /*提供给用户的接口，删除某个时间轴上所有时间段，并重新设置*/
-        setTime:function(setTimeArray){
-            if (Object.prototype.toString.call(setTimeArray) == "[object Array]") {
-                this.removeAll();
-                this.timeInit(setTimeArray);
-			}else if(setTimeArray)
-            {
-                throw new Error('时间初始化需要数组格式');
-            }
-        },
-        
-        /*删除当前时间轴上所有时间段*/
-        removeAll:function(){
-            var len = this.right_array.length;
+		/*提供给用户的接口，删除某个时间轴上所有时间段，并重新设置*/
+		setTime : function (setObj) {
+            var setTimeArray=setObj.setTimeArray;
+			if (Object.prototype.toString.call(setTimeArray) == "[object Array]") {
+				this.removeAll();
+                this.events_array=setObj.setEventsArray;
+				this.timeInit(setTimeArray);
+			} else if (setTimeArray) {
+				throw new Error('时间初始化需要数组格式');
+			}
+		},
+
+		/*删除当前时间轴上所有时间段*/
+		removeAll : function () {
+			var len = this.right_array.length;
 			for (var i = len; i--; ) {
 				$("#timeS" + this.timeSliderNum + "_" + i).remove();
 			}
@@ -458,44 +505,48 @@
 			this.left_array.splice(0, len);
 			this.rightTime_array.splice(0, len);
 			this.leftTime_array.splice(0, len);
+            this.events_array.splice(0, len);
 			this.dragNum = 0;
-        },
-        
-        /*flag为1是复制时全覆盖，0是选择性覆盖*/
-        copyTimeSlider:function(flag){
-                var len = this.left_array.length;
-                 for (var j = 0; j < 7; j++) {
-					if ($("#editCBox" + this.timeSliderNum + "_" + j).prop("checked") == true) {
-						var targetId = $(".trCanvas").eq(j).parent().attr("id");                       
-                        if(flag)
-                        {
-                            contentArray[j].removeAll();
-                        }
-						for (var i = 0; i < len; i++) {                         
-                            contentArray[j].createDrag({
-                                    backgroundDiv:targetId,
-                                    ex:this.left_array[i] + this.slderLeftOffset,
-                                    ex2:this.right_array[i]
-                            })  
-						}
+            this.leftTime=0;
+            this.rightTime=0;
+		},
+
+		/*flag为1是复制时全覆盖，0是选择性覆盖*/
+		copyTimeSlider : function (flag) {
+			var len = this.left_array.length;
+			for (var j = 0; j < 7; j++) {
+				if ($("#editCBox" + this.timeSliderNum + "_" + j).prop("checked") == true) {
+					var targetId = $(".trCanvas").eq(j).parent().attr("id");
+					if (flag) {
+						contentArray[j].removeAll();
+					}
+					for (var i = 0; i < len; i++) {
+						contentArray[j].createDrag({
+							backgroundDiv : targetId,
+							ex : this.left_array[i] + this.slderLeftOffset,
+							ex2 : this.right_array[i],
+                            events:this.events_array[i]
+						})
 					}
 				}
-        },
+			}
+		},
 		/*创建拖块函数，
-        obj参数：
-        backgroundDiv为时间轴的背景DOM，
+		obj参数：
+		backgroundDiv为时间轴的背景DOM，
 		ex为鼠标点击的位置，即创建的起始点
-        ex2代表拖块的宽度，若不存在，则默认一个小时的宽度，
+		ex2代表拖块的宽度，若不存在，则默认一个小时的宽度，
 		timeStart和timeStop为拖块的初始时间显示，若不存在则根据坐标进行计算，若存在则直接显示其值*/
 		createDrag : function (obj) {
-            var backgroundDiv=obj.backgroundDiv;
-            var ex=obj.ex;
-            var ex2=obj.ex2;
-            var timeStart=obj.timeStart;
-            var timeStop=obj.timeStop;
-            
+			var backgroundDiv = obj.backgroundDiv;
+			var ex = obj.ex;
+			var ex2 = obj.ex2;
+			var timeStart = obj.timeStart;
+			var timeStop = obj.timeStop;
+			var event = obj.events || 0;
 			var self = this;
-			var dragLeft = ex - self.slderLeftOffset;
+			var dragLeft = parseFloat((ex - self.slderLeftOffset).toFixed(1));
+
 			if (ex2) //如果指明了结束时间
 			{
 				var dragRight = ex2;
@@ -535,16 +586,17 @@
 			self.right_array.sort(function (a, b) {
 				return a - b;
 			});
-			var sliderNum = self.timeSliderNum
+			var sliderNum = self.timeSliderNum;
 
-				/*创建拖块*/
-				var drag = "<div class='timeSliderDiv'" +
+			/*创建拖块*/
+			var drag = "<div class='timeSliderDiv'" +
 				'id=timeS' + sliderNum + '_' + self.dragNum + ' ' +
-				'style=left:' + dragLeft + 'px' + ' ' +
-				'onconTextmenu="return false";' +
-				'></div>'
+				'style=left:' + dragLeft + 'px' + ';' +
+				'background-color:' + '#' + defalutColor[event] + ' ' +
+				'onconTextmenu="return false" ' +
+				'></div>';
 
-				$backgroundDiv.append(drag);
+			$backgroundDiv.append(drag);
 
 			var dragWidth = parseFloat((dragRight - dragLeft).toFixed(1));
 			$("#timeS" + sliderNum + '_' + self.dragNum).width(dragWidth);
@@ -560,8 +612,8 @@
 
 			var bar_left = "<div class=leftBar" + " " +
 				'id=leftBar' + sliderNum + "_" + self.dragNum + " " +
-				"></div>"
-				$("#timeS" + sliderNum + "_" + self.dragNum).append(bar_left);
+				"></div>";
+			$("#timeS" + sliderNum + "_" + self.dragNum).append(bar_left);
 
 			$("#leftBar" + sliderNum + "_" + self.dragNum).mouseover(function (e) {
 				self.barOver(this);
@@ -583,43 +635,43 @@
 
 			var bar_right = "<div class=rightBar" + " " +
 				'id=rightBar' + sliderNum + "_" + self.dragNum + " " +
-				"></div>"
-				$("#timeS" + sliderNum + "_" + self.dragNum).append(bar_right);
+				"></div>";
+			$("#timeS" + sliderNum + "_" + self.dragNum).append(bar_right);
 
-			var rightBarOffsetLeft = dragRight - dragLeft - $("#rightBar" + sliderNum + "_" + self.dragNum).width() / 2
-				$("#rightBar" + sliderNum + "_" + self.dragNum).css("left", rightBarOffsetLeft)
+			var rightBarOffsetLeft = dragRight - dragLeft - $("#rightBar" + sliderNum + "_" + self.dragNum).width() / 2;
+			$("#rightBar" + sliderNum + "_" + self.dragNum).css("left", rightBarOffsetLeft);
 
-				$("#rightBar" + sliderNum + "_" + self.dragNum).mouseover(function (e) {
-					self.barOver(this);
-				}).mousedown(function (e) {
-					self.rightBarDown(e, this);
-					if (document.all) { //兼容IE8
-						e.originalEvent.cancelBubble = true;
-					} else {
-						e.stopPropagation();
-					}
-				}).mouseup(function (e) {
-					self.barUp(this, "right");
-					if (document.all) { //兼容IE8
-						e.originalEvent.cancelBubble = true;
-					} else {
-						e.stopPropagation();
-					}
-				})
+			$("#rightBar" + sliderNum + "_" + self.dragNum).mouseover(function (e) {
+				self.barOver(this);
+			}).mousedown(function (e) {
+				self.rightBarDown(e, this);
+				if (document.all) { //兼容IE8
+					e.originalEvent.cancelBubble = true;
+				} else {
+					e.stopPropagation();
+				}
+			}).mouseup(function (e) {
+				self.barUp(this, "right");
+				if (document.all) { //兼容IE8
+					e.originalEvent.cancelBubble = true;
+				} else {
+					e.stopPropagation();
+				}
+			})
 
-				var left_show = "<div class=leftShow" + " " +
+			var left_show = "<div class=leftShow" + " " +
 				'id=leftShow' + sliderNum + "_" + self.dragNum + " " +
-				"></div>"
+				"></div>";
 
-				$("#timeS" + sliderNum + "_" + self.dragNum).append(left_show);
+			$("#timeS" + sliderNum + "_" + self.dragNum).append(left_show);
 
 			var right_show = "<div class=rightShow" + " " +
 				'id=rightShow' + sliderNum + "_" + self.dragNum + " " +
-				"></div>"
+				"></div>";
 
-				$("#timeS" + sliderNum + "_" + self.dragNum).append(right_show);
+			$("#timeS" + sliderNum + "_" + self.dragNum).append(right_show);
 			var rightShowOffsetLeft = dragRight - dragLeft;
-			$("#rightShow" + sliderNum + "_" + self.dragNum).css("left", rightShowOffsetLeft)
+			$("#rightShow" + sliderNum + "_" + self.dragNum).css("left", rightShowOffsetLeft);
 
 			if (timeStart) {
 				self.setSliderTime(dragLeft, 'leftShow' + sliderNum + '_' + self.dragNum, timeStart);
@@ -652,7 +704,7 @@
 		},
 
 		/*拖块按下事件，主要是用来拖拽拖块和点击弹出编辑框*/
-		dragDown : function (e, thisDrag) {
+		dragDown : function (e, thisDrag) {   
 			$(thisDrag).css("z-index", "5");
 			$(thisDrag).css("cursor", "move");
 			var self = this;
@@ -731,6 +783,9 @@
 					$("#startM").val(parseInt($("#" + leftShowId).text().split(":")[1]));
 					$("#stopH").val(parseInt($("#" + rightShowId).text().split(":")[0]));
 					$("#stopM").val(parseInt($("#" + rightShowId).text().split(":")[1]));
+					var colorHex = rgbToHex($("#" + parentId).css("backgroundColor"));
+					var eventIndex = defalutColor.indexOf(colorHex) + 1;
+					$("#eventSelect").val(eventIndex);
 					$("#fixedDiv").show();
 					$("#modalDiv").show().attr("data-number", self.timeSliderNum);
 				}
