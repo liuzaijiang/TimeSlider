@@ -30,10 +30,9 @@
 				return res[fn]
 			}
 			res[fn] = fn.call(this, arguments)
-				return res;
+			return res[fn];
 		}
-	}
-	()
+	}()
 
 	function createCoverDiv() {
 		var fixedDiv = document.createElement("div");
