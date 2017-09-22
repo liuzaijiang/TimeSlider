@@ -704,6 +704,7 @@
 
 		/*拖块按下事件，主要是用来拖拽拖块和点击弹出编辑框*/
 		dragDown : function (e, thisDrag) {   
+   
 			$(thisDrag).css("z-index", "5");
 			$(thisDrag).css("cursor", "move");
 			var self = this;
@@ -716,9 +717,9 @@
 			var parentOriginalLeft = parseFloat(parseFloat(this.getStyle($(thisDrag)[0], "left")).toFixed(1)); //拖块的原始偏移量
 			var disX = parseFloat((e.pageX - parentOriginalLeft - self.slderLeftOffset).toFixed(1)); //鼠标在拖动块上的偏移
 			var whichOne;
-
 			/*当我去移动时间段之前，先找到当前操作的时间段在数组中的位置*/
 			whichOne = self.binarySearch(self.left_array, parentOriginalLeft);
+            //whichOne=0
 			self.whichOne = whichOne;
 			var parentId = $(thisDrag).attr("id");
 			var timeSliderWidth = $("#" + parentId).parent().width(); //整个滑动条宽度
@@ -1063,20 +1064,29 @@
 				'y' : y
 			};
 		},
-		binarySearch : function (data, dest, start, end) {
-			var end = end || data.length - 1,
-			start = start || 0,
-			m = Math.floor((start + end) / 2);
-			if (data[m] == dest) {
-				return m;
-			}
-			if (dest < data[m]) {
-				return this.binarySearch(data, dest, 0, m - 1);
-			} else {
-				return this.binarySearch(data, dest, m + 1, end);
-			}
-			return false;
-		},
+        binarySearch :function(arr, target) {
+            var s = 0;
+            var e = arr.length - 1;
+            var m = Math.floor((s + e) / 2);
+            var sortTag = arr[s] <= arr[e];//确定排序顺序
+
+            while (s < e && arr[m] !== target) {
+                if (arr[m] > target) {
+                    sortTag && (e = m - 1);
+                    !sortTag && (s = m + 1);
+                } else {
+                    !sortTag && (e = m - 1);
+                    sortTag && (s = m + 1);
+                }
+                m = Math.floor((s + e) / 2);
+            }
+
+            if (arr[m] == target) {
+                return m;
+            } else {
+                return false;
+            }
+        }
 	}
 
 	window.TimeSlider = TimeSlider;
