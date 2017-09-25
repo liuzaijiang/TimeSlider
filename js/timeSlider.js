@@ -151,8 +151,8 @@
 			} else if ((STH == SPH) && (SPM < STM)) {
 				alert("这个错得太离谱")
 				return;
-			} else if ((SPH * 60 + SPM) - (STH * 60 + STM) < 40) {
-				alert("间隔至少40分钟");
+			} else if ((SPH * 60 + SPM) - (STH * 60 + STM) < 30) {
+				alert("间隔至少30分钟");
 				return;
 			}
 			var rightBarId = $("#" + self.dragId).children(".rightBar").attr("id");
@@ -845,27 +845,10 @@
 				if (pageX <= leftBorder) {
 					pageX = leftBorder;
 				}
-				var parentBlock;
-				var parentWidth = parseFloat(self.right_array[whichOne] - pageX);
-				if (parentOriginalLeft >= pageX) {
-					//左拉
+				var parentWidth = parseFloat(self.right_array[whichOne] - pageX);//拖块在移动过程中的宽度
+				if (parentOriginalLeft >= pageX||parentWidth >= self.oneDragBlockWidth / 2) {
+                  //if (parentOriginalLeft >= pageX||parentWidth >= 0.5) {
 					if (pageX >= leftBorder) {
-						parentBlock = parseInt(parentOriginalLeft - pageX);
-						$("#" + parentId).css({
-							width : parentWidth + "px",
-							left : pageX + "px"
-						});
-						$("#" + rightBar).css({
-							left : parentBlock + rightBarLeft + "px"
-						});
-						$("#" + rightShowId).css({
-							left : parentBlock + rightShowLeft + "px"
-						});
-						self.calTimeFlag = true;
-					}
-				} else {
-					//右拉
-					if (parentWidth >= self.oneDragBlockWidth / 2) {
 						$("#" + parentId).css({
 							width : parentWidth + "px",
 							left : pageX + "px"
@@ -873,10 +856,12 @@
 						$("#" + rightBar).css({
 							left : parentWidth - barWidth / 2 + "px"
 						});
-						$("#" + rightShowId).css("left", parentWidth + "px");
+						$("#" + rightShowId).css({
+							left : parentWidth + "px"
+						});
 						self.calTimeFlag = true;
 					}
-				}
+				} 
 
 				if (self.calTimeFlag) {
 					self.setSliderTime(pageX, leftShowId);
@@ -1000,15 +985,28 @@
 				this.rightTime = hour + ":" + min;
 			}
 		},
-		/*获取当前的拖块的显示时间，并存入数组，按从小到大顺序排列*/
-		getSliderTime : function (action) {
+		/*获取当前的拖块的显示时间，并存入数组，按从小到大顺序排列/
+         action为拖块是否在移动，移动分为两种，拖动拖块和拖动拉伸条
+         拖动拖块时开始和结束时间都更新，拖动拉伸条时只更新一个时间，由direction决定
+        */
+		getSliderTime : function (action,direction) {         
 			if (action == "move") {
-				this.leftTime_array[this.whichOne] = this.leftTime;
-				this.rightTime_array[this.whichOne] = this.rightTime;
+                if("right"===direction)
+                {
+                    this.rightTime_array[this.whichOne] = this.rightTime;
+                }
+                else if("left"===direction)
+                {
+                    this.leftTime_array[this.whichOne] = this.leftTime;
+                }
+                else{
+                    this.rightTime_array[this.whichOne] = this.rightTime;
+                    this.leftTime_array[this.whichOne] = this.leftTime;
+                }               
 			} else {
 				this.leftTime_array.push(this.leftTime);
 				this.rightTime_array.push(this.rightTime);
-			}
+			}         
 			this.leftTime_array.sort(function (a, b) {
 				var A = parseInt(a.split(":")[0]) * 60 + parseInt(a.split(":")[1]);
 				var B = parseInt(b.split(":")[0]) * 60 + parseInt(b.split(":")[1]);
@@ -1018,7 +1016,7 @@
 				var A = parseInt(a.split(":")[0]) * 60 + parseInt(a.split(":")[1]);
 				var B = parseInt(b.split(":")[0]) * 60 + parseInt(b.split(":")[1]);
 				return A - B;
-			});
+			});          
 		},
 		/*获取当前对应时间的left偏移量，参数time为传进来的时间数组
 		返回值：
