@@ -485,8 +485,12 @@
 		/*提供给用户的接口，删除某个时间轴上所有时间段，并重新设置*/
 		setTime : function (setObj) {
             var setTimeArray=setObj.setTimeArray;
-			if (Object.prototype.toString.call(setTimeArray) == "[object Array]") {
-				this.removeAll();
+			if (Object.prototype.toString.call(setTimeArray) == "[object Array]") {				
+                this.removeAll();
+                if(0===setTimeArray.length)
+                {
+                    return;
+                }
                 this.events_array=setObj.setEventsArray;
 				this.timeInit(setTimeArray);
 			} else if (setTimeArray) {
