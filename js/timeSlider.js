@@ -894,7 +894,7 @@
 				var right_new = parseFloat(parseFloat(this.getStyle($("#" + parentId)[0], "left")).toFixed(1)) + parseFloat(parseFloat(this.getStyle($("#" + parentId)[0], "width")).toFixed(1));
 				self.right_array[self.whichOne] = right_new;
 			}
-			self.getSliderTime("move");
+			self.getSliderTime("move",direction);
 		},
 
 		/*右拉伸按钮鼠标按下事件 e为事件对象，thisBar为当前操作的按钮*/
