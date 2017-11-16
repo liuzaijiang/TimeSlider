@@ -24,7 +24,7 @@
 
 	/*单例模式*/
 	var getInstance = function () {
-		var res = {};
+		var res = {};       
 		return function (fn) {
 			if (res[fn]) {
 				return res[fn]
@@ -34,11 +34,6 @@
 		}
 	}()
 
-	function createCoverDiv() {
-		var fixedDiv = document.createElement("div");
-		$(fixedDiv).addClass("fixBGDiv").attr("id", "fixedDiv")
-		return fixedDiv;
-	}
 
 	var defalutColor = ["007acc", 'a5df12', 'eaaae4', '04d4d4', 'd32311'];
 	/*为事件BOX添加颜色*/
@@ -61,76 +56,137 @@
 		}
 	}
 
+    function createCoverDiv() {
+		var fixedDiv = document.createElement("div");
+		$(fixedDiv).addClass("fixBGDiv").attr("id", "fixedDiv")
+        $("body").append(fixedDiv)
+		return "createCoverDivCall";
+	}
+    
 	function createPopUpBox() {
-		var modalDiv = document.createElement("div");
-		var modalDialogDiv = document.createElement("div");
-		var modalContentDiv = document.createElement("div");
-		var modalHeaderDiv = document.createElement("div");
-		var modalBodyDiv = document.createElement("div");
-		var modalFooterDiv = document.createElement("div");
+     /* 利用_.template 模板引擎来渲染 */
+     var popUpBoxString='\
+       <div class="modal" id="modalDiv" data-number="">\
+         <div class="modal-dialog">\
+             <div class="modal-content">\
+                <div class="modal-header">\
+                    <h4 class="modal-title"><%=modalHeaderTitile%></h4>\
+                </div>\
+                <div class="modal-body">\
+                  <div class="time-div">\
+                    <div class="time-start-div">\
+                       <label class="time-lab"><%=timeStartLab%></label>\
+                       <input type="text" maxlength="2" id="startH" class="time-input"> :\
+                       <input type="text" maxlength="2" id="startM" class="time-input">\
+                    </div>\
+                    <div class="time-stop-div">\
+                       <label class="time-lab"><%=timeStopLab%></label>\
+                       <input type="text" maxlength="2" id="stopH" class="time-input"> :\
+                       <input type="text" maxlength="2" id="stopM" class="time-input">\
+                    </div>\
+                  </div>\
+                  <div class="event-div">\
+                    <label class="event-lab"><%=eventLab%></label>\
+                    <select class="event-select">\
+                      <%_.forEach(eventArray,function(item,index){%>\
+                        <option value=<%=index+1%>><%=item%></option>\
+                      <%})%>\
+                    </select>\
+                  </div>\
+                </div>\
+                <div class="modal-footer">\
+                  <button class="btn" id="setBtn"><%=setBtnName%></button>\
+                  <button class="btn" id="delBtn"><%=delBtnName%></button>\
+                  <button class="btn" id="calBtn"><%=calBtnName%></button>\
+                </div>\
+             </div>\
+         </div>\
+       </div>'
 
-		var modalTitle = document.createElement("h4");
-		var modalTimeDiv = document.createElement("div");
-		var setBtn = document.createElement("button");
-		var delBtn = document.createElement("button");
-		var calBtn = document.createElement("button");
-		var startHour = document.createElement("input");
-		var startMin = document.createElement("input");
-		var stopHour = document.createElement("input");
-		var stopMin = document.createElement("input");
+       var lan=_gLanguage;
+       var obj={
+           'modalHeaderTitile':["Edit","编辑"][lan],
+           'timeStartLab':["Start Time","开始时间"][lan],
+           'timeStopLab':["Stop Time","结束时间"][lan],
+           'eventLab':["Event Type","事件类型"][lan],
+           'eventArray':[["Event1","事件1"][lan], ["Event2","事件2"][lan], ["Event3","事件3"][lan], ["Event4","事件4"][lan], ["Event5","事件5"][lan]],
+           'setBtnName':["Set","设置"][lan],
+           'delBtnName':["Delete","删除"][lan],
+           'calBtnName':["Cancel","取消"][lan]
+       }
+        popUpBoxString=_.template(popUpBoxString);
+        var dom=popUpBoxString(obj) 
+        $("body").append(dom)
+		// var modalDiv = document.createElement("div");
+		// var modalDialogDiv = document.createElement("div");
+		// var modalContentDiv = document.createElement("div");
+		// var modalHeaderDiv = document.createElement("div");
+		// var modalBodyDiv = document.createElement("div");
+		// var modalFooterDiv = document.createElement("div");
 
-		var eventDiv = document.createElement("div");
-		var eventLabel = document.createElement("label");
-		var eventSelect = document.createElement("select");
+		// var modalTitle = document.createElement("h4");
+		// var modalTimeDiv = document.createElement("div");
+		// var setBtn = document.createElement("button");
+		// var delBtn = document.createElement("button");
+		// var calBtn = document.createElement("button");
+		// var startHour = document.createElement("input");
+		// var startMin = document.createElement("input");
+		// var stopHour = document.createElement("input");
+		// var stopMin = document.createElement("input");
 
-		startHour.type = "text";
-		startHour.maxLength = 2;
-		startMin.type = "text";
-		startMin.maxLength = 2;
-		stopHour.type = "text";
-		stopHour.maxLength = 2;
-		stopMin.type = "text";
-		stopMin.maxLength = 2;
+		// var eventDiv = document.createElement("div");
+		// var eventLabel = document.createElement("label");
+		// var eventSelect = document.createElement("select");
 
-		$(modalDiv).addClass("modal").attr({
-			"id" : "modalDiv",
-			'data-number' : ""
-		})
+		// startHour.type = "text";
+		// startHour.maxLength = 2;
+		// startMin.type = "text";
+		// startMin.maxLength = 2;
+		// stopHour.type = "text";
+		// stopHour.maxLength = 2;
+		// stopMin.type = "text";
+		// stopMin.maxLength = 2;
 
-		eventLabel.innerHTML = "选择事件类型:";
-		var eventArray = ["事件1", "事件2", "事件3", "事件4", "事件5"]
-		_.forEach(eventArray, function (item, index) {
-			var myOption = document.createElement("option");
-			myOption.value = index + 1;
-			myOption.text = item;
-			eventSelect.add(myOption);
-		})
+       
+		// $(modalDiv).addClass("modal").attr({
+			// "id" : "modalDiv",
+			// 'data-number' : ""
+		// })
 
-		$(modalDialogDiv).addClass("modal-dialog").appendTo(modalDiv);
-		$(modalContentDiv).addClass("modal-content").appendTo(modalDialogDiv);
-		$(modalHeaderDiv).addClass("modal-header").appendTo(modalContentDiv);
-		$(modalTitle).addClass("modal-title").text("编辑").appendTo(modalHeaderDiv);
-		$(modalBodyDiv).addClass("modal-body").appendTo(modalContentDiv);
+		// eventLabel.innerHTML = "选择事件类型:";
+		// var eventArray = ["事件1", "事件2", "事件3", "事件4", "事件5"]
+		// _.forEach(eventArray, function (item, index) {
+			// var myOption = document.createElement("option");
+			// myOption.value = index + 1;
+			// myOption.text = item;
+			// eventSelect.add(myOption);
+		// })
 
-		$(modalTimeDiv).addClass("time-div").appendTo(modalBodyDiv);
-		$(startHour).addClass("time").appendTo(modalTimeDiv).after(":").before("开始时间").attr("id", "startH")
-		$(startMin).addClass("time").appendTo(modalTimeDiv).attr("id", "startM")
-		$(stopHour).addClass("time").appendTo(modalTimeDiv).after(":").before("结束时间").attr("id", "stopH")
-		$(stopMin).addClass("time").appendTo(modalTimeDiv).attr("id", "stopM")
+		// $(modalDialogDiv).addClass("modal-dialog").appendTo(modalDiv);
+		// $(modalContentDiv).addClass("modal-content").appendTo(modalDialogDiv);
+		// $(modalHeaderDiv).addClass("modal-header").appendTo(modalContentDiv);
+		// $(modalTitle).addClass("modal-title").text("编辑").appendTo(modalHeaderDiv);
+		// $(modalBodyDiv).addClass("modal-body").appendTo(modalContentDiv);
 
-		$(eventLabel).appendTo(eventDiv);
-		$(eventSelect).addClass("eventSelect").attr("id", "eventSelect").appendTo(eventDiv);
-		$(eventDiv).appendTo(modalBodyDiv);
+		// $(modalTimeDiv).addClass("time-div").appendTo(modalBodyDiv);
+		// $(startHour).addClass("time").appendTo(modalTimeDiv).after(":").before("开始时间").attr("id", "startH")
+		// $(startMin).addClass("time").appendTo(modalTimeDiv).attr("id", "startM")
+		// $(stopHour).addClass("time").appendTo(modalTimeDiv).after(":").before("结束时间").attr("id", "stopH")
+		// $(stopMin).addClass("time").appendTo(modalTimeDiv).attr("id", "stopM")
 
-		$(modalFooterDiv).addClass("modal-footer").appendTo(modalContentDiv);
-		$(setBtn).addClass("setbtn").appendTo(modalFooterDiv).text("设置").attr("id", "setBtn")
-		$(delBtn).addClass("setbtn").appendTo(modalFooterDiv).text("删除").attr("id", "delBtn")
-		$(calBtn).addClass("setbtn").appendTo(modalFooterDiv).text("取消").attr("id", "calBtn")
+		// $(eventLabel).appendTo(eventDiv);
+		// $(eventSelect).addClass("eventSelect").attr("id", "eventSelect").appendTo(eventDiv);
+		// $(eventDiv).appendTo(modalBodyDiv);
+
+		// $(modalFooterDiv).addClass("modal-footer").appendTo(modalContentDiv);
+		// $(setBtn).addClass("setbtn").appendTo(modalFooterDiv).text("设置").attr("id", "setBtn")
+		// $(delBtn).addClass("setbtn").appendTo(modalFooterDiv).text("删除").attr("id", "delBtn")
+		// $(calBtn).addClass("setbtn").appendTo(modalFooterDiv).text("取消").attr("id", "calBtn") 
 
 		/*绑定事件*/
-		setBtn.onclick = function () {
+		$("#setBtn").click(function () {
 			var contentIndex = $("#modalDiv").attr("data-number") - 1;
-			var self = contentArray[contentIndex];
+			var self = _gContextArray[contentIndex];
 			var STH = parseInt($("#startH").val());
 			var STM = parseInt($("#startM").val());
 			var SPH = parseInt($("#stopH").val());
@@ -220,11 +276,11 @@
             self.events_array.splice(self.whichOne, 1, $("#eventSelect").val() - 1);    
 			$("#modalDiv").hide();
 			$("#fixedDiv").hide();
-		}
+		})
 
-		delBtn.onclick = function () {
+		$("#delBtn").click(function () {
 			var contentIndex = $("#modalDiv").attr("data-number") - 1;
-			var self = contentArray[contentIndex];
+			var self = _gContextArray[contentIndex];
 			self.right_array.splice(self.whichOne, 1);
 			self.left_array.splice(self.whichOne, 1);
 			self.leftTime_array.splice(self.whichOne, 1);
@@ -233,18 +289,107 @@
 			$("#" + self.dragId).remove();
 			$("#modalDiv").hide();
 			$("#fixedDiv").hide();
-		}
+		})
 
-		calBtn.onclick = function () {
+		$("#calBtn").click(function () {
 			$("#modalDiv").hide();
 			$("#fixedDiv").hide();
-		}
-
-		return modalDiv;
+		})
+        return "createPopUpBoxCall";
 	}
+    
+    function creatEditDiv(context){
+        var editDivString='\
+                <div class="editWrap" id=<%="editDiv"+context.timeSliderNum%>>\
+                    <img src="images/edit.png" class="editImg"></img>\
+                    <img src="images/del.gif" class="delImg"></img>\
+                    <div class="editContent" id=<%="editContent"+context.timeSliderNum%>>\
+                        <div class="editHeader">\
+                            <label class="editHeaderTitle"><%=editHeaderTitle%></label>\
+                        </div>\
+                        <div class="editBody">\
+                          <%_.forEach(editTextObj,function(item,index){%>\
+                              <div class="editUnit">\
+                                 <input class=<%="editCBox"+context.timeSliderNum%> id=<%="editCBox"+context.timeSliderNum+"_"+index%> type="checkbox"></input>\
+                                 <label><%=item%></label>\
+                              </div>\
+                          <%})%>\
+                               <div class="editUnit">\
+                                  <input class="editCheckAll" type="checkbox"></input>\
+                                  <label><%=checkAllName%></label>\
+                               </div>\
+                        </div>\
+                        <div class="editFotter">\
+                            <button class="editBtn save"><%=saveName%></button>\
+                            <button class="editBtn cancel"><%=cancelName%></button>\
+                        </div>\
+                    </div>\
+                </div>'
+        
+        var lan=_gLanguage;         
+        var editTextObj = [
+				["Mon","星期一"][lan],
+				["Tue","星期二"][lan],
+				["Wed","星期三"][lan],
+				["Thurs","星期四"][lan],
+				["Fri","星期五"][lan],
+				["Sat","星期六"][lan],
+				["Sun","星期日"][lan]
+                ]
+        var obj={
+            'context':context,
+            'editHeaderTitle':["Copy To","复制到"][lan],
+            'editTextObj':editTextObj,
+            'checkAllName':["Check All","全选"][lan],
+            'saveName':["Save","保存"][lan],
+            'cancelName':["Cancel","取消"][lan]
+        }
+        
+        editDivString=_.template(editDivString);
+        var dom=editDivString(obj);
+        $("#" + context.mountId).after(dom);
+        
+        $("#editDiv"+context.timeSliderNum).click(function(e){
+             if($(e.target).attr("class")=="editImg")
+             {              
+                 $(".editContent").hide();
+                 $("#editCBox"+context.timeSliderNum+"_"+(context.timeSliderNum-1)).attr("disabled",true);
+				 $("#editContent" + context.timeSliderNum).show();
+             }
+             else if($(e.target).attr("class")=="delImg")
+             {
+                 if (window.confirm(["Do you want to delete all time periods on this timeline?","是否要删除此时间轴上的所有时间段"][lan])) {
+                        context.removeAll();
+                 }
+             }
+             else if($(e.target).attr("class").substring(0,8)=="editCBox")
+             {
+                  $("#editDiv"+context.timeSliderNum+" .editCheckAll").prop("checked", $(".editCBox" + context.timeSliderNum).length == $(".editCBox" + content.timeSliderNum).filter(":checked").length-1);
+             }
+             else if($(e.target).attr("class")=="editBtn save")
+             {          
+                 context.copyTimeSlider(1);
+                 $("#editContent" + context.timeSliderNum).hide();
+             }
+             else if($(e.target).attr("class")=="editBtn cancel")
+             {
+                  $("#editContent" + context.timeSliderNum).hide();
+             }
+             else if($(e.target).attr("class")=="editCheckAll")
+             {
+                 var state=$("#editDiv"+context.timeSliderNum+" .editCheckAll").prop("checked");       
+                 $(".editCBox" + context.timeSliderNum).filter(function(index,item){  
+                   if(!$(item).prop("disabled"))
+                    {
+                      $(item).prop("checked",state)
+                    }
+                 })
+             }
+         })
+    }
 
-	var contentArray = new Array(); //存放每个时间轴对象实例的上下文this的数组
-
+	var _gContextArray = new Array(); //存放每个时间轴对象实例的上下文this的数组
+    var _gLanguage=1; //0代表英文，1代表中文
 	function TimeSlider(initObj) {
 		this.left_array = new Array(); //存放每个拖块的左坐标
 		this.right_array = new Array(); //存放每个拖块的右坐标
@@ -265,17 +410,18 @@
 		this.mountId = null; //当前挂载的真实DOM的ID
 		this.currentEvent = null; //当前操作拖块的事件
 
+        _gLanguage=initObj.language=="en"?0:1;
 		this.init(initObj); //初始化开始
 	}
 
 	TimeSlider.prototype = {
 		sliderTotal : 0, //TimeSlider实例个数
-
 		init : function (obj) {
-			contentArray.push(this);
+			_gContextArray.push(this);
 			TimeSlider.prototype.sliderTotal++;
 			this.timeSliderNum = TimeSlider.prototype.sliderTotal;
 			this.createLayout(obj);
+
 		},
 
 		/*创建整个时间轴的DOM结构*/
@@ -315,131 +461,130 @@
 			}
 
 			/*弹出框*/
-			var fixedDiv = getInstance(createCoverDiv);
-			$("body").append(fixedDiv);
-
-			var popUpBoxDiv = getInstance(createPopUpBox);
-			$("body").append(popUpBoxDiv);
-
+			getInstance(createCoverDiv);
+			getInstance(createPopUpBox);
+            creatEditDiv(this);
 			/*end*/
 
+            
 			/*编辑区域*/
-			var editWrap = document.createElement("div");
-			$(editWrap).addClass("editWrap")
+			// var editWrap = document.createElement("div");
+			// $(editWrap).addClass("editWrap")
 
-			$("#" + this.mountId).after(editWrap);
+			// $("#" + this.mountId).after(editWrap);
 
-			var editImg = document.createElement("img");
-			editImg.src = "images/edit.gif";
-			$(editImg).hover(function () {
-				this.style.cursor = "pointer";
-			})
-			editImg.title = "编辑";
-			$(editWrap).append(editImg);
-			editImg.onclick = function () {
-				$("#editDiv" + this.timeSliderNum).show();
-			}.bind(this);
+			// var editImg = document.createElement("img");
+			// editImg.src = "images/edit.png";
+			// $(editImg).hover(function () {
+				// this.style.cursor = "pointer";
+			// })
+			// editImg.title = "编辑";
+			// $(editWrap).append(editImg);
+			// editImg.onclick = function () {
+                // $(".editDiv").hide();
+				// $("#editDiv" + this.timeSliderNum).show();
+			// }.bind(this);
 
-			var delImg = document.createElement("img");
-			delImg.src = "images/del.gif";
-			delImg.title = "删除";
-			$(delImg).addClass("delImg");
-			delImg.onclick = function () {
-				if (window.confirm("是否要删除此时间轴上的所有时间段")) {
-					this.removeAll();
-				}
-			}.bind(this);
-			$(editWrap).append(delImg);
+			// var delImg = document.createElement("img");
+			// delImg.src = "images/del.gif";
+			// delImg.title = "删除";
+			// $(delImg).addClass("delImg");
+			// delImg.onclick = function () {
+				// if (window.confirm("是否要删除此时间轴上的所有时间段")) {
+					// this.removeAll();
+				// }
+			// }.bind(this);
+			// $(editWrap).append(delImg);
 
-			var editDiv = document.createElement("div");
-			$(editDiv).addClass("editDiv").attr("id", "editDiv" + this.timeSliderNum)
+			// var editDiv = document.createElement("div");
+			// $(editDiv).addClass("editDiv").attr("id", "editDiv" + this.timeSliderNum)
 
-			$(editWrap).append(editDiv);
+			// $(editWrap).append(editDiv);
 
-			var editHeader = document.createElement("div");
-			$(editHeader).addClass("editHeader");
-			$(editDiv).append(editHeader);
+			// var editHeader = document.createElement("div");
+			// $(editHeader).addClass("editHeader");
+			// $(editDiv).append(editHeader);
 
-			var editTitle = document.createElement("label");
-			$(editTitle).text("复制到");
-			$(editHeader).append(editTitle);
+			// var editTitle = document.createElement("label");
+			// $(editTitle).text("复制到");
+			// $(editHeader).append(editTitle);
 
-			var editBody = document.createElement("div");
-			$(editBody).addClass("editBody");
-			$(editDiv).append(editBody);
+			// var editBody = document.createElement("div");
+			// $(editBody).addClass("editBody");
+			// $(editDiv).append(editBody);
 
-			var editTextObj = {
-				0 : "星期一",
-				1 : "星期二",
-				2 : "星期三",
-				3 : "星期四",
-				4 : "星期五",
-				5 : "星期六",
-				6 : "星期日",
-			}
-			for (var i = 0; i < 7; i++) {
-				var editBoxDiv = document.createElement("div");
-				editBoxDiv.style.display = "inline-block";
-				$(editBody).append(editBoxDiv);
-				var editCheckBox = document.createElement("input");
-				editCheckBox.type = "checkbox";
-				editCheckBox.onclick = function () {
-					$("#editCheckAll" + this.timeSliderNum).prop("checked", $(".editCBox" + this.timeSliderNum).length == $(".editCBox" + this.timeSliderNum).filter(":checked").length);
-				}.bind(this);
-				$(editCheckBox).addClass("editCBox" + this.timeSliderNum).attr("id", "editCBox" + this.timeSliderNum + "_" + i);
-				$(editBoxDiv).append(editCheckBox);
-				var editLabel = document.createElement("label");
-				$(editLabel).text(editTextObj[i]);
-				$(editBoxDiv).append(editLabel);
-				if (i == this.timeSliderNum - 1) {
-					$(editBoxDiv).remove();
-				}
-			}
+			// var editTextObj = {
+				// 0 : "星期一",
+				// 1 : "星期二",
+				// 2 : "星期三",
+				// 3 : "星期四",
+				// 4 : "星期五",
+				// 5 : "星期六",
+				// 6 : "星期日",
+			// }
+			// for (var i = 0; i < 7; i++) {
+				// var editBoxDiv = document.createElement("div");
+				// editBoxDiv.style.display = "inline-block";
+				// $(editBody).append(editBoxDiv);
+				// var editCheckBox = document.createElement("input");
+				// editCheckBox.type = "checkbox";
+				// editCheckBox.onclick = function () {
+					// $("#editCheckAll" + this.timeSliderNum).prop("checked", $(".editCBox" + this.timeSliderNum).length == $(".editCBox" + this.timeSliderNum).filter(":checked").length);
+				// }.bind(this);
+				// $(editCheckBox).addClass("editCBox" + this.timeSliderNum).attr("id", "editCBox" + this.timeSliderNum + "_" + i);
+				// $(editBoxDiv).append(editCheckBox);
+				// var editLabel = document.createElement("label");
+				// $(editLabel).text(editTextObj[i]);
+				// $(editBoxDiv).append(editLabel);
+				// if (i == this.timeSliderNum - 1) {
+					// $(editBoxDiv).remove();
+				// }
+			// }
 
-			/*全选按钮*/
-			var editBoxDiv = document.createElement("div");
-			editBoxDiv.style.display = "inline-block";
-			$(editBody).append(editBoxDiv);
-			var editCheckBox = document.createElement("input");
-			editCheckBox.type = "checkbox";
-			$(editCheckBox).attr("id", "editCheckAll" + this.timeSliderNum);
-			$(editBoxDiv).append(editCheckBox);
-			var editLabel = document.createElement("label");
-			$(editLabel).text("全选");
-			$(editBoxDiv).append(editLabel);
-			editCheckBox.onclick = function () {
-				$(".editCBox" + this.timeSliderNum).prop("checked", $("#editCheckAll" + this.timeSliderNum).prop("checked"));
-			}.bind(this);
-			/*end*/
+			// /*全选按钮*/
+			// var editBoxDiv = document.createElement("div");
+			// editBoxDiv.style.display = "inline-block";
+			// $(editBody).append(editBoxDiv);
+			// var editCheckBox = document.createElement("input");
+			// editCheckBox.type = "checkbox";
+			// $(editCheckBox).attr("id", "editCheckAll" + this.timeSliderNum);
+			// $(editBoxDiv).append(editCheckBox);
+			// var editLabel = document.createElement("label");
+			// $(editLabel).text("全选");
+			// $(editBoxDiv).append(editLabel);
+			// editCheckBox.onclick = function () {
+				// $(".editCBox" + this.timeSliderNum).prop("checked", $("#editCheckAll" + this.timeSliderNum).prop("checked"));
+			// }.bind(this);
+			// /*end*/
 
-			var editFooter = document.createElement("div");
-			$(editFooter).addClass("editFooter");
-			$(editDiv).append(editFooter);
+			// var editFooter = document.createElement("div");
+			// $(editFooter).addClass("editFooter");
+			// $(editDiv).append(editFooter);
 
-			var editSave = document.createElement("input");
-			$(editSave).addClass("editBtn");
-			editSave.type = "button";
-			editSave.value = "保存";
-			editSave.onclick = function () {
-				if (!window.confirm("是否选择覆盖已存在时间段？")) {
-					this.copyTimeSlider(0);
-				} else {
-					this.copyTimeSlider(1);
-				}
-				$("#editDiv" + this.timeSliderNum).hide();
-			}.bind(this)
+			// var editSave = document.createElement("input");
+			// $(editSave).addClass("editBtn");
+			// editSave.type = "button";
+			// editSave.value = "保存";
+			// editSave.onclick = function () {
+				// if (!window.confirm("是否选择覆盖已存在时间段？")) {
+					// this.copyTimeSlider(0);
+				// } else {
+					// this.copyTimeSlider(1);
+				// }
+				// $("#editDiv" + this.timeSliderNum).hide();
+			// }.bind(this)
 
-			$(editFooter).append(editSave);
+			// $(editFooter).append(editSave);
 
-			var editCancle = document.createElement("input");
-			$(editCancle).addClass("editBtn");
-			editCancle.type = "button";
-			editCancle.value = "取消";
-			editCancle.onclick = function () {
-				$("#editDiv" + this.timeSliderNum).hide();
-			}.bind(this)
+			// var editCancle = document.createElement("input");
+			// $(editCancle).addClass("editBtn");
+			// editCancle.type = "button";
+			// editCancle.value = "取消";
+			// editCancle.onclick = function () {
+				// $("#editDiv" + this.timeSliderNum).hide();
+			// }.bind(this)
 
-			$(editFooter).append(editCancle);
+			// $(editFooter).append(editCancle);
 			/*end*/
 
 			this.slderLeftOffset = $("#" + this.mountId).offset().left; //时间轴距离左页面的距离
@@ -521,10 +666,10 @@
 				if ($("#editCBox" + this.timeSliderNum + "_" + j).prop("checked") == true) {
 					var targetId = $(".trCanvas").eq(j).parent().attr("id");
 					if (flag) {
-						contentArray[j].removeAll();
+						_gContextArray[j].removeAll();
 					}
 					for (var i = 0; i < len; i++) {
-						contentArray[j].createDrag({
+						_gContextArray[j].createDrag({
 							backgroundDiv : targetId,
 							ex : this.left_array[i] + this.slderLeftOffset,
 							ex2 : this.right_array[i],

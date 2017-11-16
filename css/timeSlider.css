@@ -4,8 +4,9 @@
 		border:0;
 		display: block;
 		z-index: 0;
-		margin-left:250px;
+		margin-left:150px;
 		position:relative;
+        font: 12px/1.5 tahoma,arial,'Hiragino Sans GB','\5b8b\4f53',sans-serif;
 	}
 	
 	.timeSliderDiv{
@@ -87,6 +88,47 @@
 		border-top:1px solid #e5e5e5;
 	}
 	
+    .btn{
+		font-size:14px;
+		line-height:1.427;
+		height:40px;
+		width:80px;
+		text-align:center;
+		border:1px solid #d8d8d8;
+		margin:2px;
+		border-radius:5px;
+	}
+	
+    .btn:hover{
+		background-color:#e4e4e4;
+        cursor:pointer;
+	}
+    
+	.time-div{
+		margin:10px;
+	}
+	
+   
+	.time-input{
+		width:25px;
+		margin:5px;
+        text-align:center;
+	}
+    
+    .time-lab{
+        display:inline-block;
+        width:80px;
+    }
+    
+    .event-div{
+        margin:10px;
+    }
+    
+    .event-select{
+        margin-left:20px;
+    }
+    
+    
 	.coordinate {
 		width:1px;
 		height:4px;
@@ -154,29 +196,6 @@
 	}
 	
 	
-	.setbtn:hover{
-		background-color:#e4e4e4;
-	}
-	
-	.setbtn{
-		font-size:14px;
-		line-height:1.427;
-		height:40px;
-		width:80px;
-		text-align:center;
-		border:1px solid #d8d8d8;
-		margin:2px;
-		border-radius:5px;
-	}
-	
-	.time-div{
-		margin-top:10px;
-	}
-	
-	.time{
-		width:20px;
-		margin:10px;
-	}
     
 	.label-week,.label-event{
 		float:left;
@@ -188,11 +207,11 @@
 		position:relative;
 		height:50px;
 		width:100px;
-		left:1050px;
+		left:950px;
 		bottom:30px;
 	}
 	
-	.editDiv{
+	.editContent{
 		width:180px;
 		position:absolute;
 		left:0;
@@ -209,31 +228,38 @@
 		border-bottom:1px solid #e5e5e5;
 	}
 	
+    .editHeaderTitle{
+        font-size:10px;
+        font-weight:bold;
+    }
+    
 	.editBody{
 		position:relative;
 		padding:10px;
 	}
+    
+    .editUnit{
+        display:inline-block;
+    }
 	
-	.editFooter{
-		padding :9px 2px 2px;
+	.editFotter{
+		padding :10px;
 		text-align:right;
 		margin-top:5px;
 		border-top:1px solid #e5e5e5;
 	}
 	
 	.delImg{
-		position:absolute;
-		left:40px;
-		top:2px;
+        margin-left:10px;
 	}
 	
-	.delImg:hover{
+	.editImg:hover,.delImg:hover{
 		cursor:pointer;
 	}
 	
 	.editBtn{
 		font-size:14px;
-		width:50px;
+		width:55px;
 		text-align:center;
 		margin:2px;
 	}
