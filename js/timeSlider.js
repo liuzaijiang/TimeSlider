@@ -37,7 +37,6 @@
 
 	var defalutColor = ["007acc", 'a5df12', 'eaaae4', '04d4d4', 'd32311'];
 	/*为事件BOX添加颜色*/
-	//var setColorForEvent= function(){
 	(function () {
 		_.forEach($(".eventBox"), function (item, index) {
 			$(item).css("backgroundColor", "#" + defalutColor[index])
@@ -87,7 +86,7 @@
                   </div>\
                   <div class="event-div">\
                     <label class="event-lab"><%=eventLab%></label>\
-                    <select class="event-select">\
+                    <select class="event-select" id="eventSelect">\
                       <%_.forEach(eventArray,function(item,index){%>\
                         <option value=<%=index+1%>><%=item%></option>\
                       <%})%>\
@@ -117,71 +116,6 @@
         popUpBoxString=_.template(popUpBoxString);
         var dom=popUpBoxString(obj) 
         $("body").append(dom)
-		// var modalDiv = document.createElement("div");
-		// var modalDialogDiv = document.createElement("div");
-		// var modalContentDiv = document.createElement("div");
-		// var modalHeaderDiv = document.createElement("div");
-		// var modalBodyDiv = document.createElement("div");
-		// var modalFooterDiv = document.createElement("div");
-
-		// var modalTitle = document.createElement("h4");
-		// var modalTimeDiv = document.createElement("div");
-		// var setBtn = document.createElement("button");
-		// var delBtn = document.createElement("button");
-		// var calBtn = document.createElement("button");
-		// var startHour = document.createElement("input");
-		// var startMin = document.createElement("input");
-		// var stopHour = document.createElement("input");
-		// var stopMin = document.createElement("input");
-
-		// var eventDiv = document.createElement("div");
-		// var eventLabel = document.createElement("label");
-		// var eventSelect = document.createElement("select");
-
-		// startHour.type = "text";
-		// startHour.maxLength = 2;
-		// startMin.type = "text";
-		// startMin.maxLength = 2;
-		// stopHour.type = "text";
-		// stopHour.maxLength = 2;
-		// stopMin.type = "text";
-		// stopMin.maxLength = 2;
-
-       
-		// $(modalDiv).addClass("modal").attr({
-			// "id" : "modalDiv",
-			// 'data-number' : ""
-		// })
-
-		// eventLabel.innerHTML = "选择事件类型:";
-		// var eventArray = ["事件1", "事件2", "事件3", "事件4", "事件5"]
-		// _.forEach(eventArray, function (item, index) {
-			// var myOption = document.createElement("option");
-			// myOption.value = index + 1;
-			// myOption.text = item;
-			// eventSelect.add(myOption);
-		// })
-
-		// $(modalDialogDiv).addClass("modal-dialog").appendTo(modalDiv);
-		// $(modalContentDiv).addClass("modal-content").appendTo(modalDialogDiv);
-		// $(modalHeaderDiv).addClass("modal-header").appendTo(modalContentDiv);
-		// $(modalTitle).addClass("modal-title").text("编辑").appendTo(modalHeaderDiv);
-		// $(modalBodyDiv).addClass("modal-body").appendTo(modalContentDiv);
-
-		// $(modalTimeDiv).addClass("time-div").appendTo(modalBodyDiv);
-		// $(startHour).addClass("time").appendTo(modalTimeDiv).after(":").before("开始时间").attr("id", "startH")
-		// $(startMin).addClass("time").appendTo(modalTimeDiv).attr("id", "startM")
-		// $(stopHour).addClass("time").appendTo(modalTimeDiv).after(":").before("结束时间").attr("id", "stopH")
-		// $(stopMin).addClass("time").appendTo(modalTimeDiv).attr("id", "stopM")
-
-		// $(eventLabel).appendTo(eventDiv);
-		// $(eventSelect).addClass("eventSelect").attr("id", "eventSelect").appendTo(eventDiv);
-		// $(eventDiv).appendTo(modalBodyDiv);
-
-		// $(modalFooterDiv).addClass("modal-footer").appendTo(modalContentDiv);
-		// $(setBtn).addClass("setbtn").appendTo(modalFooterDiv).text("设置").attr("id", "setBtn")
-		// $(delBtn).addClass("setbtn").appendTo(modalFooterDiv).text("删除").attr("id", "delBtn")
-		// $(calBtn).addClass("setbtn").appendTo(modalFooterDiv).text("取消").attr("id", "calBtn") 
 
 		/*绑定事件*/
 		$("#setBtn").click(function () {
@@ -457,135 +391,15 @@
 					}).appendTo("#" + this.mountId);
 
 				}
-				//$(labelDiv).attr("readonly",true);
 			}
 
 			/*弹出框*/
 			getInstance(createCoverDiv);
 			getInstance(createPopUpBox);
+            /*编辑区域*/
             creatEditDiv(this);
 			/*end*/
-
-            
-			/*编辑区域*/
-			// var editWrap = document.createElement("div");
-			// $(editWrap).addClass("editWrap")
-
-			// $("#" + this.mountId).after(editWrap);
-
-			// var editImg = document.createElement("img");
-			// editImg.src = "images/edit.png";
-			// $(editImg).hover(function () {
-				// this.style.cursor = "pointer";
-			// })
-			// editImg.title = "编辑";
-			// $(editWrap).append(editImg);
-			// editImg.onclick = function () {
-                // $(".editDiv").hide();
-				// $("#editDiv" + this.timeSliderNum).show();
-			// }.bind(this);
-
-			// var delImg = document.createElement("img");
-			// delImg.src = "images/del.gif";
-			// delImg.title = "删除";
-			// $(delImg).addClass("delImg");
-			// delImg.onclick = function () {
-				// if (window.confirm("是否要删除此时间轴上的所有时间段")) {
-					// this.removeAll();
-				// }
-			// }.bind(this);
-			// $(editWrap).append(delImg);
-
-			// var editDiv = document.createElement("div");
-			// $(editDiv).addClass("editDiv").attr("id", "editDiv" + this.timeSliderNum)
-
-			// $(editWrap).append(editDiv);
-
-			// var editHeader = document.createElement("div");
-			// $(editHeader).addClass("editHeader");
-			// $(editDiv).append(editHeader);
-
-			// var editTitle = document.createElement("label");
-			// $(editTitle).text("复制到");
-			// $(editHeader).append(editTitle);
-
-			// var editBody = document.createElement("div");
-			// $(editBody).addClass("editBody");
-			// $(editDiv).append(editBody);
-
-			// var editTextObj = {
-				// 0 : "星期一",
-				// 1 : "星期二",
-				// 2 : "星期三",
-				// 3 : "星期四",
-				// 4 : "星期五",
-				// 5 : "星期六",
-				// 6 : "星期日",
-			// }
-			// for (var i = 0; i < 7; i++) {
-				// var editBoxDiv = document.createElement("div");
-				// editBoxDiv.style.display = "inline-block";
-				// $(editBody).append(editBoxDiv);
-				// var editCheckBox = document.createElement("input");
-				// editCheckBox.type = "checkbox";
-				// editCheckBox.onclick = function () {
-					// $("#editCheckAll" + this.timeSliderNum).prop("checked", $(".editCBox" + this.timeSliderNum).length == $(".editCBox" + this.timeSliderNum).filter(":checked").length);
-				// }.bind(this);
-				// $(editCheckBox).addClass("editCBox" + this.timeSliderNum).attr("id", "editCBox" + this.timeSliderNum + "_" + i);
-				// $(editBoxDiv).append(editCheckBox);
-				// var editLabel = document.createElement("label");
-				// $(editLabel).text(editTextObj[i]);
-				// $(editBoxDiv).append(editLabel);
-				// if (i == this.timeSliderNum - 1) {
-					// $(editBoxDiv).remove();
-				// }
-			// }
-
-			// /*全选按钮*/
-			// var editBoxDiv = document.createElement("div");
-			// editBoxDiv.style.display = "inline-block";
-			// $(editBody).append(editBoxDiv);
-			// var editCheckBox = document.createElement("input");
-			// editCheckBox.type = "checkbox";
-			// $(editCheckBox).attr("id", "editCheckAll" + this.timeSliderNum);
-			// $(editBoxDiv).append(editCheckBox);
-			// var editLabel = document.createElement("label");
-			// $(editLabel).text("全选");
-			// $(editBoxDiv).append(editLabel);
-			// editCheckBox.onclick = function () {
-				// $(".editCBox" + this.timeSliderNum).prop("checked", $("#editCheckAll" + this.timeSliderNum).prop("checked"));
-			// }.bind(this);
-			// /*end*/
-
-			// var editFooter = document.createElement("div");
-			// $(editFooter).addClass("editFooter");
-			// $(editDiv).append(editFooter);
-
-			// var editSave = document.createElement("input");
-			// $(editSave).addClass("editBtn");
-			// editSave.type = "button";
-			// editSave.value = "保存";
-			// editSave.onclick = function () {
-				// if (!window.confirm("是否选择覆盖已存在时间段？")) {
-					// this.copyTimeSlider(0);
-				// } else {
-					// this.copyTimeSlider(1);
-				// }
-				// $("#editDiv" + this.timeSliderNum).hide();
-			// }.bind(this)
-
-			// $(editFooter).append(editSave);
-
-			// var editCancle = document.createElement("input");
-			// $(editCancle).addClass("editBtn");
-			// editCancle.type = "button";
-			// editCancle.value = "取消";
-			// editCancle.onclick = function () {
-				// $("#editDiv" + this.timeSliderNum).hide();
-			// }.bind(this)
-
-			// $(editFooter).append(editCancle);
-			/*end*/
+          
 
 			this.slderLeftOffset = $("#" + this.mountId).offset().left; //时间轴距离左页面的距离
 
@@ -743,7 +557,6 @@
 				'background-color:' + '#' + defalutColor[event] + ' ' +
 				'onconTextmenu="return false" ' +
 				'></div>';
-
 			$backgroundDiv.append(drag);
 
 			var dragWidth = parseFloat((dragRight - dragLeft).toFixed(1));
@@ -868,7 +681,6 @@
 			var whichOne;
 			/*当我去移动时间段之前，先找到当前操作的时间段在数组中的位置*/
 			whichOne = self.binarySearch(self.left_array, parentOriginalLeft);
-            //whichOne=0
 			self.whichOne = whichOne;
 			var parentId = $(thisDrag).attr("id");
 			var timeSliderWidth = $("#" + parentId).parent().width(); //整个滑动条宽度
@@ -892,7 +704,6 @@
 				}
 			}
 			$(document).mousemove(function (ev) {
-				//var x=self.getMousePos(ev).x;
 				self.hasMove = true;
 				l = parseFloat(parseFloat(ev.pageX - disX - self.slderLeftOffset).toFixed(1));
 				if (l <= leftBorder) {
@@ -932,8 +743,15 @@
 					$("#startM").val(parseInt($("#" + leftShowId).text().split(":")[1]));
 					$("#stopH").val(parseInt($("#" + rightShowId).text().split(":")[0]));
 					$("#stopM").val(parseInt($("#" + rightShowId).text().split(":")[1]));
-					var colorHex = rgbToHex($("#" + parentId).css("backgroundColor"));
-					var eventIndex = defalutColor.indexOf(colorHex) + 1;
+                    var color=$("#" + parentId).css("backgroundColor");//IE11获取的是rgb值，IE8是hex值，所以需要区分一下；
+                    if(_.indexOf(color,"#")==-1)
+                    {
+                        var colorHex = rgbToHex($("#" + parentId).css("backgroundColor"));
+                    }
+                    else{
+                        var colorHex = color.replace('#',"");
+                    }			
+                    var eventIndex = _.indexOf(defalutColor,colorHex) + 1;
 					$("#eventSelect").val(eventIndex);
 					$("#fixedDiv").show();
 					$("#modalDiv").show().attr("data-number", self.timeSliderNum);
@@ -992,7 +810,6 @@
 				}
 				var parentWidth = parseFloat(self.right_array[whichOne] - pageX);//拖块在移动过程中的宽度
 				if (parentOriginalLeft >= pageX||parentWidth >= self.oneDragBlockWidth / 2) {
-                  //if (parentOriginalLeft >= pageX||parentWidth >= 0.5) {
 					if (pageX >= leftBorder) {
 						$("#" + parentId).css({
 							width : parentWidth + "px",
@@ -1047,9 +864,7 @@
 			var parentId = $(thisBar).parent().attr("id");
 			var rightShowId = $("#" + parentId).children(".rightShow").attr("id");
 			var rightShowLeft = $("#" + rightShowId).css("left");
-			//var parentOriginalLeft=parseInt($("#"+parentId).css("left"));//拖块的原始偏移量
 			var parentOriginalLeft = parseFloat(parseFloat(this.getStyle($("#" + parentId)[0], "left")).toFixed(1)); //拖块的原始偏移量
-			//var parentOriginalWidth=$("#"+parentId).width();//拖块的原始宽度
 			var parentOriginalWidth = parseFloat(parseFloat(this.getStyle($("#" + parentId)[0], "width")).toFixed(1)); //拖块的原始宽度
 			var originalRight = parentOriginalLeft + parentOriginalWidth; //拖块原始右坐标
 			var whichOne;
@@ -1072,7 +887,6 @@
 				}
 
 				$(document).mousemove(function (ev) {
-					//var x=slef.getMousePos(ev).x;
 					var pageX = parseFloat(ev.pageX - self.slderLeftOffset);
 					if (pageX >= timeSliderWidth) {
 						pageX = timeSliderWidth;
