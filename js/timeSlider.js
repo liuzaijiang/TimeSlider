@@ -119,8 +119,8 @@
 
 		/*绑定事件*/
 		$("#setBtn").click(function () {
-			var contentIndex = $("#modalDiv").attr("data-number") - 1;
-			var self = _gContextArray[contentIndex];
+			var contextIndex = $("#modalDiv").attr("data-number") - 1;
+			var self = _gContextArray[contextIndex];
 			var STH = parseInt($("#startH").val());
 			var STM = parseInt($("#startM").val());
 			var SPH = parseInt($("#stopH").val());
@@ -213,8 +213,8 @@
 		})
 
 		$("#delBtn").click(function () {
-			var contentIndex = $("#modalDiv").attr("data-number") - 1;
-			var self = _gContextArray[contentIndex];
+			var contextIndex = $("#modalDiv").attr("data-number") - 1;
+			var self = _gContextArray[contextIndex];
 			self.right_array.splice(self.whichOne, 1);
 			self.left_array.splice(self.whichOne, 1);
 			self.leftTime_array.splice(self.whichOne, 1);
@@ -298,7 +298,7 @@
              }
              else if($(e.target).attr("class").substring(0,8)=="editCBox")
              {
-                  $("#editDiv"+context.timeSliderNum+" .editCheckAll").prop("checked", $(".editCBox" + context.timeSliderNum).length == $(".editCBox" + content.timeSliderNum).filter(":checked").length-1);
+                  $("#editDiv"+context.timeSliderNum+" .editCheckAll").prop("checked", $(".editCBox" + context.timeSliderNum).length == $(".editCBox" + context.timeSliderNum).filter(":checked").length-1);
              }
              else if($(e.target).attr("class")=="editBtn save")
              {          
