@@ -127,22 +127,22 @@
 			var SPM = parseInt($("#stopM").val());
 
 			if ((STH).toString() == "" || (STM).toString() == "" || (SPH).toString() == "" || (SPM).toString() == "") {
-				alert("请设置");
+				alert(["Please set","请设置"][lan]);
 				return
 			} else if (STH < 0 || STH > 23 || SPH < 0 || SPH > 24) {
-				alert("小时请填写0-24之间的数字");
+				alert(["Hour error, please fill in the number between 0-24","小时错误,请填写0-24之间的数字"][lan]);
 				return;
 			} else if (STM < 0 || STM > 59 || SPM < 0 || SPM > 59) {
-				alert("分钟请填写0-59之间的数字");
+				alert(["Minute error, please fill in the number between 0-59","分钟错误,请填写0-59之间的数字"][lan]);
 				return;
 			} else if (SPH < STH || (SPH == 24 && SPM > 0)) {
-				alert("请填写正确的时间");
+				alert(["Please fill in the correct time","请填写正确的时间"][lan]);
 				return;
 			} else if ((STH == SPH) && (SPM < STM)) {
-				alert("这个错得太离谱")
+				alert(["Please fill in the correct time","请填写正确的时间"][lan]);
 				return;
 			} else if ((SPH * 60 + SPM) - (STH * 60 + STM) < 30) {
-				alert("间隔至少30分钟");
+				alert(["At least 30 minutes apart","间隔至少30分钟"][lan]);
 				return;
 			}
 			var rightBarId = $("#" + self.dragId).children(".rightBar").attr("id");
@@ -156,23 +156,23 @@
 
 			/*设置过程中判断时间段是否超出边界范围及超过其他时间段*/
 			if (newLeft < 0 || newRight > $("#" + self.dragId).parent().width()) {
-				alert("超过时间轴长度，请重新设置");
+				alert(["Over timeline length, please reset","超过时间轴长度，请重新设置"][lan]);
 				return
 			}
 			if (arrayLen >= 2) {
 				if (self.whichOne == 0) {
 					if (newRight > self.left_array[self.whichOne + 1]) {
-						alert("与其他时间段重合，请重新设置");
+						alert(["Coincides with other time periods, please reset","与其他时间段重合，请重新设置"][lan]);
 						return;
 					}
 				} else if (self.whichOne == arrayLen - 1) {
 					if (newLeft < self.right_array[self.whichOne - 1]) {
-						alert("与其他时间段重合，请重新设置");
+						alert(["Coincides with other time periods, please reset","与其他时间段重合，请重新设置"][lan]);
 						return;
 					}
 				} else {
 					if (newLeft < self.right_array[self.whichOne - 1] || newRight > self.left_array[self.whichOne + 1]) {
-						alert("与其他时间段重合，请重新设置");
+						alert(["Coincides with other time periods, please reset","与其他时间段重合，请重新设置"][lan]);
 						return;
 					}
 				}
@@ -236,7 +236,7 @@
         var editDivString='\
                 <div class="editWrap" id=<%="editDiv"+context.timeSliderNum%>>\
                     <img src="images/edit.png" class="editImg"></img>\
-                    <img src="images/del.gif" class="delImg"></img>\
+                    <img src="images/del.png" class="delImg"></img>\
                     <div class="editContent" id=<%="editContent"+context.timeSliderNum%>>\
                         <div class="editHeader">\
                             <label class="editHeaderTitle"><%=editHeaderTitle%></label>\
@@ -524,7 +524,7 @@
 			}
 			/*判断新建的时间段是否超过整个时间轴右边界*/
 			if ((dragLeft) >= $backgroundDiv.width() - self.oneDragBlockWidth) {
-				console.log("超过")
+				//console.log("超过")
 				return;
 			}
 
@@ -532,7 +532,7 @@
 			if (leftArrayLength >= 1) {
 				for (var j = 0; j < leftArrayLength; j++) {
 					if (dragRight > self.left_array[j] && dragLeft < self.right_array[j]) {
-						console.log("重叠")
+						//console.log("重叠")
 						return;
 					}
 				}
@@ -680,14 +680,15 @@
 			var disX = parseFloat((e.pageX - parentOriginalLeft - self.slderLeftOffset).toFixed(1)); //鼠标在拖动块上的偏移
 			var whichOne;
 			/*当我去移动时间段之前，先找到当前操作的时间段在数组中的位置*/
-			whichOne = self.binarySearch(self.left_array, parentOriginalLeft);
+			//whichOne = self.binarySearch(self.left_array, parentOriginalLeft);
+            whichOne = _.sortedIndex(self.left_array, parentOriginalLeft);
+            console.log(whichOne);
 			self.whichOne = whichOne;
 			var parentId = $(thisDrag).attr("id");
 			var timeSliderWidth = $("#" + parentId).parent().width(); //整个滑动条宽度
 			this.dragId = parentId;
 
 			/*优化逻辑*/
-			//var where;//判断当前操作的滑块是处理哪个位置，开头，中间或者结尾
 			var leftBorder = 0; //左边界；
 			var rightBorder = timeSliderWidth; //右边界
 			var dragWidth = parseFloat(parseFloat(this.getStyle($("#" + parentId)[0], "width")).toFixed(1)); //拖块自身的宽度
@@ -697,12 +698,14 @@
 				if (self.whichOne == 0) {
 					rightBorder = self.left_array[self.whichOne + 1];
 				} else if (self.whichOne == arrayLength - 1) {
-					leftBorder = self.right_array[self.whichOne - 1]
+					leftBorder = self.right_array[self.whichOne - 1];
 				} else {
-					leftBorder = self.right_array[self.whichOne - 1]
-						rightBorder = self.left_array[self.whichOne + 1];
+					leftBorder = self.right_array[self.whichOne - 1];
+					rightBorder = self.left_array[self.whichOne + 1];
 				}
 			}
+            console.log("leftBorder:"+leftBorder)
+            console.log("rightBorder:"+rightBorder)
 			$(document).mousemove(function (ev) {
 				self.hasMove = true;
 				l = parseFloat(parseFloat(ev.pageX - disX - self.slderLeftOffset).toFixed(1));
@@ -789,7 +792,8 @@
 
 			var arrayLength = self.left_array.length;
 			/*当我去移动时间段之前，先找到当前操作的时间段在数组中的位置*/
-			whichOne = self.binarySearch(self.left_array, parentOriginalLeft);
+			//whichOne = self.binarySearch(self.left_array, parentOriginalLeft);
+            whichOne = _.sortedIndex(self.left_array, parentOriginalLeft);
 			self.whichOne = whichOne;
 
 			/*优化逻辑*/
@@ -874,7 +878,8 @@
 			var barWidth = $("#" + rightBar).width(); //拉伸按钮的宽度
 			var len = self.left_array.length;
 
-			whichOne = self.binarySearch(self.left_array, parentOriginalLeft);
+			//whichOne = self.binarySearch(self.left_array, parentOriginalLeft);
+            whichOne = _.sortedIndex(self.left_array, parentOriginalLeft);
 			self.whichOne = whichOne;
 
 			/*优化逻辑*/
