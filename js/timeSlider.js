@@ -522,6 +522,11 @@
 			} else {
 				$backgroundDiv = $(backgroundDiv);
 			}
+            
+            /*判断新建的时间段是否正确，例如开始时间大于结束时间*/
+            if(dragLeft>=dragRight) {
+                return;
+            }
 			/*判断新建的时间段是否超过整个时间轴右边界*/
 			if ((dragLeft) >= $backgroundDiv.width() - self.oneDragBlockWidth) {
 				//console.log("超过")
