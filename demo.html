@@ -80,7 +80,7 @@
 初始化方式：
 <pre class="code">
     var defaultTime1=["2:9-5:45", "10:8-13:36", "17:34-20:32"];
-    var defaultEvents1=[1,3];
+    var defaultEvents1=[1,2,3];
 	var timeS1=new TimeSlider({
         id:"timeslider1",
         language:"cn",
@@ -100,7 +100,7 @@
 </p>
 <button id="setTime">设置</button>
 <pre class="code">
-timeS1.setTime({
+timeS1.set({
        setTimeArray:["2:9-5:45", "10:8-13:36", "17:34-20:32"],        
        setEventsArray:[4,2]
    })
@@ -110,8 +110,8 @@ timeS1.setTime({
 <script type="text/javascript" src="js/timeSlider.js"></script>
 <script>
     /* 动态创建7个时间轴 */
-    var defaultTime1=["2:9-5:45", "10:8-13:36", "17:34-20:32"];
-    var defaultEvents1=[1,3];
+    var defaultTime1=["2:9-5:45","10:8-13:36","17:34-20:32"];
+    var defaultEvents1=[1,2,3];
 	var timeS1=new TimeSlider({
         id:"timeslider1",
         language:"cn",
@@ -153,18 +153,16 @@ timeS1.setTime({
               
     $("#getTime").click(function(){
         $("#content").empty();
-        var sliderTime=[];
         _.forEach(timeS1.leftTime_array,function(item,index){
-            var time='<span>'+item+"-"+timeS1.rightTime_array[index]+'</span></br>';
-            
+            var time='<span>'+item+"-"+timeS1.rightTime_array[index]+'</span></br>';       
            $("#content").append(time)
         })
     })        
     
     $("#setTime").click(function(){
-        timeS1.setTime({
-              setTimeArray:["2:30-14:43","15:40-18:30"],        
-              setEventsArray:[4,2]
+        timeS1.set({
+              setTimeArray:["2:30-14:43","15:40-18:30"]    
+              
         })
     })
 </script>

@@ -4,14 +4,14 @@
 		border:0;
 		display: block;
 		z-index: 0;
-		margin-left:150px;
+		margin-left:100px;
 		position:relative;
-        font: 12px/1.5 tahoma,arial,'Hiragino Sans GB','\5b8b\4f53',sans-serif;
+        top:-20px;
 	}
 	
 	.timeSliderDiv{
-		height:25px;
-		width:32px;
+		height:20px;
+		width:16px;
 		z-index:4;
 		top:0;
 		position:absolute;
@@ -20,7 +20,7 @@
 	
 	.trCanvas{
 		width: 768px;
-		height: 25px;
+		height: 20px;
 		background: #f2f2ee;
 		position: relative;
 	}
@@ -51,7 +51,7 @@
 	.modal-dialog{
 		position:relative;
 		width:400px;
-		margin:130px auto;
+		margin:150px auto;
 	}
 	
 	.modal-content{
@@ -84,7 +84,7 @@
 	.modal-footer{
 		padding :19px 20px 20px;
 		text-align:right;
-		margin-top:15px;
+		margin-top:5px;
 		border-top:1px solid #e5e5e5;
 	}
 	
@@ -118,6 +118,8 @@
     .time-lab{
         display:inline-block;
         width:80px;
+        *zoom:1;
+        *display:inline;
     }
     
     .event-div{
@@ -140,17 +142,18 @@
 	.coordinateLabDiv{
 		width:20px;
 		margin-left:-3px;
-		top:32px;
+		top:22px;
 		position:absolute;
 		z-index:-1;
+        font-size:14px;
 	}
 	
 	
 	.leftBar{
 		position:absolute;
-		left:-3px;
-		top:10px;
-		height:15px;
+		left:-6px;
+		top:8px;
+		height:12px;
 		width:6px;
 		background-color:#e4e4e4;
 		display:none;
@@ -158,9 +161,8 @@
 	
 	.rightBar{
 		position:absolute;
-		left:25px;
-		top:10px;
-		height:15px;
+		top:8px;
+		height:12px;
 		width:6px;
 		background-color:#e4e4e4;
 		display:none;
@@ -197,17 +199,23 @@
 	
 	
     
-	.label-week,.label-event{
+	.label-event{
 		float:left;
-		margin-left:50px;
+		margin-left:20px;
+	}
+   
+    .label-week{
+		float:left;
+		margin-left:20px;
+        margin-top:-20px;
 	}
     
 	
 	.editWrap{
 		position:relative;
 		width:100px;
-		left:950px;
-		bottom:30px;
+		left:890px;
+		bottom:40px;
 	}
 	
 	.editContent{
@@ -228,7 +236,6 @@
 	}
 	
     .editHeaderTitle{
-        font-size:10px;
         font-weight:bold;
     }
     
@@ -239,6 +246,9 @@
     
     .editUnit{
         display:inline-block;
+        width:80px;
+        *zoom:1;
+        *display:inline;
     }
 	
 	.editFotter{
@@ -259,8 +269,12 @@
 	.editBtn{
 		font-size:14px;
 		width:55px;
+        height: 30px;
 		text-align:center;
 		margin:2px;
+        background-repeat: no-repeat;
+        border:0;
+        padding: 0;
 	}
 	
     .eventBoxWrap{
