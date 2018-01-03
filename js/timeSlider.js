@@ -44,14 +44,13 @@
 		})
 	})()
 
-    var rightliuzj;
 	//将颜色从rgb转换为16进制格式
 	function rgbToHex(rgb) {
 		var _rgb = rgb.match(/[^\(\)]+(?=\))/g)[0].split(",");
 		if (_rgb) {
 			var hex = "";
 			_.forEach(_rgb, function (item) {
-				hex += ("0" + parseInt(item,10).toString(16)).slice(-2);
+				hex += ("0" + parseInt(item, 10).toString(16)).slice(-2);
 			})
 			return (hex);
 		}
@@ -67,44 +66,44 @@
 	function createPopUpBox() {
 		/* 利用_.template 模板引擎来渲染 */
 		var popUpBoxString = '\
-               <div class="modal" id="modalDiv" data-number="">\
-                 <div class="modal-dialog">\
-                     <div class="modal-content">\
-                        <div class="modal-header">\
-                            <h4 class="modal-title"><%=modalHeaderTitile%></h4>\
-                        </div>\
-                        <div class="modal-body">\
-                          <div class="time-div">\
-                            <div class="time-start-div">\
-                               <label class="time-lab"><%=timeStartLab%></label>\
-                               <input type="text" maxlength="2" id="startH" class="time-input"> :\
-                               <input type="text" maxlength="2" id="startM" class="time-input">\
+                   <div class="modal" id="modalDiv" data-number="">\
+                     <div class="modal-dialog">\
+                         <div class="modal-content">\
+                            <div class="modal-header">\
+                                <h4 class="modal-title"><%=modalHeaderTitile%></h4>\
                             </div>\
-                            <div class="time-stop-div">\
-                               <label class="time-lab"><%=timeStopLab%></label>\
-                               <input type="text" maxlength="2" id="stopH" class="time-input"> :\
-                               <input type="text" maxlength="2" id="stopM" class="time-input">\
+                            <div class="modal-body">\
+                              <div class="time-div">\
+                                <div class="time-start-div">\
+                                   <label class="time-lab"><%=timeStartLab%></label>\
+                                   <input type="text" maxlength="2" id="startH" class="time-input"> :\
+                                   <input type="text" maxlength="2" id="startM" class="time-input">\
+                                </div>\
+                                <div class="time-stop-div">\
+                                   <label class="time-lab"><%=timeStopLab%></label>\
+                                   <input type="text" maxlength="2" id="stopH" class="time-input"> :\
+                                   <input type="text" maxlength="2" id="stopM" class="time-input">\
+                                </div>\
+                              </div>\
+                              <div class="event-div">\
+                                <label class="event-lab"><%=eventLab%></label>\
+                                <select class="event-select" id="eventSelect">\
+                                  <%_.forEach(eventArray,function(item,index){%>\
+                                    <option value=<%=index+1%>><%=item%></option>\
+                                  <%})%>\
+                                </select>\
+                              </div>\
                             </div>\
-                          </div>\
-                          <div class="event-div">\
-                            <label class="event-lab"><%=eventLab%></label>\
-                            <select class="event-select" id="eventSelect">\
-                              <%_.forEach(eventArray,function(item,index){%>\
-                                <option value=<%=index+1%>><%=item%></option>\
-                              <%})%>\
-                            </select>\
-                          </div>\
-                        </div>\
-                        <div class="modal-footer">\
-                          <button class="btn" id="setBtn"><%=setBtnName%></button>\
-                          <button class="btn" id="delBtn"><%=delBtnName%></button>\
-                          <button class="btn" id="calBtn"><%=calBtnName%></button>\
-                        </div>\
+                            <div class="modal-footer">\
+                              <button class="btn" id="setBtn"><%=setBtnName%></button>\
+                              <button class="btn" id="delBtn"><%=delBtnName%></button>\
+                              <button class="btn" id="calBtn"><%=calBtnName%></button>\
+                            </div>\
+                         </div>\
                      </div>\
-                 </div>\
-               </div>'
+                   </div>';
 
-			var lan = _gLanguage;
+		var lan = _gLanguage;
 		var obj = {
 			'modalHeaderTitile' : ["Edit", "编辑"][lan],
 			'timeStartLab' : ["Start Time", "开始时间"][lan],
@@ -120,24 +119,32 @@
 			$("body").append(dom)
 
 			/*绑定事件*/
+			$("#startH,#startM,#stopH,#stopM").keyup(_.debounce(function () {
+					var id = this.id;
+					var maxTime;
+					if (id == "startH") {
+						maxTime = 23;
+					} else if (id == "stopH") {
+						maxTime = 24;
+					} else {
+						maxTime = 59;
+					}
+					var regStatus = (/^0+|\D+/g).test($(this).val());
+					var val = $(this).val().replace(/^0+|\D+/g, "");
+					if (!val || regStatus || val < 0 || val > maxTime) {
+						$(this).val(0);
+					}
+				}, 500))
+
 			$("#setBtn").click(function () {
 				var contextIndex = $("#modalDiv").attr("data-number") - 1;
 				var self = _gContextArray[contextIndex];
-				var STH = parseInt($("#startH").val(),10);
-				var STM = parseInt($("#startM").val(),10);
-				var SPH = parseInt($("#stopH").val(),10);
-				var SPM = parseInt($("#stopM").val(),10);
+				var STH = parseInt($("#startH").val(), 10);
+				var STM = parseInt($("#startM").val(), 10);
+				var SPH = parseInt($("#stopH").val(), 10);
+				var SPM = parseInt($("#stopM").val(), 10);
 
-				if ((STH).toString() == "" || (STM).toString() == "" || (SPH).toString() == "" || (SPM).toString() == "") {
-					alert(["Please set", "请设置"][lan]);
-					return
-				} else if (STH < 0 || STH > 23 || SPH < 0 || SPH > 24) {
-					alert(["Hour error, please fill in the number between 0-24", "小时错误,请填写0-24之间的数字"][lan]);
-					return;
-				} else if (STM < 0 || STM > 59 || SPM < 0 || SPM > 59) {
-					alert(["Minute error, please fill in the number between 0-59", "分钟错误,请填写0-59之间的数字"][lan]);
-					return;
-				} else if (SPH < STH || (SPH == 24 && SPM > 0)) {
+				if (SPH < STH || (SPH == 24 && SPM > 0)) {
 					alert(["Please fill in the correct time", "请填写正确的时间"][lan]);
 					return;
 				} else if ((STH == SPH) && (SPM < STM)) {
@@ -153,44 +160,42 @@
 
 				var newLeft = parseFloat((STH * self.oneHourWidth + STM * self.oneHourWidth / 60).toFixed(1));
 				var newRight = parseFloat((SPH * self.oneHourWidth + SPM * self.oneHourWidth / 60).toFixed(1));
-				var arrayLen;                           
+				var arrayLen;
 
 				arrayLen = self.left_array.length;
-
 				/*设置过程中判断时间段是否超出边界范围及超过其他时间段*/
 				if (newLeft < 0 || newRight > $("#" + self.dragId).parent().width()) {
 					alert(["Over timeline length, please reset", "超过时间轴长度，请重新设置"][lan]);
 					return
 				}
-                
-                var tmpLeft = self.left_array.splice(self.whichOne, 1);
+
+				var tmpLeft = self.left_array.splice(self.whichOne, 1);
 				var tmpRight = self.right_array.splice(self.whichOne, 1);
 
-                
 				if (arrayLen >= 2) {
-                    for (var j = 0; j < arrayLen; j++) {
-                        if (newRight > self.left_array[j] && newLeft < self.right_array[j]) {  
-                              alert(["Coincides with other time periods, please reset", "与其他时间段重合，请重新设置"][lan]);
-                              self.left_array.push(tmpLeft[0]);
-                              self.right_array.push(tmpRight[0]);
-                              self.left_array.sort(function (a, b) {
-                                    return a - b;
-                               });           
-                              self.right_array.sort(function (a, b) {
-                                    return a - b;
-                               });		
-                              return;
-                            }
-                        }
+					for (var j = 0; j < arrayLen; j++) {
+						if (newRight > self.left_array[j] && newLeft < self.right_array[j]) {
+							alert(["Coincides with other time periods, please reset", "与其他时间段重合，请重新设置"][lan]);
+							self.left_array.push(tmpLeft[0]);
+							self.right_array.push(tmpRight[0]);
+							self.left_array.sort(function (a, b) {
+								return a - b;
+							});
+							self.right_array.sort(function (a, b) {
+								return a - b;
+							});
+							return;
+						}
+					}
 				}
-                self.left_array.push(newLeft);
-                self.right_array.push(newRight);
-                self.left_array.sort(function (a, b) {
-                    return a - b;
-                });           
-                self.right_array.sort(function (a, b) {
-                    return a - b;
-                });			
+				self.left_array.push(newLeft);
+				self.right_array.push(newRight);
+				self.left_array.sort(function (a, b) {
+					return a - b;
+				});
+				self.right_array.sort(function (a, b) {
+					return a - b;
+				});
 
 				$("#" + self.dragId).css({
 					"left" : newLeft,
@@ -241,31 +246,31 @@
 
 	function creatEditDiv(context) {
 		var editDivString = '\
-            <div class="editWrap" id=<%="editDiv"+context.timeSliderNum%>>\
-                <img src="images/edit.png" class="editImg"></img>\
-                <img src="images/del.png" class="delImg"></img>\
-                <div class="editContent" id=<%="editContent"+context.timeSliderNum%>>\
-                    <div class="editHeader">\
-                        <label class="editHeaderTitle"><%=editHeaderTitle%></label>\
-                    </div>\
-                    <div class="editBody">\
-                      <%_.forEach(editTextObj,function(item,index){%>\
-                          <div class="editUnit">\
-                             <input class=<%="editCBox"+context.timeSliderNum%> id=<%="editCBox"+context.timeSliderNum+"_"+index%> type="checkbox"></input>\
-                             <label><%=item%></label>\
-                          </div>\
-                      <%})%>\
-                           <div class="editUnit">\
-                              <input class="editCheckAll" type="checkbox"></input>\
-                              <label><%=checkAllName%></label>\
-                           </div>\
-                    </div>\
-                    <div class="editFotter">\
-                        <button class="editBtn save"><%=saveName%></button>\
-                        <button class="editBtn cancel"><%=cancelName%></button>\
-                    </div>\
-                </div>\
-            </div>'
+			            <div class="editWrap" id=<%="editDiv"+context.timeSliderNum%>>\
+			                <img src="images/edit.png" class="editImg"></img>\
+			                <img src="images/del.png" class="delImg"></img>\
+			                <div class="editContent" id=<%="editContent"+context.timeSliderNum%>>\
+			                    <div class="editHeader">\
+			                        <label class="editHeaderTitle"><%=editHeaderTitle%></label>\
+			                    </div>\
+			                    <div class="editBody">\
+			                      <%_.forEach(editTextObj,function(item,index){%>\
+			                          <div class="editUnit">\
+			                             <input class=<%="editCBox"+context.timeSliderNum%> id=<%="editCBox"+context.timeSliderNum+"_"+index%> type="checkbox"></input>\
+			                             <label><%=item%></label>\
+			                          </div>\
+			                      <%})%>\
+			                           <div class="editUnit">\
+			                              <input class="editCheckAll" type="checkbox"></input>\
+			                              <label><%=checkAllName%></label>\
+			                           </div>\
+			                    </div>\
+			                    <div class="editFotter">\
+			                        <button class="editBtn save"><%=saveName%></button>\
+			                        <button class="editBtn cancel"><%=cancelName%></button>\
+			                    </div>\
+			                </div>\
+			            </div>';
 
 		var lan = _gLanguage;
 		var editTextObj = [
@@ -398,17 +403,16 @@
 			/*end*/
 
 			this.slderLeftOffset = $("#" + this.mountId).offset().left; //时间轴距离左页面的距离
-            
-            /*单击时间轴创建时间块*/
+
+			/*单击时间轴创建时间块*/
 			$(backgroundDiv).mousedown(function (e) {
 				self.createDrag({
 					backgroundDiv : this,
 					ex : e.pageX
-				})          
-                whichOne = _.sortedIndex(self.left_array, parseFloat((e.pageX - self.slderLeftOffset).toFixed(1)));
-                self.events_array.splice(whichOne,0,0);
+				})
+				whichOne = _.sortedIndex(self.left_array, parseFloat((e.pageX - self.slderLeftOffset).toFixed(1)));
+				self.events_array.splice(whichOne, 0, 0);
 			})
-            
 
 			/*时间初始化*/
 			if (Object.prototype.toString.call(obj.defaultTime) == "[object Array]") {
@@ -440,14 +444,14 @@
 		},
 
 		/*提供给用户的接口，删除某个时间轴上所有时间段，并重新设置*/
-		set : function (obj) {            
+		set : function (obj) {
 			var setTimeArray = obj.setTimeArray;
 			if (Object.prototype.toString.call(setTimeArray) == "[object Array]") {
 				this.removeAll();
 				if (0 === setTimeArray.length) {
 					return;
 				}
-                this.events_array=obj.setEventsArray||[];
+				this.events_array = obj.setEventsArray || [];
 				this.timeInit(setTimeArray);
 			} else if (setTimeArray) {
 				throw new Error('时间初始化需要数组格式');
@@ -457,7 +461,7 @@
 		/*删除当前时间轴上所有时间段*/
 		removeAll : function () {
 			var len = this.right_array.length;
-			$("#timeslider" + this.timeSliderNum + " .timeSliderDiv").remove();   
+			$("#timeslider" + this.timeSliderNum + " .timeSliderDiv").remove();
 			this.right_array.splice(0, len);
 			this.left_array.splice(0, len);
 			this.rightTime_array.splice(0, len);
@@ -476,7 +480,7 @@
 					var targetId = $(".trCanvas").eq(j).parent().attr("id");
 					if (flag) {
 						_gContextArray[j].removeAll();
-					}                 
+					}
 					for (var i = 0; i < len; i++) {
 						_gContextArray[j].createDrag({
 							backgroundDiv : targetId,
@@ -484,7 +488,7 @@
 							ex2 : this.right_array[i],
 							event : this.events_array[i]
 						})
-                        _gContextArray[j].events_array[i]=this.events_array[i];
+						_gContextArray[j].events_array[i] = this.events_array[i];
 					}
 				}
 			}
@@ -494,14 +498,14 @@
 		backgroundDiv为时间轴的背景DOM，
 		ex为鼠标点击的位置，即创建的起始点
 		ex2代表拖块的宽度，若不存在，则默认一个小时的宽度，
-		*/
+		 */
 		createDrag : function (obj) {
 			var backgroundDiv = obj.backgroundDiv;
 			var ex = obj.ex;
 			var ex2 = obj.ex2;
 			var event = obj.event || 0;
 			var self = this;
-			var dragLeft = parseFloat((ex - self.slderLeftOffset).toFixed(1)); 
+			var dragLeft = parseFloat((ex - self.slderLeftOffset).toFixed(1));
 			if (ex2) //如果指明了结束时间
 			{
 				var dragRight = ex2;
@@ -520,7 +524,7 @@
 			} else {
 				$backgroundDiv = $(backgroundDiv);
 			}
-            
+
 			/*判断新建的时间段是否超过整个时间轴右边界*/
 			if ((dragLeft) >= $backgroundDiv.width() - self.oneDragBlockWidth) {
 				return;
@@ -529,7 +533,7 @@
 			/*判断新创建的时间段是否能放下，防止时间段重叠*/
 			if (leftArrayLength >= 1) {
 				for (var j = 0; j < leftArrayLength; j++) {
-					if (dragRight > self.left_array[j] && dragLeft < self.right_array[j]) {                   
+					if (dragRight > self.left_array[j] && dragLeft < self.right_array[j]) {
 						return;
 					}
 				}
@@ -540,7 +544,7 @@
 			/*将拖块的坐标进行排序*/
 			self.left_array.sort(function (a, b) {
 				return a - b;
-			});           
+			});
 			self.right_array.sort(function (a, b) {
 				return a - b;
 			});
@@ -556,7 +560,7 @@
 			$backgroundDiv.append(drag);
 
 			var dragWidth = parseFloat((dragRight - dragLeft).toFixed(1));
-			$("#timeS" + sliderNum + '_' + self.dragNum).css("width",dragWidth+"px");
+			$("#timeS" + sliderNum + '_' + self.dragNum).css("width", dragWidth + "px");
 			$("#timeS" + sliderNum + "_" + self.dragNum).mousedown(function (e) {
 				self.dragDown(e, this);
 				if (document.all) { //兼容IE8
@@ -566,29 +570,29 @@
 				}
 
 			})
-            
-            $("#timeS" + sliderNum + "_" + self.dragNum).dblclick(function (e) {
-                var rightShowId = $(this).children(".rightShow").attr("id");
-                var leftShowId = $(this).children(".leftShow").attr("id");
-                $("#startH").val(parseInt($("#" + leftShowId).text().split(":")[0],10));
-				$("#startM").val(parseInt($("#" + leftShowId).text().split(":")[1],10));
-				$("#stopH").val(parseInt($("#" + rightShowId).text().split(":")[0],10));
-				$("#stopM").val(parseInt($("#" + rightShowId).text().split(":")[1],10));	
-                var color=$(this).css("backgroundColor");//IE11获取的是rgb值，IE8是hex值，所以需要区分一下；
-                if(_.indexOf(color,"#")==-1)
-                {
-                    var colorHex = rgbToHex($(this).css("backgroundColor"));
-                }
-                else{
-                    var colorHex = color.replace('#',"");
-                }			
-                var eventIndex = _.indexOf(defalutColor,colorHex) + 1;
-                $("#eventSelect").val(eventIndex);
-                $("#fixedDiv").show();
-                $("#modalDiv").show().attr("data-number", self.timeSliderNum);
-				$("#fixedDiv").show();
-                $("#modalDiv").show().attr("data-number", self.timeSliderNum);
-                if (document.all) { //兼容IE8
+
+			$("#timeS" + sliderNum + "_" + self.dragNum).dblclick(function (e) {
+				if (e.target.className.indexOf("timeSliderDiv") != -1) {
+					var rightShowId = $(this).children(".rightShow").attr("id");
+					var leftShowId = $(this).children(".leftShow").attr("id");
+					$("#startH").val(parseInt($("#" + leftShowId).text().split(":")[0], 10));
+					$("#startM").val(parseInt($("#" + leftShowId).text().split(":")[1], 10));
+					$("#stopH").val(parseInt($("#" + rightShowId).text().split(":")[0], 10));
+					$("#stopM").val(parseInt($("#" + rightShowId).text().split(":")[1], 10));
+					var color = $(this).css("backgroundColor"); //IE11获取的是rgb值，IE8是hex值，所以需要区分一下；
+					if (_.indexOf(color, "#") == -1) {
+						var colorHex = rgbToHex($(this).css("backgroundColor"));
+					} else {
+						var colorHex = color.replace('#', "");
+					}
+					var eventIndex = _.indexOf(defalutColor, colorHex) + 1;
+					$("#eventSelect").val(eventIndex);
+					$("#fixedDiv").show();
+					$("#modalDiv").show().attr("data-number", self.timeSliderNum);
+					$("#fixedDiv").show();
+					$("#modalDiv").show().attr("data-number", self.timeSliderNum);
+				}
+				if (document.all) { //兼容IE8
 					e.originalEvent.cancelBubble = true;
 				} else {
 					e.stopPropagation();
@@ -598,24 +602,24 @@
 			var bar_left = "<div class=leftBar" + " " +
 				'id=leftBar' + sliderNum + "_" + self.dragNum + " " +
 				"></div>";
-			
-            $("#timeS" + sliderNum + "_" + self.dragNum).append(bar_left);
-            
+
+			$("#timeS" + sliderNum + "_" + self.dragNum).append(bar_left);
+
 			$("#leftBar" + sliderNum + "_" + self.dragNum).mouseover(function (e) {
 				self.barOver(this);
-                if (document.all) { //兼容IE8
+				if (document.all) { //兼容IE8
 					e.originalEvent.cancelBubble = true;
 				} else {
 					e.stopPropagation();
 				}
-			}).mousedown(function (e) {   
+			}).mousedown(function (e) {
 				self.leftBarDown(e, this);
 				if (document.all) { //兼容IE8
 					e.originalEvent.cancelBubble = true;
 				} else {
 					e.stopPropagation();
 				}
-			}).mouseup(function (e) {   
+			}).mouseup(function (e) {
 				self.barUp(this, "left");
 				if (document.all) { //兼容IE8
 					e.originalEvent.cancelBubble = true;
@@ -627,22 +631,21 @@
 			var bar_right = "<div class=rightBar" + " " +
 				'id=rightBar' + sliderNum + "_" + self.dragNum + " " +
 				"></div>";
-                           
- 
+
 			$("#timeS" + sliderNum + "_" + self.dragNum).append(bar_right);
 
-			var rightBarOffsetLeft = dragRight - dragLeft ;
+			var rightBarOffsetLeft = dragRight - dragLeft;
 			$("#rightBar" + sliderNum + "_" + self.dragNum).css("left", rightBarOffsetLeft);
 
-			$("#rightBar" + sliderNum + "_" + self.dragNum).mouseover(function (e) {           
+			$("#rightBar" + sliderNum + "_" + self.dragNum).mouseover(function (e) {
 				self.barOver(this);
-                if (document.all) { //兼容IE8
+				if (document.all) { //兼容IE8
 					e.originalEvent.cancelBubble = true;
 				} else {
 					e.stopPropagation();
 				}
 			}).mousedown(function (e) {
-				self.rightBarDown(e, this);		
+				self.rightBarDown(e, this);
 				if (document.all) { //兼容IE8
 					e.originalEvent.cancelBubble = true;
 				} else {
@@ -654,7 +657,7 @@
 					e.originalEvent.cancelBubble = true;
 				} else {
 					e.stopPropagation();
-				}			
+				}
 			})
 
 			var left_show = "<div class=leftShow" + " " +
@@ -671,10 +674,9 @@
 			var rightShowOffsetLeft = dragRight - dragLeft;
 			$("#rightShow" + sliderNum + "_" + self.dragNum).css("left", rightShowOffsetLeft);
 
-
-            self.setSliderTime(dragLeft, 'leftShow' + sliderNum + '_' + self.dragNum);
-            self.setSliderTime(dragRight, 'rightShow' + sliderNum + '_' + self.dragNum);
-            self.getSliderTime();
+			self.setSliderTime(dragLeft, 'leftShow' + sliderNum + '_' + self.dragNum);
+			self.setSliderTime(dragRight, 'rightShow' + sliderNum + '_' + self.dragNum);
+			self.getSliderTime();
 
 			/*控制时间显示效果*/
 			$("#timeS" + sliderNum + "_" + self.dragNum).hover(function () {
@@ -718,7 +720,7 @@
 			/*优化逻辑*/
 			//var where;//判断当前操作的滑块是处理哪个位置，开头，中间或者结尾
 			var leftBorder = 0; //左边界；
-			var rightBorder = timeSliderWidth; //右边界			
+			var rightBorder = timeSliderWidth; //右边界
 			var leftOffset = 0; //移动后的拖块偏移量
 			var rightOffset = 0;
 			if (arrayLength > 1) {
@@ -731,7 +733,7 @@
 					rightBorder = self.left_array[self.whichOne + 1];
 				}
 			}
-            var dragWidth = parseFloat((self.right_array[self.whichOne]-self.left_array[self.whichOne]).toFixed(1)); //拖块自身的宽度
+			var dragWidth = parseFloat((self.right_array[self.whichOne] - self.left_array[self.whichOne]).toFixed(1)); //拖块自身的宽度
 			$(document).mousemove(function (ev) {
 				leftOffset = parseFloat(parseFloat(ev.pageX - disX - self.slderLeftOffset).toFixed(1));
 				if (leftOffset <= leftBorder) {
@@ -749,14 +751,14 @@
 				if (self.calTimeFlag) {
 					self.setSliderTime(leftOffset, leftShowId);
 					self.setSliderTime(rightOffset, rightShowId);
-                    self.left_array[whichOne] = leftOffset;
-                    self.right_array[whichOne] = rightOffset;
+					self.left_array[whichOne] = leftOffset;
+					self.right_array[whichOne] = rightOffset;
 					self.calTimeFlag = false;
 				}
 			})
 
-		    $(document).on("mouseup mouseleave",function(){
-                $("#" + parentId).css("cursor", "auto");
+			$(document).on("mouseup mouseleave", function () {
+				$("#" + parentId).css("cursor", "auto");
 				/*保存移动后的时间段的新坐标*/
 
 				// var left_new = parseFloat(parseFloat(self.getStyle($("#" + parentId)[0], "left")).toFixed(1));
@@ -767,7 +769,7 @@
 				// self.right_array[whichOne] = right_new;
 				self.getSliderTime("move");
 				$(document).off("mousemove mouseup mouseleave");
-            })
+			})
 			if (document.all) { //兼容IE8
 				e.originalEvent.cancelBubble = true;
 			} else {
@@ -776,22 +778,22 @@
 		},
 
 		/*左拉伸按钮鼠标按下事件 e为事件对象，thisBar为当前操作的拖块*/
-		leftBarDown : function (e, thisBar) {    
+		leftBarDown : function (e, thisBar) {
 			$(thisBar).css("cursor", "w-resize");
 			/*拉伸按钮会改变拖块的宽度*/
 			var parentId = $(thisBar).parent().attr("id");
 			var parentOriginalLeft = parseFloat(parseFloat(this.getStyle($("#" + parentId)[0], "left")).toFixed(1)); //拖块的原始偏移量
-			var leftBarOffset = parseInt($(thisBar).css("left"),10);
+			var leftBarOffset = parseInt($(thisBar).css("left"), 10);
 
 			var rightBar = $("#" + parentId).children(".rightBar").attr("id"); //右拉伸按钮
-			var rightBarLeft = parseInt($("#" + rightBar).css("left"),10);
+			var rightBarLeft = parseInt($("#" + rightBar).css("left"), 10);
 			var barWidth = $("#" + rightBar).width(); //拉伸按钮的宽度
 
 			var rightShowId = $("#" + parentId).children(".rightShow").attr("id"); //显示具体时间的div
-			var rightShowLeft = parseInt($("#" + rightShowId).css("left"),10);
+			var rightShowLeft = parseInt($("#" + rightShowId).css("left"), 10);
 
 			var leftShowId = $("#" + parentId).children(".leftShow").attr("id"); //显示具体时间的div
-			var leftShowLeft = parseInt($("#" + leftShowId).css("left"),10);
+			var leftShowLeft = parseInt($("#" + leftShowId).css("left"), 10);
 
 			var whichOne;
 			var self = this;
@@ -807,7 +809,7 @@
 			if (arrayLength > 1) {
 				if (whichOne != 0) {
 					leftBorder = self.right_array[whichOne - 1];
-				}        
+				}
 			}
 
 			/*绑定拉伸条的移动事件*/
@@ -835,19 +837,19 @@
 
 				if (self.calTimeFlag) {
 					self.setSliderTime(pageX, leftShowId);
-                    self.left_array[self.whichOne] = pageX;
+					self.left_array[self.whichOne] = pageX;
 					self.calTimeFlag = false;
 				}
 			})
 
-            $(document).on("mouseup mouseleave",function(e){
-                self.barUp(thisBar, "left");
-                if (document.all) { //兼容IE8
+			$(document).on("mouseup mouseleave", function (e) {
+				self.barUp(thisBar, "left");
+				if (document.all) { //兼容IE8
 					e.originalEvent.cancelBubble = true;
 				} else {
 					e.stopPropagation();
 				}
-            })
+			})
 		},
 
 		/*拉伸条mouseover事件*/
@@ -861,7 +863,7 @@
 			var self = this;
 			$(thisBar).css("cursor", "default");
 			$(document).off("mousemove mouseup mouseleave");
-			self.getSliderTime("move", direction);//保存时间
+			self.getSliderTime("move", direction); //保存时间
 		},
 
 		/*右拉伸按钮鼠标按下事件 e为事件对象，thisBar为当前操作的按钮*/
@@ -898,11 +900,11 @@
 						pageX = timeSliderWidth;
 					}
 
-					var parentWidth =parseFloat(parseFloat(pageX - parentOriginalLeft).toFixed(1)); //现在拖块的宽度
+					var parentWidth = parseFloat(parseFloat(pageX - parentOriginalLeft).toFixed(1)); //现在拖块的宽度
 
 					if (parentWidth >= self.oneDragBlockWidth) {
 						if (pageX >= rightBorder) {
-							pageX = rightBorder;  
+							pageX = rightBorder;
 						}
 						var parentWidth = parseFloat(parseFloat(pageX - parentOriginalLeft).toFixed(1));
 						$("#" + parentId).css({
@@ -919,19 +921,19 @@
 
 					if (self.calTimeFlag) {
 						self.setSliderTime(pageX, rightShowId);
-                        self.right_array[self.whichOne] = pageX;
+						self.right_array[self.whichOne] = pageX;
 						self.calTimeFlag = false;
 					}
 
 				})
-                $(document).on("mouseup mouseleave",function(e){    
-                    self.barUp(thisBar, "right");
-                    if (document.all) { //兼容IE8
-                        e.originalEvent.cancelBubble = true;
-                    } else {
-                        e.stopPropagation();
-                    }
-                })
+				$(document).on("mouseup mouseleave", function (e) {
+					self.barUp(thisBar, "right");
+					if (document.all) { //兼容IE8
+						e.originalEvent.cancelBubble = true;
+					} else {
+						e.stopPropagation();
+					}
+				})
 		},
 		/*设置当前的显示时间
 		参数offsetX为偏移量，id为显示时间的DOM id
@@ -960,7 +962,7 @@
 		action为拖块是否在移动，移动分为两种，拖动拖块和拖动拉伸条
 		拖动拖块时开始和结束时间都更新，拖动拉伸条时只更新一个时间，由direction决定
 		 */
-		getSliderTime : function (action, direction) {   
+		getSliderTime : function (action, direction) {
 			if (action == "move") {
 				if ("right" === direction) {
 					this.rightTime_array[this.whichOne] = this.rightTime;
@@ -971,24 +973,24 @@
 					this.leftTime_array[this.whichOne] = this.leftTime;
 				}
 			} else {
-				 this.leftTime_array.push(this.leftTime);
-				 this.rightTime_array.push(this.rightTime);
+				this.leftTime_array.push(this.leftTime);
+				this.rightTime_array.push(this.rightTime);
 			}
 			this.leftTime_array.sort(function (a, b) {
-				var A = parseInt(a.split(":")[0],10) * 60 + parseInt(a.split(":")[1],10);
-				var B = parseInt(b.split(":")[0],10) * 60 + parseInt(b.split(":")[1],10);
+				var A = parseInt(a.split(":")[0], 10) * 60 + parseInt(a.split(":")[1], 10);
+				var B = parseInt(b.split(":")[0], 10) * 60 + parseInt(b.split(":")[1], 10);
 				return A - B;
 			});
 			this.rightTime_array.sort(function (a, b) {
-				var A = parseInt(a.split(":")[0],10) * 60 + parseInt(a.split(":")[1],10);
-				var B = parseInt(b.split(":")[0],10) * 60 + parseInt(b.split(":")[1],10);
+				var A = parseInt(a.split(":")[0], 10) * 60 + parseInt(a.split(":")[1], 10);
+				var B = parseInt(b.split(":")[0], 10) * 60 + parseInt(b.split(":")[1], 10);
 				return A - B;
 			});
-            //IE8下使用parseInt对于数字08,07,06.....等数字进行转换时会变成0
-            // IE8下面parseint默认会把“08”、“09”当成八进制，但是又发现不是合法的八进制，最后就抛出了0这个false。
-            // 解决方法1，加个参数：parseInt(numString, 10)
-            // 解决方法2，用new Number转成数字 var num = new Number(numString);
-            // 解决方法3，换成parseFloat：parseFloat(numString)
+			//IE8下使用parseInt对于数字08,07,06.....等数字进行转换时会变成0
+			// IE8下面parseint默认会把“08”、“09”当成八进制，但是又发现不是合法的八进制，最后就抛出了0这个false。
+			// 解决方法1，加个参数：parseInt(numString, 10)
+			// 解决方法2，用new Number转成数字 var num = new Number(numString);
+			// 解决方法3，换成parseFloat：parseFloat(numString)
 
 		},
 		/*获取当前对应时间的left偏移量，参数time为传进来的时间数组
@@ -999,11 +1001,11 @@
 		getSliderOffsetX : function (time) {
 			var timeArray = new Array;
 			var self = this;
-			var startH = parseInt(time[0].split(":")[0],10) * self.oneHourWidth;
-			var startM = parseInt(time[0].split(":")[1],10) * self.oneHourWidth / 60;
+			var startH = parseInt(time[0].split(":")[0], 10) * self.oneHourWidth;
+			var startM = parseInt(time[0].split(":")[1], 10) * self.oneHourWidth / 60;
 			startM = parseFloat(startM.toFixed(1));
-			var stopH = parseInt(time[1].split(":")[0],10) * self.oneHourWidth;
-			var stopM = parseInt(time[1].split(":")[1],10) * self.oneHourWidth / 60;
+			var stopH = parseInt(time[1].split(":")[0], 10) * self.oneHourWidth;
+			var stopM = parseInt(time[1].split(":")[1], 10) * self.oneHourWidth / 60;
 			stopM = parseFloat(stopM.toFixed(1));
 			var startTime = startH + startM + self.slderLeftOffset;
 			var stopTime = stopH + stopM;
