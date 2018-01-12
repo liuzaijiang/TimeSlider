@@ -155,7 +155,7 @@
 		top:8px;
 		height:12px;
 		width:6px;
-		background-color:#e4e4e4;
+		background-color:#d4d4d4;
 		display:none;
 	}
 	
@@ -164,7 +164,8 @@
 		top:8px;
 		height:12px;
 		width:6px;
-		background-color:#e4e4e4;
+        right:-6px;
+		background-color:#d4d4d4;
 		display:none;
 	}
 	
@@ -191,6 +192,7 @@
 		height:18px;
 		position:absolute;
 		top:28px;
+        right:-44px;
 		text-align:center;
 		line-height:18px;
 		font-size:.8em;

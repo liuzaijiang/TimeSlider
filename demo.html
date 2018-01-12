@@ -6,7 +6,8 @@
 <title>scheduler</title>
 <style>
     body{
-        background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAG0lEQVQIW2OMqXogyYADMIIkl7QpPMcmP+gkAYLGGdeobP2EAAAAAElFTkSuQmCC)
+        background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAG0lEQVQIW2OMqXogyYADMIIkl7QpPMcmP+gkAYLGGdeobP2EAAAAAElFTkSuQmCC);
+        user-select:none;
     }
     
     .code{
@@ -85,8 +86,7 @@
         id:"timeslider1",
         language:"cn",
         defaultTime:defaultTime1,
-        defaultEvents:defaultEvents1
-        
+        defaultEvents:defaultEvents1     
     });
 </pre>
 <p>
@@ -110,16 +110,14 @@ timeS1.set({
 <script type="text/javascript" src="js/timeSlider.js"></script>
 <script>
     /* 动态创建7个时间轴 */
-    var defaultTime1=["2:9-5:45","10:8-13:36","17:34-20:32"];
+    var defaultTime1=["2:9-5:45", "10:8-13:36", "17:34-20:32"];
     var defaultEvents1=[1,2,3];
 	var timeS1=new TimeSlider({
         id:"timeslider1",
         language:"cn",
         defaultTime:defaultTime1,
-        defaultEvents:defaultEvents1
-        
+        defaultEvents:defaultEvents1     
     });
-    
     var timeS2=new TimeSlider({
         id:"timeslider2",
         language:"cn"
@@ -153,8 +151,9 @@ timeS1.set({
               
     $("#getTime").click(function(){
         $("#content").empty();
-        _.forEach(timeS1.leftTime_array,function(item,index){
-            var time='<span>'+item+"-"+timeS1.rightTime_array[index]+'</span></br>';       
+        _.forEach(timeS1.get().times,function(item,index){
+            var event=timeS1.get().events[index]+1;
+            var time='<span>'+item+'</span> <span>事件'+event+'</span></br>';       
            $("#content").append(time)
         })
     })        
