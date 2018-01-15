@@ -1027,5 +1027,6 @@
 	}
 	/****************内部私有函数区end******************/
 
+    TimeSlider.prototype.constructor = TimeSlider;
 	window.TimeSlider = TimeSlider;
 })()
