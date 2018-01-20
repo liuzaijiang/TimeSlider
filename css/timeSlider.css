@@ -151,20 +151,18 @@
 	
 	.leftBar{
 		position:absolute;
-		left:-6px;
-		top:8px;
-		height:12px;
-		width:6px;
+		left:-4px;
+		height:20px;
+		width:4px;
 		background-color:#d4d4d4;
 		display:none;
 	}
 	
 	.rightBar{
 		position:absolute;
-		top:8px;
-		height:12px;
-		width:6px;
-        right:-6px;
+		height:20px;
+		width:4px;
+        right:-4px;
 		background-color:#d4d4d4;
 		display:none;
 	}

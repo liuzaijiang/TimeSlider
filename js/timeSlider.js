@@ -487,13 +487,13 @@
 								left : offsetX_left_present + "px"
 							});
 							self.setSliderTime(offsetX_left_present, leftShowId);
+                            self.left_array[self.whichOne] = offsetX_left_present;
 						}
 					}
 				}
 			})
 
 			$(document).on("mouseup mouseleave", function (e) {
-				self.left_array[self.whichOne] = offsetX_left_present;
 				self.barUp(thisBar, "left");
 			})
 			if (document.all) { //兼容IE8
@@ -553,12 +553,12 @@
 							width : timeSliderWidth_present + "px"
 						});
 						self.setSliderTime(offsetX_right_present, rightShowId);
+                        self.right_array[self.whichOne] = offsetX_right_present;
 					}
 
 				}
 			})
 			$(document).on("mouseup mouseleave", function (e) {
-				self.right_array[self.whichOne] = offsetX_right_present;
 				self.barUp(thisBar, "right");
 			})
 			if (document.all) { //兼容IE8
