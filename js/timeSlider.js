@@ -20,10 +20,12 @@
 		this.events_array = new Array(); //存放每个时间轴的事件
 		this.leftTime = 0; //存放当前操作时间段的时间
 		this.rightTime = 0; //存放当前操作时间段的时间
+		this.offsetX_left = 0; //存放最后一个被创建时间段的坐标
 		this.timeSliderWidth = 0; //时间轴宽度
 		this.slderLeftOffset = 0; //时间轴距离左页面的距离
 		this.oneTimeBlockWidth = 0; //每个时间段的宽度
 		this.oneHourWidth = 0; //每一个小时占的宽度
+		this.oneMinWidth = 0; //每一个分钟占的宽度
 		this.timeBlockNum = 0; //时间段个数-1
 		this.hasMove = false; //判断时间段是click事件还是move事件
 		this.whichOne = 0; //目前操纵的时间段在坐标数组中的索引
@@ -43,7 +45,6 @@
 			TimeSlider.prototype.sliderTotal++;
 			this.timeSliderNum = TimeSlider.prototype.sliderTotal;
 			this.createLayout(obj);
-
 		},
 
 		/*创建整个时间轴的DOM结构*/
@@ -51,26 +52,23 @@
 			var self = this; //保存当前上下文
 			self.mountId = obj.id;
 			self.events_array = obj.defaultEvents || [];
-			var oneTimeBlockWidth = obj.oneTimeBlockWidth || 30; //手动点击创建时，每个时间段的默认时间
+			var defaultOneTimeBlockTime = obj.defaultOneTimeBlockTime || 30; //手动点击创建时，每个时间段的默认时间
 
 			/*********************创建布局start******************/
 			var backgroundDiv = document.createElement("div");
 			$(backgroundDiv).addClass("trCanvas").appendTo("#" + self.mountId);
 
-			//绑定事件，使得单击时间轴创建时间块
+			//绑定事件，使得单击时间轴创建时间段
 			$(backgroundDiv).mousedown(function (e) {
-				self.createTimeBlock({
-					backgroundDiv : this,
-					offsetX_left : parseFloat((e.pageX - self.slderLeftOffset).toFixed(3))
-				})
-				whichOne = _.sortedIndex(self.left_array, parseFloat((e.pageX - self.slderLeftOffset).toFixed(3)));
-				self.events_array.splice(whichOne, 0, 0);
+				self.manualCreation(e);
 			})
 
 			var oneHourWidth = Math.floor($(backgroundDiv).width() / 24); //每一个小时占的宽度
 			self.oneHourWidth = oneHourWidth;
+			var oneMinWidth = parseFloat((oneHourWidth / 60).toFixed(4)); //每一个分钟占的宽度
+			self.oneMinWidth = oneMinWidth;
 
-			var oneTimeBlockWidth = ((oneHourWidth * oneTimeBlockWidth) / 60); //每个时间段的宽度
+			var oneTimeBlockWidth = parseFloat((oneMinWidth * defaultOneTimeBlockTime).toFixed(4)); //每个时间段的宽度
 			self.oneTimeBlockWidth = oneTimeBlockWidth;
 
 			self.timeSliderWidth = $(backgroundDiv).width(); //时间轴宽度
@@ -114,8 +112,57 @@
 			}
 
 		},
+		//手动创建时间段，即鼠标点击时间轴
+		//因为在鼠标点击的时候只会产生整数px，所以这里先通过鼠标点击的坐标算出
+		//对应的时间，然后通过这个时间再次获取精确的坐标值
+		manualCreation : function (e) {
+			var self = this;
+			var offsetX_left = parseFloat((e.pageX - self.slderLeftOffset).toFixed(4));
+			var offsetX_right = parseFloat((offsetX_left + self.oneTimeBlockWidth).toFixed(4));
+			var tmpStartHour = Math.floor(offsetX_left / self.oneHourWidth);
+			var tmpStartMin = Math.round(offsetX_left % self.oneHourWidth / self.oneMinWidth);
+			var tmpStopHour = Math.floor(offsetX_right / self.oneHourWidth);
+			var tmpStopMin = Math.round(offsetX_right % self.oneHourWidth / self.oneMinWidth);
+			if (tmpStartMin < 10) {
+				tmpStartMin = "0" + tmpStartMin;
+			} else if (tmpStartMin == 60) {
+				tmpStartMin = "00";
+				tmpStartHour += 1;
+			}
+			if (tmpStopMin < 10) {
+				tmpStopMin = "0" + tmpStopMin;
+			} else if (tmpStopMin == 60) {
+				tmpStopMin = "00";
+				tmpStartHour += 1;
+			}
+			var hour1 = tmpStartHour.toString().length < 2 ? "0" + tmpStartHour : tmpStartHour;
+			var time1 = hour1 + ":" + tmpStartMin;
+
+			var hour2 = tmpStopHour.toString().length < 2 ? "0" + tmpStopHour : tmpStopHour;
+			var time2 = hour2 + ":" + tmpStopMin;
+
+			var timeArray = new Array(); //存放初始化时间的数组
+			var offsetXArray = new Array(); //存放通过初始化时间换算出来的位移数组
+
+			timeArray.push(time1);
+			timeArray.push(time2);
+			offsetXArray = self.getSliderOffsetX(timeArray);
+			self.createTimeBlock({
+				backgroundDiv : self.mountId,
+				offsetX_left : offsetXArray[0],
+				offsetX_right : offsetXArray[1],
+			})
+
+			//添加时间段的时候默认添加事件0
+			whichOne = _.sortedIndex(self.left_array, self.offsetX_left);
+			self.events_array.splice(whichOne, 0, 0);
+		},
 		//时间段初始化函数
 		timeInit : function (data) {
+			//隐藏编辑框
+			$(".editContent").hide();
+			$(".editUnit>input[type=checkbox],.editCheckAll").prop("checked", false);
+
 			_.map(data, function (item, index) {
 				var startTime = item.split("-")[0];
 				var stopTime = item.split("-")[1];
@@ -145,10 +192,9 @@
 		createTimeBlock : function (obj) {
 			var self = this;
 			var backgroundDiv = obj.backgroundDiv;
-			var offsetX_left = parseFloat(obj.offsetX_left.toFixed(3)); 
-			var offsetX_right = obj.offsetX_right || parseFloat((offsetX_left + self.oneTimeBlockWidth).toFixed(3));
+			var offsetX_left = parseFloat(obj.offsetX_left.toFixed(4));
+			var offsetX_right = obj.offsetX_right || parseFloat((offsetX_left + self.oneTimeBlockWidth).toFixed(4));
 			var event = obj.event || 0;
-
 			/**************对于时间段创建时错误校验start***************/
 			//错误数据处理：后台数据错误，导致结束时间大于开始时间
 			if (offsetX_right <= offsetX_left) {
@@ -181,6 +227,7 @@
 			//刚加入一个时间段就把其左右坐标进行保存
 			self.left_array.push(offsetX_left);
 			self.right_array.push(offsetX_right);
+			self.offsetX_left = offsetX_left;
 			//将时间段的坐标进行排序
 			self.left_array.sort(function (a, b) {
 				return a - b;
@@ -196,7 +243,7 @@
 				sliderNum : sliderNum,
 				timeBlockNum : self.timeBlockNum,
 				offsetX_left : offsetX_left,
-				timeBlockWidth : parseFloat((offsetX_right - offsetX_left).toFixed(3)),
+				timeBlockWidth : parseFloat((offsetX_right - offsetX_left).toFixed(4)),
 				defalutColor : defalutColor[event]
 			}
 			var timeBlockSting = [
@@ -210,7 +257,6 @@
 			timeBlockSting = _.template(timeBlockSting);
 			var timeBlockDom = timeBlockSting(timeBlockDataObj);
 			$backgroundDiv.append(timeBlockDom);
-
 			//为时间段绑定点击事件
 			$("#timeS" + sliderNum + "_" + self.timeBlockNum).mousedown(function (e) {
 				self.timeBlockMouseDown(e, this);
@@ -362,13 +408,12 @@
 			var self = this;
 			var rightShowId = $(thisTimeBlock).children(".rightShow").attr("id");
 			var leftShowId = $(thisTimeBlock).children(".leftShow").attr("id");
-
 			var arrayLength = self.right_array.length;
-			var parentOriginalLeft = parseFloat(parseFloat(self.getStyle($(thisTimeBlock)[0], "left")).toFixed(3)); //时间段的原始偏移量
-			var mouseRelativeOffsetX = parseFloat((e.pageX - parentOriginalLeft - self.slderLeftOffset).toFixed(3)); //鼠标在时间段上的偏移
 			var whichOne;
 			/*当我去移动时间段之前，先找到当前操作的时间段在数组中的位置*/
-			whichOne = _.sortedIndex(self.left_array, parentOriginalLeft);
+			whichOne = _.sortedIndex(self.leftTime_array, $("#" + leftShowId).text());
+			var parentOriginalLeft = self.left_array[whichOne]; //时间段的原始偏移量
+			var mouseRelativeOffsetX = parseFloat((e.pageX - parentOriginalLeft - self.slderLeftOffset).toFixed(4)); //鼠标在时间段上的偏移
 			self.whichOne = whichOne;
 			var timeBlockId = $(thisTimeBlock).attr("id");
 			var timeSliderWidth = self.timeSliderWidth; //整个滑动条宽度
@@ -388,18 +433,19 @@
 					rightBorder = self.left_array[self.whichOne + 1];
 				}
 			}
-			var timeBlockWidth = parseFloat((self.right_array[self.whichOne] - self.left_array[self.whichOne]).toFixed(3)); //时间段自身的宽度
+
+			var timeBlockWidth = parseFloat((self.right_array[self.whichOne] - self.left_array[self.whichOne]).toFixed(4)); //时间段自身的宽度
 			$(document).mousemove(function (ev) {
 				_stopTimeStamp = new Date().getTime();
 				if (_stopTimeStamp - _startTimeStamp > 80) {
 					self.hasMove = true;
-					leftOffset = parseFloat((ev.pageX - mouseRelativeOffsetX - self.slderLeftOffset).toFixed(3));
+					leftOffset = parseFloat((ev.pageX - mouseRelativeOffsetX - self.slderLeftOffset).toFixed(4));
 					if (leftOffset <= leftBorder) {
 						leftOffset = leftBorder;
-					} else if (leftOffset >= parseFloat((rightBorder - timeBlockWidth).toFixed(3))) {
-						leftOffset = parseFloat((rightBorder - timeBlockWidth).toFixed(3));
+					} else if (leftOffset >= parseFloat((rightBorder - timeBlockWidth).toFixed(4))) {
+						leftOffset = parseFloat((rightBorder - timeBlockWidth).toFixed(4));
 					}
-					rightOffset = parseFloat((leftOffset + timeBlockWidth).toFixed(3));
+					rightOffset = parseFloat((leftOffset + timeBlockWidth).toFixed(4));
 
 					if (leftOffset >= leftBorder && rightOffset <= rightBorder) {
 						$("#" + timeBlockId).css({
@@ -407,8 +453,6 @@
 						});
 						self.setSliderTime(leftOffset, leftShowId);
 						self.setSliderTime(rightOffset, rightShowId);
-						self.left_array[whichOne] = leftOffset;
-						self.right_array[whichOne] = rightOffset;
 					}
 				}
 			})
@@ -431,10 +475,19 @@
 					$("#eventSelect").val(eventIndex);
 					$("#fixedDiv").fadeIn(100);
 					$("#modalDiv").fadeIn(150).attr("data-number", self.timeSliderNum);
+				} else {
+					self.hasMove = false;
+					self.getSliderTime("move");
+					var tmpTimeArray = new Array();
+					tmpTimeArray.push(self.leftTime_array[self.whichOne], self.rightTime_array[self.whichOne]);
+					tmpTimeArray = self.getSliderOffsetX(tmpTimeArray);
+					self.left_array[self.whichOne] = parseFloat(tmpTimeArray[0].toFixed(4));
+					self.right_array[self.whichOne] = parseFloat(tmpTimeArray[1].toFixed(4));
+					$("#" + timeBlockId).css({
+						left : parseFloat(tmpTimeArray[0].toFixed(4)) + "px"
+					});
 				}
-				self.hasMove = false;
 				$("#" + timeBlockId).css("cursor", "auto");
-				self.getSliderTime("move");
 				$(document).off("mousemove mouseup mouseleave");
 			})
 			if (document.all) { //兼容IE8
@@ -453,16 +506,16 @@
 			$(thisBar).css("cursor", "w-resize");
 			var self = this;
 			var timeBlockId = $(thisBar).parent().attr("id");
-			var parentOriginalLeft = parseFloat(parseFloat(self.getStyle($("#" + timeBlockId)[0], "left")).toFixed(3)); //时间段的原始偏移量
 			var leftShowId = $("#" + timeBlockId).children(".leftShow").attr("id"); //显示具体时间的div
 			var whichOne;
 			var len = self.left_array.length;
-			var mouseRelativeOffsetX = parseInt(parentOriginalLeft - (e.pageX - self.slderLeftOffset), 10); //鼠标的相对位移,这里对IE8特殊处理，取整;
 			var offsetX_left_present;
 			/*当我去移动时间段之前，先找到当前操作的时间段在数组中的位置*/
-			whichOne = _.sortedIndex(self.left_array, parentOriginalLeft);
+			whichOne = _.sortedIndex(self.leftTime_array, $("#" + leftShowId).text());
+			var parentOriginalLeft = self.left_array[whichOne]//时间段的原始偏移量
+				//var mouseRelativeOffsetX = parseInt(parentOriginalLeft - (e.pageX - self.slderLeftOffset), 10);
+				var mouseRelativeOffsetX = 0;
 			self.whichOne = whichOne;
-
 			/*寻找边界*/
 			var leftBorder = 0; //左边界；
 
@@ -475,11 +528,11 @@
 			$(document).mousemove(function (ev) {
 				_stopTimeStamp = new Date().getTime();
 				if (_stopTimeStamp - _startTimeStamp > 100) { //消抖
-					offsetX_left_present = parseFloat((ev.pageX - self.slderLeftOffset + mouseRelativeOffsetX).toFixed(3)); //偏移量
+					offsetX_left_present = parseFloat((ev.pageX - self.slderLeftOffset + mouseRelativeOffsetX).toFixed(4)); //偏移量
 					if (offsetX_left_present <= leftBorder) {
 						offsetX_left_present = leftBorder;
 					}
-					var timeBlockWidth_present = parseFloat((self.right_array[whichOne] - offsetX_left_present).toFixed(3)); //时间段在移动过程中的宽度
+					var timeBlockWidth_present = parseFloat((self.right_array[whichOne] - offsetX_left_present).toFixed(4)); //时间段在移动过程中的宽度
 					if (timeBlockWidth_present >= self.oneTimeBlockWidth) { //规定左伸缩的时候最小为30分钟
 						if (offsetX_left_present >= leftBorder) {
 							$("#" + timeBlockId).css({
@@ -487,14 +540,13 @@
 								left : offsetX_left_present + "px"
 							});
 							self.setSliderTime(offsetX_left_present, leftShowId);
-                            self.left_array[self.whichOne] = offsetX_left_present;
 						}
 					}
 				}
 			})
 
 			$(document).on("mouseup mouseleave", function (e) {
-				self.barUp(thisBar, "left");
+				self.barUp(thisBar, "left", timeBlockId);
 			})
 			if (document.all) { //兼容IE8
 				e.originalEvent.cancelBubble = true;
@@ -502,32 +554,23 @@
 				e.stopPropagation();
 			}
 		},
-		/*拉伸按钮鼠标松开事件thisBar为当前操作的按钮,direction为当前是操作的左边拉伸按钮还是右边拉伸按钮*/
-		barUp : function (thisBar, direction) {
-			var self = this;
-			$(thisBar).css("cursor", "default");
-			$(document).off("mousemove mouseup mouseleave");
-			self.getSliderTime("move", direction); //保存时间
-		},
-
 		/*右拉伸按钮鼠标按下事件 e为事件对象，thisBar为当前操作的按钮*/
 		rightBarDown : function (e, thisBar) {
 			var self = this;
 			_startTimeStamp = new Date().getTime();
 			var timeBlockId = $(thisBar).parent().attr("id"); //当前操作的时间段id
 			var rightShowId = $("#" + timeBlockId).children(".rightShow").attr("id");
-			var parentOriginalLeft = parseFloat(parseFloat(self.getStyle($("#" + timeBlockId)[0], "left")).toFixed(3)); //时间段的原始偏移量
 			var whichOne;
 			var timeSliderWidth = self.timeSliderWidth; //整个滑动条宽度
 			var len = self.left_array.length;
 			var offsetX_right_present;
 
-			whichOne = _.sortedIndex(self.left_array, parentOriginalLeft); //寻找当前时间段索引
+			whichOne = _.sortedIndex(self.rightTime_array, $("#" + rightShowId).text()); //寻找当前时间段索引
 			self.whichOne = whichOne;
-			var mouseRelativeOffsetX = parseFloat((e.pageX - self.slderLeftOffset - self.right_array[whichOne]).toFixed(3)) //鼠标的相对位移
-
-				//寻找边界值
-				var rightBorder = timeSliderWidth; //右边界
+			var parentOriginalLeft = self.left_array[whichOne]; //时间段的原始偏移量
+			var mouseRelativeOffsetX = parseFloat((e.pageX - self.slderLeftOffset - self.right_array[whichOne]).toFixed(4)); //鼠标的相对位移
+			//寻找边界值
+			var rightBorder = timeSliderWidth; //右边界
 
 			if (len > 1) {
 				if (whichOne != len - 1) {
@@ -537,35 +580,50 @@
 			$(document).mousemove(function (ev) {
 				_stopTimeStamp = new Date().getTime();
 				if (_stopTimeStamp - _startTimeStamp > 50) { //消抖
-					offsetX_right_present = parseFloat((ev.pageX - self.slderLeftOffset - mouseRelativeOffsetX).toFixed(3));
+					offsetX_right_present = parseFloat((ev.pageX - self.slderLeftOffset - mouseRelativeOffsetX).toFixed(4));
 					if (offsetX_right_present >= timeSliderWidth) {
 						offsetX_right_present = timeSliderWidth;
 					}
 
-					var timeSliderWidth_present = parseFloat((offsetX_right_present - parentOriginalLeft).toFixed(3)); //现在时间段的宽度
+					var timeSliderWidth_present = parseFloat((offsetX_right_present - parentOriginalLeft).toFixed(4)); //现在时间段的宽度
 
 					if (timeSliderWidth_present >= self.oneTimeBlockWidth) {
 						if (offsetX_right_present >= rightBorder) {
 							offsetX_right_present = rightBorder;
 						}
-						var timeSliderWidth_present = parseFloat((offsetX_right_present - parentOriginalLeft).toFixed(3));
+						var timeSliderWidth_present = parseFloat((offsetX_right_present - parentOriginalLeft).toFixed(4));
 						$("#" + timeBlockId).css({
 							width : timeSliderWidth_present + "px"
 						});
 						self.setSliderTime(offsetX_right_present, rightShowId);
-                        self.right_array[self.whichOne] = offsetX_right_present;
 					}
 
 				}
 			})
 			$(document).on("mouseup mouseleave", function (e) {
-				self.barUp(thisBar, "right");
+				self.barUp(thisBar, "right", timeBlockId);
 			})
 			if (document.all) { //兼容IE8
 				e.originalEvent.cancelBubble = true;
 			} else {
 				e.stopPropagation();
 			}
+		},
+		/*拉伸按钮鼠标松开事件thisBar为当前操作的按钮,direction为当前是操作的左边拉伸按钮还是右边拉伸按钮*/
+		barUp : function (thisBar, direction, timeBlockId) {
+			var self = this;
+			$(thisBar).css("cursor", "default");
+			$(document).off("mousemove mouseup mouseleave");
+			self.getSliderTime("move", direction); //保存时间
+			var tmpTimeArray = new Array();
+			tmpTimeArray.push(self.leftTime_array[self.whichOne], self.rightTime_array[self.whichOne]);
+			tmpTimeArray = self.getSliderOffsetX(tmpTimeArray);
+			self.left_array[self.whichOne] = parseFloat(tmpTimeArray[0].toFixed(4));
+			self.right_array[self.whichOne] = parseFloat(tmpTimeArray[1].toFixed(4));
+			$("#" + timeBlockId).css({
+				width : parseFloat((tmpTimeArray[1] - tmpTimeArray[0]).toFixed(4)) + "px",
+				left : parseFloat(tmpTimeArray[0].toFixed(4)) + "px"
+			});
 		},
 		/*设置当前的显示时间
 		参数offsetX为偏移量，id为显示时间的DOM id
@@ -574,7 +632,7 @@
 			var direction = id.substring(0, 1);
 			var self = this;
 			var tmpHour = Math.floor(offsetX / self.oneHourWidth);
-			var min = Math.round(offsetX % self.oneHourWidth * 60 / self.oneHourWidth);
+			var min = Math.round(offsetX % self.oneHourWidth / self.oneMinWidth);
 			if (min < 10) {
 				min = "0" + min;
 			} else if (min == 60) {
@@ -634,13 +692,13 @@
 			var offsetX_Array = new Array;
 			var self = this;
 			var startH_OffsetX = parseInt(time[0].split(":")[0], 10) * self.oneHourWidth;
-			var startM_OffsetX = parseInt(time[0].split(":")[1], 10) * self.oneHourWidth / 60;
+			var startM_OffsetX = parseInt(time[0].split(":")[1], 10) * self.oneMinWidth;
 			var a = parseInt(time[0].split(":")[0], 10);
 			var b = parseInt(time[0].split(":")[1], 10);
-			startM_OffsetX = parseFloat(startM_OffsetX.toFixed(3));
+			startM_OffsetX = parseFloat(startM_OffsetX.toFixed(4));
 			var stopH_OffsetX = parseInt(time[1].split(":")[0], 10) * self.oneHourWidth;
-			var stopM_OffsetX = parseInt(time[1].split(":")[1], 10) * self.oneHourWidth / 60;
-			stopM_OffsetX = parseFloat(stopM_OffsetX.toFixed(3));
+			var stopM_OffsetX = parseInt(time[1].split(":")[1], 10) * self.oneMinWidth;
+			stopM_OffsetX = parseFloat(stopM_OffsetX.toFixed(4));
 			var startTime_OffsetX = startH_OffsetX + startM_OffsetX;
 			var stopTime_OffsetX = stopH_OffsetX + stopM_OffsetX;
 			offsetX_Array[0] = startTime_OffsetX;
@@ -730,15 +788,15 @@
 		}
 	}
 
-    //创建遮罩
+	//创建遮罩
 	function createCoverDiv() {
 		var fixedDiv = document.createElement("div");
-		$(fixedDiv).addClass("fixBGDiv").attr("id", "fixedDiv").css("opacity",0.4);
+		$(fixedDiv).addClass("fixBGDiv").attr("id", "fixedDiv").css("opacity", 0.4);
 		$("body").append(fixedDiv)
 		return "createCoverDivCall";
 	}
 
-    //创建弹出编辑框
+	//创建弹出编辑框
 	function createPopUpBox() {
 		/* 利用_.template 模板引擎来渲染 */
 		var popUpBoxString = '\
@@ -805,7 +863,7 @@
 				} else {
 					maxTime = 59;
 				}
-				var regStatus = (/^0+|\D+/g).test($(this).val());
+				var regStatus = (/\D+/g).test($(this).val());
 				var val = $(this).val().replace(/^0+|\D+/g, "");
 				if (!val || regStatus || val < 0 || val > maxTime) {
 					$(this).val(0);
@@ -833,10 +891,11 @@
 			var rightShowId = $("#" + self.timeBlockId_present).children(".rightShow").attr("id");
 			var leftShowId = $("#" + self.timeBlockId_present).children(".leftShow").attr("id");
 
-			var newLeft = parseFloat((STH * self.oneHourWidth + STM * self.oneHourWidth / 60).toFixed(3));
-			var newRight = parseFloat((SPH * self.oneHourWidth + SPM * self.oneHourWidth / 60).toFixed(3));
+			var newLeft = parseFloat((STH * self.oneHourWidth + STM * self.oneMinWidth).toFixed(4));
+			var newRight = parseFloat((SPH * self.oneHourWidth + SPM * self.oneMinWidth).toFixed(4));
 			var arrayLen;
 			arrayLen = self.left_array.length;
+			var tmpLeft = self.left_array.splice(self.whichOne, 1);
 			var tmpLeft = self.left_array.splice(self.whichOne, 1);
 			var tmpRight = self.right_array.splice(self.whichOne, 1);
 			if (arrayLen >= 2) {
@@ -865,7 +924,7 @@
 			});
 			$("#" + self.timeBlockId_present).css({
 				"left" : newLeft,
-				"width" : parseFloat((newRight - newLeft).toFixed(3))
+				"width" : parseFloat((newRight - newLeft).toFixed(4))
 			})
 
 			self.setSliderTime(newLeft, leftShowId);
@@ -957,6 +1016,9 @@
 		$("#editDiv" + context.timeSliderNum).click(function (e) {
 			if ($(e.target).attr("class")) {
 				if ($(e.target).attr("class") == "editImg") {
+                    //隐藏编辑框
+                    $(".editContent").hide();
+                    $(".editUnit>input[type=checkbox],.editCheckAll").prop("checked", false);
 					$(".editContent").hide();
 					$("#editCBox" + context.timeSliderNum + "_" + (context.timeSliderNum - 1)).attr("disabled", true);
 					$("#editContent" + context.timeSliderNum).show();
@@ -1027,6 +1089,6 @@
 	}
 	/****************内部私有函数区end******************/
 
-    TimeSlider.prototype.constructor = TimeSlider;
+	TimeSlider.prototype.constructor = TimeSlider;
 	window.TimeSlider = TimeSlider;
 })()
