@@ -896,7 +896,6 @@
 			var arrayLen;
 			arrayLen = self.left_array.length;
 			var tmpLeft = self.left_array.splice(self.whichOne, 1);
-			var tmpLeft = self.left_array.splice(self.whichOne, 1);
 			var tmpRight = self.right_array.splice(self.whichOne, 1);
 			if (arrayLen >= 2) {
 				for (var j = 0; j < arrayLen; j++) {
