@@ -14,7 +14,7 @@
 		width:14px;
 		z-index:4;
 		top:0;
-        border-left:2px solid #c4c4c4;
+        border-left:2px solid #7e6ed4;
 		position:absolute;
 		background:#007acc;
         box-sizing:border-box;
@@ -153,19 +153,17 @@
 	
 	.leftBar{
 		position:absolute;
-		left:-2px;
-		height:20px;
-		width:2px;
-		background-color:#d4d4d4;
+        left:-20px;
+        border:10px solid transparent;
+        border-right:8px solid #d3d3d3;
         display:none;
 	}
 	
 	.rightBar{
 		position:absolute;
-		height:20px;
-		width:2px;
-        right:-2px;
-		background-color:#d4d4d4;
+        right:-18px;
+        border:10px solid transparent;
+        border-left:8px solid #d3d3d3;
         display:none;
 	}
 	

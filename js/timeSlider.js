@@ -513,8 +513,8 @@
 			/*当我去移动时间段之前，先找到当前操作的时间段在数组中的位置*/
 			whichOne = _.sortedIndex(self.leftTime_array, $("#" + leftShowId).text());
 			var parentOriginalLeft = self.left_array[whichOne]//时间段的原始偏移量
-				//var mouseRelativeOffsetX = parseInt(parentOriginalLeft - (e.pageX - self.slderLeftOffset), 10);
-				var mouseRelativeOffsetX = 0;
+			var mouseRelativeOffsetX = parseInt(parentOriginalLeft - (e.pageX - self.slderLeftOffset), 10);
+			//var mouseRelativeOffsetX = 0;
 			self.whichOne = whichOne;
 			/*寻找边界*/
 			var leftBorder = 0; //左边界；
