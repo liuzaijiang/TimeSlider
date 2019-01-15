@@ -1,27 +1,30 @@
-﻿    .timeSlider{
-        padding: 0;
-        margin: 0;
-        border:0;
-        display: block;
-        z-index: 0;
-        margin-left:100px;
-        position:relative;
-        top:-20px;
+﻿    body{
+        font: Tahoma,Helvetica,Arial,'宋体',sans-serif;
+    }
+    
+    .timeSlider{
+		padding: 0;
+		margin: 0;
+		border:0;
+		display: block;
+		z-index: 0;
+		margin-left:100px;
+		position:relative;
+        height:47px;
 	}
 	
 	.timeSliderDiv{
 		height:20px;
-		width:14px;
 		z-index:4;
 		top:0;
-        border-left:2px solid #7e6ed4;
 		position:absolute;
+        border-left:1px solid #000;
 		background:#007acc;
         box-sizing:border-box;
 	}
 	
 	.trCanvas{
-		width: 768px;
+		width: 720px;
 		height: 20px;
 		background: #f2f2ee;
 		position: relative;
@@ -151,28 +154,28 @@
 	}
 	
 	
-	.leftBar{
+	.startTimeBar{
 		position:absolute;
-        left:-20px;
-        border:10px solid transparent;
-        border-right:8px solid #d3d3d3;
+		left:-19px;
+		border:10px solid transparent;
+        border-right:8px solid #aaa;
         display:none;
 	}
 	
-	.rightBar{
+	.stopTimeBar{
 		position:absolute;
-        right:-18px;
-        border:10px solid transparent;
-        border-left:8px solid #d3d3d3;
+		right:-18px;
+		border:10px solid transparent;
+        border-left:8px solid #aaa;
         display:none;
 	}
 	
-    .rightBar:hover,.leftBar:hover{
+    .stopTimeBar:hover,.startTimeBar:hover{
         cursor:e-resize;
     }
     
-	.leftShow{
-		background-color:blue;
+	.startTimeShow{
+		background-color:#0084FF;
 		color:white;
 		padding-left:3px;
 		width:44px;
@@ -183,11 +186,11 @@
 		text-align:center;
 		line-height:18px;
 		font-size:.8em;
-		display:none;
+        display:none;
 	}
 	
-	.rightShow{
-		background-color:blue;
+	.stopTimeShow{
+		background-color:#0084FF;
 		color:white;
 		padding-left:3px;
 		width:44px;
@@ -198,7 +201,7 @@
 		text-align:center;
 		line-height:18px;
 		font-size:.8em;
-		display:none;
+        display:none;
 	}
 	
 	
@@ -211,15 +214,14 @@
     .label-week{
 		float:left;
 		margin-left:20px;
-        margin-top:-20px;
 	}
     
 	
 	.editWrap{
 		position:relative;
 		width:100px;
-		left:890px;
-		bottom:40px;
+		left:850px;
+		bottom:45px;
 	}
 	
 	.editContent{
@@ -230,6 +232,7 @@
 		display:none;
 		background-color:#f9f6f6;
 		border:1px solid #e4e4e4;
+        border-radius:5px;
 		z-index:5;
 	}
 	
@@ -266,8 +269,8 @@
         margin-left:10px;
 	}
 	
-	.editImg:hover,.delImg:hover{
-		cursor:pointer;
+	.editBtn:hover,.editImg:hover,.delImg:hover{
+		cursor:pointer; 
 	}
 	
 	.editBtn{
@@ -278,8 +281,13 @@
 		margin:2px;
         background-repeat: no-repeat;
         border:0;
+        border-radius:5px;
         padding: 0;
 	}
+    
+    .editBtn:hover{
+        background-color:#ccc;
+    }
 	
     .eventBoxWrap{
         position:relative;
